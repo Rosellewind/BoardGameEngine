@@ -21,6 +21,7 @@ class ViewController: UIViewController {
         boardView = BoardView(board: board, colors: [UIColor.redColor(), UIColor.blackColor()])
         if boardView != nil {
             self.view.addSubview(boardView!)
+            boardView?.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView!))
         }
     }

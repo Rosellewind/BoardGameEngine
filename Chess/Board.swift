@@ -28,19 +28,13 @@ class Board {///// call model?
     }
     
     func index(position: Position) -> Int {
-        return position.column + position.row * numRows
+        return position.column + position.row * numColumns
     }
     
+    func position(index: Int) -> Position {//0
+        return Position(row: index / numColumns, column: index % numColumns)
+    }
 }
-
-//class Cell: UIView {
-//    init(backgroundColor: UIColor, ) {
-//        
-//    }
-//    static func makeCells() -> [Cell] {
-//        
-//    }
-//}
 
 class BoardView: UIView {
     var cells = [UIView]()
@@ -49,7 +43,6 @@ class BoardView: UIView {
     init (board: Board, colors: [UIColor]) {
         self.colors = colors
         super.init(frame: CGRectZero)
-        self.translatesAutoresizingMaskIntoConstraints = false////////del?
         
         // make cells
         var colorIndex = 0 {
@@ -63,6 +56,7 @@ class BoardView: UIView {
             
             // make a cell
             let cell = UIView()
+            cell.tag = i
             
             // set the color
             if colors.count > 0 && !(board.skipCells?.contains(i))! {
@@ -82,12 +76,6 @@ class BoardView: UIView {
         
         //autolayout cells
         var constraints = [NSLayoutConstraint]()
-        
-        // keep ratio 1:1 in all cells
-        for cell in cells {
-            let ratio = NSLayoutConstraint.keepRatio(cell)
-            constraints.append(ratio)
-        }
         
         // add horizontal constraints
         for i in 0.stride(to: board.numCells, by: board.numColumns) {
