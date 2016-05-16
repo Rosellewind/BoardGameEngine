@@ -18,7 +18,13 @@ class ViewController: UIViewController {
     }
     
     override func viewDidAppear(animated: Bool) {
-        boardView = BoardView(board: board, colors: [UIColor.redColor(), UIColor.blackColor()])
+        var images = [UIImage]()
+        for i in 1...3 {
+            if let image = UIImage(named: "\(i).jpg") {
+                images.append(image)
+            }
+        }
+        boardView = BoardView(board: board, images: images, colors: [UIColor.redColor(), UIColor.blackColor()])
         if boardView != nil {
             self.view.addSubview(boardView!)
             boardView?.translatesAutoresizingMaskIntoConstraints = false

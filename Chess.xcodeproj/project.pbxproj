@@ -14,6 +14,11 @@
 		4A0F33D41CE9358B00C25E7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */; };
 		4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33DB1CE935BC00C25E7D /* Board.swift */; };
 		4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */; };
+		4A0F34211CEA5C1300C25E7D /* 1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F341D1CEA5C1300C25E7D /* 1.jpg */; };
+		4A0F34221CEA5C1300C25E7D /* 2.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F341E1CEA5C1300C25E7D /* 2.jpg */; };
+		4A0F34231CEA5C1300C25E7D /* 3.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F341F1CEA5C1300C25E7D /* 3.jpg */; };
+		4A0F34241CEA5C1300C25E7D /* 4.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34201CEA5C1300C25E7D /* 4.jpg */; };
+		4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34261CEA5F6E00C25E7D /* Piece.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +31,11 @@
 		4A0F33D51CE9358B00C25E7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A0F33DB1CE935BC00C25E7D /* Board.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
 		4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Swift Extensions.swift"; sourceTree = "<group>"; };
+		4A0F341D1CEA5C1300C25E7D /* 1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 1.jpg; sourceTree = "<group>"; };
+		4A0F341E1CEA5C1300C25E7D /* 2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 2.jpg; sourceTree = "<group>"; };
+		4A0F341F1CEA5C1300C25E7D /* 3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 3.jpg; sourceTree = "<group>"; };
+		4A0F34201CEA5C1300C25E7D /* 4.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 4.jpg; sourceTree = "<group>"; };
+		4A0F34261CEA5F6E00C25E7D /* Piece.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,9 +68,11 @@
 		4A0F33C81CE9358B00C25E7D /* Chess */ = {
 			isa = PBXGroup;
 			children = (
+				4A0F34251CEA5C1A00C25E7D /* Images */,
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
+				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
@@ -68,6 +80,17 @@
 				4A0F33D51CE9358B00C25E7D /* Info.plist */,
 			);
 			path = Chess;
+			sourceTree = "<group>";
+		};
+		4A0F34251CEA5C1A00C25E7D /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				4A0F341D1CEA5C1300C25E7D /* 1.jpg */,
+				4A0F341E1CEA5C1300C25E7D /* 2.jpg */,
+				4A0F341F1CEA5C1300C25E7D /* 3.jpg */,
+				4A0F34201CEA5C1300C25E7D /* 4.jpg */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -130,6 +153,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A0F33D41CE9358B00C25E7D /* LaunchScreen.storyboard in Resources */,
+				4A0F34241CEA5C1300C25E7D /* 4.jpg in Resources */,
+				4A0F34211CEA5C1300C25E7D /* 1.jpg in Resources */,
+				4A0F34221CEA5C1300C25E7D /* 2.jpg in Resources */,
+				4A0F34231CEA5C1300C25E7D /* 3.jpg in Resources */,
 				4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */,
 				4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */,
 			);
@@ -142,6 +169,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
 				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,

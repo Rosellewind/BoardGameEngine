@@ -11,10 +11,9 @@ import UIKit
 struct Position {
     var row: Int
     var column: Int
-
 }
 
-class Board {///// call model?
+class Board {
     let numRows: Int
     let numColumns: Int
     let numCells: Int
@@ -38,42 +37,57 @@ class Board {///// call model?
 
 class BoardView: UIView {
     var cells = [UIView]()
-    let colors: [UIColor]
+    let images: [UIImage]?
+    let colors: [UIColor]?
     
-    init (board: Board, colors: [UIColor]) {
+    
+    init (board: Board, images: [UIImage]?, colors: [UIColor]?) {
+        self.images = images
         self.colors = colors
         super.init(frame: CGRectZero)
+        makeCells(board)
         
-        // make cells
-        var colorIndex = 0 {
-            didSet {
-                if colorIndex == colors.count {
-                    colorIndex = 0
-                }
-            }
+              }
+    func makeCells(board: Board) {
+        var imageIndex = 0 {
+            didSet {if imageIndex == images?.count {imageIndex = 0}}
         }
+        var colorIndex = 0 {
+            didSet {if colorIndex == colors?.count {colorIndex = 0}}
+        }
+        
         for i in 0..<board.numCells {
             
             // make a cell
             let cell = UIView()
             cell.tag = i
             
-            // set the color
-            if colors.count > 0 && !(board.skipCells?.contains(i))! {
-                if let skips = board.skipCells where skips.contains(i) {
-                    cell.backgroundColor = UIColor.clearColor()
-                } else {
-                    cell.backgroundColor = colors[colorIndex]
+            // set the image or color
+            if let skips = board.skipCells where skips.contains(i) {
+                cell.backgroundColor = UIColor.clearColor()
+            } else {
+                if imageIndex < images?.count {
+                    let imageView = UIImageView(image: images![imageIndex])
+                    cell.addSubview(imageView)
+                    imageView.translatesAutoresizingMaskIntoConstraints = false
+                    NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
+                }
+                if colorIndex < colors?.count {
+                    cell.backgroundColor = colors![colorIndex]
                 }
             }
+            imageIndex += 1
             colorIndex += 1
-
+            
             // add to array
             cells.append(cell)
             cell.translatesAutoresizingMaskIntoConstraints = false
             self.addSubview(cell)
         }
-        
+        addConstraintsToCells(board)
+    }
+    
+    func addConstraintsToCells(board: Board) {
         //autolayout cells
         var constraints = [NSLayoutConstraint]()
         
@@ -99,9 +113,21 @@ class BoardView: UIView {
             constraints.appendContentsOf(heights)
         }
         NSLayoutConstraint.activateConstraints(constraints)
-      }
+    }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
