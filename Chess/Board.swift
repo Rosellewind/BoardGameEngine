@@ -11,6 +11,8 @@ import UIKit
 struct Position {
     var row: Int
     var column: Int
+    
+    
 }
 
 class Board {
@@ -18,12 +20,14 @@ class Board {
     let numColumns: Int
     let numCells: Int
     let skipCells: [Int]?
+    let checkered: Bool
     
-    init(numRows: Int, numColumns: Int, skipCells: [Int]?) {
+    init(numRows: Int, numColumns: Int, skipCells: [Int]?, checkered: Bool) {
         self.numRows = numRows
         self.numColumns = numColumns
         self.numCells = numRows * numColumns
         self.skipCells = skipCells
+        self.checkered = checkered
     }
     
     func index(position: Position) -> Int {
@@ -50,10 +54,10 @@ class BoardView: UIView {
               }
     func makeCells(board: Board) {
         var imageIndex = 0 {
-            didSet {if imageIndex == images?.count {imageIndex = 0}}
+            didSet {if imageIndex >= images?.count {imageIndex = 0}}
         }
         var colorIndex = 0 {
-            didSet {if colorIndex == colors?.count {colorIndex = 0}}
+            didSet {if colorIndex >= colors?.count {colorIndex = 0}}
         }
         
         for i in 0..<board.numCells {
@@ -63,6 +67,22 @@ class BoardView: UIView {
             cell.tag = i
             
             // set the image or color
+            let evenNumberColumns = board.numColumns % 2 == 0
+            if board.checkered && evenNumberColumns{
+                let inFirstColumn = board.position(i).column == 0
+                if inFirstColumn {
+                    let onOddRow = board.position(i).row % 2 != 0
+                    if onOddRow {
+                        imageIndex = 1
+                        colorIndex = 1
+                    }
+                    else {
+                        imageIndex = 0
+                        colorIndex = 0
+                    }
+                }
+            }
+            
             if let skips = board.skipCells where skips.contains(i) {
                 cell.backgroundColor = UIColor.clearColor()
             } else {

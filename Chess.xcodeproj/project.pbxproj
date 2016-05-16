@@ -19,6 +19,9 @@
 		4A0F34231CEA5C1300C25E7D /* 3.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F341F1CEA5C1300C25E7D /* 3.jpg */; };
 		4A0F34241CEA5C1300C25E7D /* 4.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34201CEA5C1300C25E7D /* 4.jpg */; };
 		4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34261CEA5F6E00C25E7D /* Piece.swift */; };
+		4A0F34291CEA67D800C25E7D /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34281CEA67D800C25E7D /* GameController.swift */; };
+		4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342A1CEA6BBF00C25E7D /* x.swift */; };
+		4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342C1CEA74FF00C25E7D /* Player.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +39,9 @@
 		4A0F341F1CEA5C1300C25E7D /* 3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 3.jpg; sourceTree = "<group>"; };
 		4A0F34201CEA5C1300C25E7D /* 4.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 4.jpg; sourceTree = "<group>"; };
 		4A0F34261CEA5F6E00C25E7D /* Piece.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
+		4A0F34281CEA67D800C25E7D /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
+		4A0F342A1CEA6BBF00C25E7D /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
+		4A0F342C1CEA74FF00C25E7D /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,7 +78,10 @@
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
+				4A0F34281CEA67D800C25E7D /* GameController.swift */,
+				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
+				4A0F342A1CEA6BBF00C25E7D /* x.swift */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
@@ -170,7 +179,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
+				4A0F34291CEA67D800C25E7D /* GameController.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */,
+				4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */,
+				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
 				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,
 				4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */,
