@@ -12,6 +12,8 @@
 		4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33CD1CE9358B00C25E7D /* Main.storyboard */; };
 		4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33D01CE9358B00C25E7D /* Assets.xcassets */; };
 		4A0F33D41CE9358B00C25E7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */; };
+		4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33DB1CE935BC00C25E7D /* Board.swift */; };
+		4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		4A0F33D01CE9358B00C25E7D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A0F33D31CE9358B00C25E7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4A0F33D51CE9358B00C25E7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A0F33DB1CE935BC00C25E7D /* Board.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
+		4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Swift Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,9 +60,11 @@
 			children = (
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
+				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
+				4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */,
 				4A0F33D51CE9358B00C25E7D /* Info.plist */,
 			);
 			path = Chess;
@@ -138,6 +144,8 @@
 			files = (
 				4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
+				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,
+				4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

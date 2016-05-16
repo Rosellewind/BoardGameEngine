@@ -9,10 +9,20 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    let board = Board(numRows: 6, numColumns: 5, skipCells: [0, 4, 11, 12])
+    var boardView: BoardView?
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        boardView = BoardView(board: board, colors: [UIColor.redColor(), UIColor.blackColor()])
+        if boardView != nil {
+            self.view.addSubview(boardView!)
+            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView!))
+        }
     }
 
     override func didReceiveMemoryWarning() {
