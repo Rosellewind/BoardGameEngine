@@ -14,7 +14,8 @@ enum ChessVariation {
 class GameController {
     let board: Board
     let boardView: BoardView
-//    let players: [Player]
+    let players: [Player]
+    var pieceViews = [PieceView]()
     
     init(variation: ChessVariation, gameView: UIView) {
         switch variation {
@@ -28,12 +29,36 @@ class GameController {
             
             // add the view
             gameView.addSubview(boardView)
-//            boardView.translatesAutoresizingMaskIntoConstraints = false
-//            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+            boardView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
             
-            // create the players
-//            players = [Player(orientation: .bottom, pieces: ), Player(orientation: .bottom, pieces: )]
+            // create the players with pieces
+            players = [Player(variation: .StandardChess, orientation: .bottom), Player(variation: .StandardChess, orientation: .top)]
             
+            // create pieceView's
+            for player in players {
+                for piece in player.pieces {///////need a tag?
+                    let ending = player.orientation == .bottom ? "Black.png" : "White.png"////add images
+                    if let image = UIImage(named: piece.name + "Black.png") {
+                        let pieceView = PieceView(image: image)
+                        pieceViews.append(pieceView)
+                        let indexOfPieceOnBoard = board.index(piece.position)
+                        let correctCells = boardView.cells.filter({ (view: UIView) -> Bool in
+                            if indexOfPieceOnBoard == view.tag {////////check tag
+                                return true
+                            } else {
+                                return false
+                            }
+                        })
+                        if correctCells.count > 0 {
+                            correctCells[0].addSubview(pieceView)
+                            pieceView.translatesAutoresizingMaskIntoConstraints = false
+                            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(pieceView))
+                        }
+                        
+                    }
+                }
+            }
         case .Galaxy:
             // create the board
             board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20], checkered: true)
@@ -51,6 +76,9 @@ class GameController {
             gameView.addSubview(boardView)
             boardView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+            
+            // create the players with pieces
+            players = [Player(variation: .Galaxy, orientation: .bottom)]
             
         }
        

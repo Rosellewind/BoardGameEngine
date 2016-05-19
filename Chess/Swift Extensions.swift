@@ -85,7 +85,7 @@ extension NSLayoutConstraint {
             if i == 0 {
                 
                 // bind first top to superview
-                top = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view.superview, attribute: .Leading, multiplier: 1, constant: 0)
+                top = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view.superview, attribute: .Top, multiplier: 1, constant: 0)
             } else {
                 
                 // bind all others to the previous view

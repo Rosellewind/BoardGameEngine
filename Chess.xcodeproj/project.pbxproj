@@ -22,6 +22,12 @@
 		4A0F34291CEA67D800C25E7D /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34281CEA67D800C25E7D /* GameController.swift */; };
 		4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342A1CEA6BBF00C25E7D /* x.swift */; };
 		4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342C1CEA74FF00C25E7D /* Player.swift */; };
+		4A0F34341CED798C00C25E7D /* BishopBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F342E1CED798C00C25E7D /* BishopBlack.png */; };
+		4A0F34351CED798C00C25E7D /* KingBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F342F1CED798C00C25E7D /* KingBlack.png */; };
+		4A0F34361CED798C00C25E7D /* KnightBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34301CED798C00C25E7D /* KnightBlack.png */; };
+		4A0F34371CED798C00C25E7D /* PawnBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34311CED798C00C25E7D /* PawnBlack.png */; };
+		4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34321CED798C00C25E7D /* QueenBlack.png */; };
+		4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34331CED798C00C25E7D /* RookBlack.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +48,12 @@
 		4A0F34281CEA67D800C25E7D /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		4A0F342A1CEA6BBF00C25E7D /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
 		4A0F342C1CEA74FF00C25E7D /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		4A0F342E1CED798C00C25E7D /* BishopBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BishopBlack.png; sourceTree = "<group>"; };
+		4A0F342F1CED798C00C25E7D /* KingBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = KingBlack.png; sourceTree = "<group>"; };
+		4A0F34301CED798C00C25E7D /* KnightBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = KnightBlack.png; sourceTree = "<group>"; };
+		4A0F34311CED798C00C25E7D /* PawnBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PawnBlack.png; sourceTree = "<group>"; };
+		4A0F34321CED798C00C25E7D /* QueenBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QueenBlack.png; sourceTree = "<group>"; };
+		4A0F34331CED798C00C25E7D /* RookBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RookBlack.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,8 +89,8 @@
 				4A0F34251CEA5C1A00C25E7D /* Images */,
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
-				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F34281CEA67D800C25E7D /* GameController.swift */,
+				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
 				4A0F342A1CEA6BBF00C25E7D /* x.swift */,
@@ -94,6 +106,12 @@
 		4A0F34251CEA5C1A00C25E7D /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				4A0F342E1CED798C00C25E7D /* BishopBlack.png */,
+				4A0F342F1CED798C00C25E7D /* KingBlack.png */,
+				4A0F34301CED798C00C25E7D /* KnightBlack.png */,
+				4A0F34311CED798C00C25E7D /* PawnBlack.png */,
+				4A0F34321CED798C00C25E7D /* QueenBlack.png */,
+				4A0F34331CED798C00C25E7D /* RookBlack.png */,
 				4A0F341D1CEA5C1300C25E7D /* 1.jpg */,
 				4A0F341E1CEA5C1300C25E7D /* 2.jpg */,
 				4A0F341F1CEA5C1300C25E7D /* 3.jpg */,
@@ -165,9 +183,15 @@
 				4A0F34241CEA5C1300C25E7D /* 4.jpg in Resources */,
 				4A0F34211CEA5C1300C25E7D /* 1.jpg in Resources */,
 				4A0F34221CEA5C1300C25E7D /* 2.jpg in Resources */,
+				4A0F34361CED798C00C25E7D /* KnightBlack.png in Resources */,
+				4A0F34341CED798C00C25E7D /* BishopBlack.png in Resources */,
 				4A0F34231CEA5C1300C25E7D /* 3.jpg in Resources */,
+				4A0F34351CED798C00C25E7D /* KingBlack.png in Resources */,
+				4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */,
 				4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */,
 				4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */,
+				4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */,
+				4A0F34371CED798C00C25E7D /* PawnBlack.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

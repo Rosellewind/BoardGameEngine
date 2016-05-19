@@ -8,36 +8,221 @@
 
 import UIKit
 
-struct Move {
-    // up and down, side to side, diagonal right, diagonal left
+enum ChessPiece: String {
+    case King, Queen, Rook, Bishop, Knight, Pawn
 }
 
-struct Piece {
-    let name: String
-    let position: Position
+class Piece {
+    var name: String
+    var position: Position
     let startingPosition: Position
-    let isLegalMove: ((Int) -> Bool)
+    var isLegalMove: (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?)/////onlyIfOccupied?
     
-    init(name: String, position: Position, isLegalMove: ((Int) -> Bool)) {
+    init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?)) {
         self.name = name
         self.position = position
         self.startingPosition = position
         self.isLegalMove = isLegalMove
     }
     
+    init(toCopy: Piece) {
+        self.name = toCopy.name
+        self.position = toCopy.position
+        self.startingPosition = toCopy.position
+        self.isLegalMove = toCopy.isLegalMove
+    }
+    
+    func copy() -> Piece{
+        return Piece(toCopy: self)
+    }
+    
     static func standardPieces(variation: ChessVariation, playerOrientation: PlayerOrientation) -> [Piece]{
-        let pieces = [Piece]()
-//        switch variation {
-//        case .StandardChess:
-//            let x = 0
-////            let king = Piece(name: "King", moves: <#T##[Position]#>, position: <#T##Position#>)
-////            let rook = Piece(name: "Rook", moves: , position: )
-//        }
-////        let move = {}
+        var pieces = [Piece]()
+        switch variation {
+        case .StandardChess:
+            let king = self.chessPiece(.King)
+            let queen = self.chessPiece(.Queen)
+            let rook = self.chessPiece(.Rook)
+            let bishop = self.chessPiece(.Bishop)
+            let knight = self.chessPiece(.Knight)
+            let pawn = self.chessPiece(.Pawn)
+            let rook2 = rook.copy()
+            let bishop2 = bishop.copy()
+            let knight2 = knight.copy()
+            let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
+            var pawns = [Piece]()
+            
+
+            if playerOrientation == .top || playerOrientation == .bottom {
+                rook2.position = Position(row: 0, column: 7)
+                bishop2.position = Position(row: 0, column: 5)
+                knight2.position = Position(row: 0, column: 6)
+                
+                pawns.append(pawn)
+                for i in 1..<8 {
+                    let pawnI = pawn.copy()
+                    pawnI.position = Position(row: pawn.position.row, column: i)
+                    pawns.append(pawnI)
+                }
+                
+                if playerOrientation == .bottom {
+                    for piece in royalty {
+                        piece.position = Position(row: 7, column: piece.position.column)
+                    }
+                    for piece in pawns {
+                        piece.position = Position(row: 6, column: piece.position.column)
+                    }
+                }
+            } else {
+                
+            }
+
+            pieces.appendContentsOf(royalty)
+            pieces.appendContentsOf(pawns)
+
+        case .Galaxy:
+            let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                return (true, nil, nil)
+            })
+            pieces.append(piece)
+        }
         return pieces
+    }
+    
+    static func chessPiece(name: ChessPiece) -> Piece {
+        switch name {
+        case .King:
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                
+                // exactly one square horizontally, vertically, or diagonally, 1 castling per game
+                if translation.row == 0 && translation.column == 0 {
+                    return (false, nil, nil)
+                } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){
+                    return (true, nil, nil)
+                }
+                return (false, nil, nil)
+            })
+        case .Queen:
+            return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                var isLegal = false
+                var ifTheseAreNotOccupied = [Position]()
+                
+                // any number of vacant squares in a horizontal, vertical, or diagonal direction.
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if translation.row == 0 {  // horizontal
+                    let signage = translation.column > 0 ? 1 : -1
+                    for i in 1..<abs(translation.column) {
+                        ifTheseAreNotOccupied.append(Position(row: 0, column: i * signage))
+                    }
+                    isLegal = true
+                } else if translation.column == 0 { // vertical
+                    let signage = translation.row > 0 ? 1 : -1
+                    for i in 1..<abs(translation.row) {
+                        ifTheseAreNotOccupied.append(Position(row: i * signage, column: 0))
+                    }
+                    isLegal = true
+                } else if abs(translation.row) == abs(translation.row) {    // diagonal
+                    let rowSignage = translation.row > 0 ? 1 : -1
+                    let columnSignage = translation.column > 0 ? 1 : -1
+                    for i in 1..<abs(translation.row) {
+                        ifTheseAreNotOccupied.append(Position(row: i * rowSignage, column: i * columnSignage))
+                    }
+                    isLegal = true
+                }
+                return (isLegal, nil, ifTheseAreNotOccupied.count > 0 ? ifTheseAreNotOccupied : nil)
+            })
+        case .Rook:
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                var isLegal = false
+                var ifTheseAreNotOccupied = [Position]()
+                
+                // any number of vacant squares in a horizontal or vertical direction, also moved in castling
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if translation.row == 0 {  // horizontal
+                    let signage = translation.column > 0 ? 1 : -1
+                    for i in 1..<abs(translation.column) {
+                        ifTheseAreNotOccupied.append(Position(row: 0, column: i * signage))
+                    }
+                    isLegal = true
+                } else if translation.column == 0 { // vertical
+                    let signage = translation.row > 0 ? 1 : -1
+                    for i in 1..<abs(translation.row) {
+                        ifTheseAreNotOccupied.append(Position(row: i * signage, column: 0))
+                    }
+                    isLegal = true
+                }
+                return (isLegal, nil, ifTheseAreNotOccupied.count > 0 ? ifTheseAreNotOccupied : nil)
+            })
+        case .Bishop:
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 2), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                var isLegal = false
+                var ifTheseAreNotOccupied = [Position]()
+                
+                // any number of vacant squares in any diagonal direction
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if abs(translation.row) == abs(translation.row) {    // diagonal
+                    let rowSignage = translation.row > 0 ? 1 : -1
+                    let columnSignage = translation.column > 0 ? 1 : -1
+                    for i in 1..<abs(translation.row) {
+                        ifTheseAreNotOccupied.append(Position(row: i * rowSignage, column: i * columnSignage))
+                    }
+                    isLegal = true
+                }
+                return (isLegal, nil, ifTheseAreNotOccupied.count > 0 ? ifTheseAreNotOccupied : nil)
+            })
+        case .Knight:
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 1), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                var isLegal = false
+                
+                // the nearest square not on the same rank, file, or diagonal, L, 2 steps/1 step
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if abs(translation.row) == 2 && abs(translation.column) == 1 || abs(translation.row) == 1 && abs(translation.column) == 2{
+                    isLegal = true
+                }
+                return (isLegal, nil, nil)
+            })
+            
+        case .Pawn:
+            return Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, ifOccupied: [Position]?, andNotOccupied : [Position]?) in
+                var isLegal = false
+                var ifTheseAreNotOccupied = [Position]()
+                var ifTheseAreOccupied = [Position]()
+                
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if translation.row == 1 && translation.column == 0 {     // move forward one on vacant
+                    ifTheseAreNotOccupied = [translation]
+                    isLegal = true
+                } else if translation.row == 1 && abs(translation.column) == 1 {
+                    ifTheseAreOccupied = [translation]
+                    isLegal = true
+                }
+                return (isLegal, ifTheseAreOccupied, ifTheseAreNotOccupied)
+            })
+            
+        }
     }
 }
 
 class PieceView: UIView {
+    var image: UIImage
     
+    init(image: UIImage) {
+        self.image = image
+        super.init(frame: CGRectZero)
+        
+        let imageView = UIImageView(image:image)
+        self.addSubview(imageView)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
+
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

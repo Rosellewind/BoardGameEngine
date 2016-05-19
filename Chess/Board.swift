@@ -101,8 +101,8 @@ class BoardView: UIView {
             
             // add to array
             cells.append(cell)
-            cell.translatesAutoresizingMaskIntoConstraints = false
             self.addSubview(cell)
+            cell.translatesAutoresizingMaskIntoConstraints = false
         }
         addConstraintsToCells(board)
     }

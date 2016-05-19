@@ -14,21 +14,16 @@ enum PlayerOrientation: Int {
 
 
 class Player {
-    var pieces: [Piece]
     let orientation: PlayerOrientation
+    var pieces: [Piece]
     
     init(orientation: PlayerOrientation, pieces: [Piece]) {
         self.orientation = orientation
         self.pieces = pieces
     }
     
-    static func chessPieces(board: Board, orientation: PlayerOrientation) -> [Piece] {
-        let pieces = [Piece]()
-        
-        let is8WidthBoard = board.numRows == 8 && board.numColumns == 8
-        if is8WidthBoard {
-            
-        }
-        return pieces
+    init(variation: ChessVariation, orientation: PlayerOrientation) {
+        self.orientation = orientation
+        self.pieces = Piece.standardPieces(variation, playerOrientation: orientation)
     }
 }
