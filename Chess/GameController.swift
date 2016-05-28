@@ -50,7 +50,8 @@ class GameController {
                 for piece in player.pieces {///////need a tag?
                     let ending = player.orientation == .bottom ? "Black.png" : "White.png"////add images
                     if let image = UIImage(named: piece.name + "Black.png") {
-                        let pieceView = PieceView(image: image, startingPoint: CGPointZero)
+                        let pieceView = PieceView(image: image)
+                        pieceView.tag = piece.tag
                         pieceViews.append(pieceView)
                         let indexOfPieceOnBoard = board.index(piece.position)
                         let correctCells = boardView.cells.filter({ (view: UIView) -> Bool in
@@ -62,12 +63,13 @@ class GameController {
                         })
                         if correctCells.count > 0 {
                             let cell = correctCells[0]
-                            gameView.addSubview(pieceView)
+                            boardView.addSubview(pieceView)
                             pieceView.translatesAutoresizingMaskIntoConstraints = false
                             let widthConstraint = NSLayoutConstraint(item: pieceView, attribute: .Width, relatedBy: .Equal, toItem: boardView.cells[0], attribute: .Width, multiplier: 1, constant: 0)
                             let heightConstraint = NSLayoutConstraint(item: pieceView, attribute: .Height, relatedBy: .Equal, toItem: boardView.cells[0], attribute: .Height, multiplier: 1, constant: 0)
                             let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
                             let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+                            pieceView.positionConstraints = [positionX, positionY]
                             NSLayoutConstraint.activateConstraints([widthConstraint, heightConstraint, positionX, positionY])
                         }
                     }
@@ -105,6 +107,7 @@ class GameController {
     }
     
     @objc func cellTapped(sender: UITapGestureRecognizer) {
+        print("cellTapped")
         if let view = sender.view {
             let position = board.position(view.tag)
             let piece = pieceForPosition(position)
@@ -154,11 +157,8 @@ class GameController {
                         }
                         print("legal move")
                         // move the piece into new position, or listen to position change and change position
-//                        UIView.animateWithDuration(2.0, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-//                            pieceViews.filter({ (<#PieceView#>) -> Bool in
-//                                $0.
-//                            })
-//                            }, completion: nil)
+                        animatePiece(selectedPiece!, position: position)
+
                         
                         whoseTurn += 1
                     }
@@ -210,5 +210,32 @@ class GameController {
             }
         }
         return pieceFound
+    }
+    
+    func animatePiece(piece: Piece, position: Position) {
+        let matching = pieceViews.filter({$0.tag == piece.tag})
+        if matching.count > 0 {
+            let pieceView = matching[0]
+            
+            // deactivate position constraints
+            NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
+            
+            // activate new position constraints
+            let cellIndex = board.index(position)
+            let matchingCells = boardView.cells.filter({$0.tag == cellIndex})
+            if matchingCells.count > 0 {
+                let cell = matchingCells[0]
+                let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
+                let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+                pieceView.positionConstraints = [positionX, positionY]
+                NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
+            }
+        }
+        
+        // animate the change
+        boardView.setNeedsUpdateConstraints()
+        UIView.animateWithDuration(0.5) { 
+            self.boardView.layoutIfNeeded()
+        }
     }
 }

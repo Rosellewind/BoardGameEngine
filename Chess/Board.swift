@@ -141,14 +141,14 @@ class BoardView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        print("center:....\(self.center)")
-        for view in subviews {
-            view.needsUpdateConstraints()
-            print("center:....\(view.center)")
-
-        }
-    }
+//    override func layoutSubviews() {
+//        print("center:....\(self.center)")
+//        for view in subviews {
+//            view.needsUpdateConstraints()
+//            print("center:....\(view.center)")
+//
+//        }
+//    }
 }
 
 
