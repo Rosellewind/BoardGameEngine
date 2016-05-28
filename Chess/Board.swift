@@ -8,12 +8,14 @@
 
 import UIKit
 
-struct Position {
+struct Position: Equatable {
     var row: Int
     var column: Int
-    
-    
 }
+func ==(lhs: Position, rhs: Position) -> Bool {
+    return lhs.row == rhs.row && lhs.column == rhs.column
+}
+
 
 class Board {
     let numRows: Int
@@ -137,6 +139,15 @@ class BoardView: UIView {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        print("center:....\(self.center)")
+        for view in subviews {
+            view.needsUpdateConstraints()
+            print("center:....\(view.center)")
+
+        }
     }
 }
 

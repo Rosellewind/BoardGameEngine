@@ -22,7 +22,6 @@ class ViewController: UIViewController {
         gameController = GameController(variation: .StandardChess, gameView: gameView)
 //        gameController = GameController(variation: .Galaxy, gameView: gameView)
         
-        
     }
 
     override func didReceiveMemoryWarning() {
