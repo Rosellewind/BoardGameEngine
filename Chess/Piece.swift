@@ -6,6 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
+
 import UIKit
 
 enum ChessPiece: String {
@@ -13,15 +14,15 @@ enum ChessPiece: String {
 }
 
 enum Condition {
-    case MustBeOccupied, CantBeOccupied
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent
 }
 
-class Piece {
+class Piece: NSObject, NSCopying {
     var name: String
     var position: Position
     let startingPosition: Position
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?)
-    var selected = false
+    dynamic var selected = false
     var tag = 0
     
     init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?)) {
@@ -31,7 +32,7 @@ class Piece {
         self.isLegalMove = isLegalMove
     }
     
-    init(toCopy: Piece) {
+    required init(toCopy: Piece) {
         self.name = toCopy.name
         self.tag = toCopy.tag
         self.position = toCopy.position
@@ -39,8 +40,8 @@ class Piece {
         self.isLegalMove = toCopy.isLegalMove
     }
     
-    func copy() -> Piece{
-        return Piece(toCopy: self)
+    func copyWithZone(zone: NSZone) -> AnyObject {
+        return self.dynamicType.init(toCopy: self)
     }
     
     static func standardPieces(variation: ChessVariation, playerOrientation: PlayerOrientation) -> [Piece]{
@@ -53,9 +54,9 @@ class Piece {
             let bishop = self.chessPiece(.Bishop)
             let knight = self.chessPiece(.Knight)
             let pawn = self.chessPiece(.Pawn)
-            let rook2 = rook.copy()
-            let bishop2 = bishop.copy()
-            let knight2 = knight.copy()
+            let rook2 = rook.copy() as! Piece
+            let bishop2 = bishop.copy() as! Piece
+            let knight2 = knight.copy() as! Piece
             let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
             var pawns = [Piece]()
             
@@ -67,7 +68,7 @@ class Piece {
                 
                 pawns.append(pawn)
                 for i in 1..<8 {
-                    let pawnI = pawn.copy()
+                    let pawnI = pawn.copy() as! Piece
                     pawnI.position = Position(row: pawn.position.row, column: i)
                     pawns.append(pawnI)
                 }
@@ -93,8 +94,11 @@ class Piece {
             })
             pieces.append(piece)
         }
+        
+        // set the tag
+        let offset = playerOrientation.rawValue * pieces.count
         for i in 0..<pieces.count {
-            pieces[i].tag = i
+            pieces[i].tag = i + offset
         }
         return pieces
     }
@@ -212,30 +216,16 @@ class Piece {
         case .Pawn:
             return Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
-                var cantBeOccupied = [Position]()
-                var mustBeOccupied = [Position]()
                 var conditions: [(condition: Condition, positions: [Position])]?
 
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if translation.row == 1 && translation.column == 0 {     // move forward one on vacant
-                    cantBeOccupied = [translation]
                     isLegal = true
+                    conditions = [(.CantBeOccupied, [translation])]
                 } else if translation.row == 1 && abs(translation.column) == 1 {    // move diagonal one on occupied
-                    mustBeOccupied = [translation]
                     isLegal = true
-                }
-                
-                // conditions
-                if cantBeOccupied.count > 1 {
-                    conditions = [(.CantBeOccupied, cantBeOccupied)]
-                }
-                if mustBeOccupied.count > 1 {
-                    if conditions == nil {
-                        conditions = [(.MustBeOccupied, mustBeOccupied)]
-                    } else {
-                        conditions!.append((.MustBeOccupied, mustBeOccupied))
-                    }
+                    conditions = [(.MustBeOccupiedByOpponent, [translation])]
                 }
                 return (isLegal, conditions)
             })
@@ -244,9 +234,30 @@ class Piece {
     }
 }
 
+
+private var myContext = 0
+
 class PieceView: UIView {
     var image: UIImage
     var positionConstraints = [NSLayoutConstraint]()
+    
+    var observing: [(objectToObserve: NSObject, keyPath: String)]? {
+        willSet {
+            if observing != nil {
+                for observe in observing! {
+                    observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
+                }
+            }
+        }
+        didSet {
+            if observing != nil {
+                for observe in observing! {//////shorten?
+                    observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: .New, context: &myContext)
+                }
+            }
+        }
+    }
+
     init(image: UIImage) {
         self.image = image
         super.init(frame: CGRectZero)
@@ -260,5 +271,25 @@ class PieceView: UIView {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+        if context == &myContext {
+            if keyPath == "selected" {
+                if let piece = object as? Piece {
+                    if piece.selected == true {
+                        self.alpha = 0.4
+                    } else {
+                        self.alpha = 1.0
+                    }
+                }
+            }
+        } else {
+            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+        }
+    }
+    
+    deinit {
+        observing = nil
     }
 }

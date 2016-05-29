@@ -8,6 +8,9 @@
 
 ////// stopped here, next add taps, which square/position, which piece matches position, select it(var), next tap, if selected, ask piece if legalMove, check that conditions are met, animate piece to new spot, remove any if called for
 
+//// pieceView tags aren't working, double
+
+
 import UIKit
 
 enum ChessVariation {
@@ -52,6 +55,7 @@ class GameController {
                     if let image = UIImage(named: piece.name + "Black.png") {
                         let pieceView = PieceView(image: image)
                         pieceView.tag = piece.tag
+                        pieceView.observing = [(piece, "selected")]
                         pieceViews.append(pieceView)
                         let indexOfPieceOnBoard = board.index(piece.position)
                         let correctCells = boardView.cells.filter({ (view: UIView) -> Bool in
@@ -113,21 +117,25 @@ class GameController {
             let piece = pieceForPosition(position)
             
             // beginning of turn, selecting the piece
-            if selectedPiece == nil {
+            let isBeginningOfTurn = selectedPiece == nil
+            if isBeginningOfTurn {
                 // get the piece
-                if piece != nil {// cell must be occupied for selection //////////pieceView listen to selection
-                    piece!.selected = true
-                    selectedPiece = piece
+                if piece != nil {// cell must be occupied for selection
+                    let isPlayersOwnPiece = players[whoseTurn].pieces.contains(piece!)
+                    if isPlayersOwnPiece {
+                        piece!.selected = true  ////// necessary?
+                        selectedPiece = piece
+                    }
                 }
             }
             
             // final part of turn, choosing where to go
             else {
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, orientation: players[whoseTurn].orientation)
-                let move = selectedPiece!.isLegalMove(translation: translation)
-                if move.isLegal {
+                let moveFunction = selectedPiece!.isLegalMove(translation: translation)
+                if moveFunction.isLegal {
                     var isStillLegal = true
-                    if let conditions = move.conditions {
+                    if let conditions = moveFunction.conditions {
                         for condition in conditions where isStillLegal == true {
                             switch condition.condition {
                             case .CantBeOccupied:
@@ -148,20 +156,48 @@ class GameController {
                                         isStillLegal = false
                                     }
                                 }
+                            case .MustBeOccupiedByOpponent:
+                                for translation in condition.positions {
+                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
+                                    let pieceOccupying = pieceForPosition(positionToCheck)
+                                    if pieceOccupying != nil && players[whoseTurn].pieces.contains(pieceOccupying!) {
+                                        isStillLegal = false
+                                    }
+                                }
                             }
                         }
                     }
                     if isStillLegal {
                         if piece != nil {
                             // remove it, score///////////
+                            let matching = pieceViews.filter({$0.tag == piece!.tag})
+                            if matching.count > 0 {///////animate, grow?
+                                matching[0].removeFromSuperview()
+                                for player in players {
+                                    let index = player.pieces.indexOf(piece!)
+                                    if index != nil {
+                                        player.pieces.removeAtIndex(index!)
+
+                                    }
+                                }
+                            }
                         }
                         print("legal move")
                         // move the piece into new position, or listen to position change and change position
                         animatePiece(selectedPiece!, position: position)
-
                         
+                        selectedPiece!.selected = false
+                        selectedPiece = nil
                         whoseTurn += 1
+                    } else {
+                        // delesect
+                        selectedPiece!.selected = false
+                        selectedPiece = nil
                     }
+                } else {    // move is not legal
+                    // delesect
+                    selectedPiece!.selected = false
+                    selectedPiece = nil
                 }
             }
             
@@ -230,12 +266,15 @@ class GameController {
                 pieceView.positionConstraints = [positionX, positionY]
                 NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
             }
-        }
-        
-        // animate the change
-        boardView.setNeedsUpdateConstraints()
-        UIView.animateWithDuration(0.5) { 
-            self.boardView.layoutIfNeeded()
+            
+            // update piece position
+            piece.position = position
+            
+            // animate the change
+            boardView.setNeedsUpdateConstraints()
+            UIView.animateWithDuration(0.5) {
+                self.boardView.layoutIfNeeded()
+            }
         }
     }
 }
