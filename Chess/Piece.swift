@@ -14,7 +14,7 @@ enum ChessPiece: String {
 }
 
 enum Condition {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, OnlyInitialMove
 }
 
 class Piece: NSObject, NSCopying {
@@ -24,6 +24,7 @@ class Piece: NSObject, NSCopying {
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?)
     dynamic var selected = false
     var tag = 0
+    var isFirstMove = true
     
     init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?)) {
         self.name = name
@@ -38,6 +39,7 @@ class Piece: NSObject, NSCopying {
         self.position = toCopy.position
         self.startingPosition = toCopy.position
         self.isLegalMove = toCopy.isLegalMove
+        self.isFirstMove = toCopy.isFirstMove
     }
     
     func copyWithZone(zone: NSZone) -> AnyObject {
@@ -220,12 +222,16 @@ class Piece: NSObject, NSCopying {
             })
             
         case .Pawn:
-            return Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
+            let piece = Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
                 var conditions: [(condition: Condition, positions: [Position])]?
-
+                
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
+                } else if translation.row == 2 && translation.column == 0 {  // initial move, forward two
+                    isLegal = true
+                    conditions = [(.CantBeOccupied, [Position(row: 1, column: 0), Position(row: 2, column: 0)]), (.OnlyInitialMove, [Position]())]
+                    return (isLegal, conditions)
                 } else if translation.row == 1 && translation.column == 0 {     // move forward one on vacant
                     isLegal = true
                     conditions = [(.CantBeOccupied, [translation])]
@@ -235,7 +241,7 @@ class Piece: NSObject, NSCopying {
                 }
                 return (isLegal, conditions)
             })
-            
+            return piece
         }
     }
 }

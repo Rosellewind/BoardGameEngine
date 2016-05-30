@@ -135,6 +135,7 @@ class GameController {
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 if moveFunction.isLegal {
                     var isStillLegal = true
+                    var markIsFirstMoveAsFalse = false
                     if let conditions = moveFunction.conditions {
                         for condition in conditions where isStillLegal == true {
                             switch condition.condition {
@@ -174,10 +175,17 @@ class GameController {
                                         isStillLegal = false
                                     }
                                 }
+                            case .OnlyInitialMove:
+                                if !selectedPiece!.isFirstMove {
+                                    isStillLegal = false
+                                }
                             }
                         }
                     }
                     if isStillLegal {
+                        if selectedPiece!.isFirstMove == true {
+                            selectedPiece!.isFirstMove = false
+                        }
                         if piece != nil {
                             // remove it, score///////////
                             let matching = pieceViews.filter({$0.tag == piece!.tag})
