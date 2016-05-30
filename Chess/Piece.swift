@@ -14,7 +14,7 @@ enum ChessPiece: String {
 }
 
 enum Condition {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf
 }
 
 class Piece: NSObject, NSCopying {
@@ -108,20 +108,22 @@ class Piece: NSObject, NSCopying {
         case .King:
             return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
+                var conditions: [(condition: Condition, positions: [Position])]?
 
                 // exactly one square horizontally, vertically, or diagonally, 1 castling per game
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){
                     isLegal = true
+                    conditions = [(.CantBeOccupiedBySelf, [translation])]
                 }
-                return (isLegal, nil)
+                return (isLegal, conditions)
             })
         case .Queen:
             return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
-                var conditions: [(condition: Condition, positions: [Position])]?
+                var conditions: [(condition: Condition, positions: [Position])] = [(condition: .CantBeOccupiedBySelf, positions: [translation])]
                 
                 // any number of vacant squares in a horizontal, vertical, or diagonal direction.
                 if translation.row == 0 && translation.column == 0 {
@@ -138,7 +140,7 @@ class Piece: NSObject, NSCopying {
                         cantBeOccupied.append(Position(row: i * signage, column: 0))
                     }
                     isLegal = true
-                } else if abs(translation.row) == abs(translation.row) {    // diagonal
+                } else if abs(translation.row) == abs(translation.column) {    // diagonal
                     let rowSignage = translation.row > 0 ? 1 : -1
                     let columnSignage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
@@ -146,8 +148,8 @@ class Piece: NSObject, NSCopying {
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 1 {
-                    conditions = [(.CantBeOccupied, cantBeOccupied)]
+                if cantBeOccupied.count > 0 {
+                    conditions.append((.CantBeOccupied, cantBeOccupied))
                 }
                 return (isLegal, conditions)
             })
@@ -155,7 +157,7 @@ class Piece: NSObject, NSCopying {
             return Piece(name: name.rawValue, position: Position(row: 0, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
-                var conditions: [(condition: Condition, positions: [Position])]?
+                var conditions: [(condition: Condition, positions: [Position])] = [(condition: .CantBeOccupiedBySelf, positions: [translation])]
 
                 // any number of vacant squares in a horizontal or vertical direction, also moved in castling
                 if translation.row == 0 && translation.column == 0 {
@@ -173,8 +175,8 @@ class Piece: NSObject, NSCopying {
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 1 {
-                    conditions = [(.CantBeOccupied, cantBeOccupied)]
+                if cantBeOccupied.count > 0 {
+                    conditions.append((.CantBeOccupied, cantBeOccupied))
                 }
                 return (isLegal, conditions)
             })
@@ -182,12 +184,14 @@ class Piece: NSObject, NSCopying {
             return Piece(name: name.rawValue, position: Position(row: 0, column: 2), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
-                var conditions: [(condition: Condition, positions: [Position])]?
+                
+                // can't land on self
+                var conditions: [(condition: Condition, positions: [Position])] = [(condition: .CantBeOccupiedBySelf, positions: [translation])]
                 
                 // any number of vacant squares in any diagonal direction
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
-                } else if abs(translation.row) == abs(translation.row) {    // diagonal
+                } else if abs(translation.row) == abs(translation.column) {    // diagonal
                     let rowSignage = translation.row > 0 ? 1 : -1
                     let columnSignage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
@@ -195,22 +199,24 @@ class Piece: NSObject, NSCopying {
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 1 {
-                    conditions = [(.CantBeOccupied, cantBeOccupied)]
+                if cantBeOccupied.count > 0 {
+                    conditions.append((.CantBeOccupied, cantBeOccupied))
                 }
                 return (isLegal, conditions)
             })
         case .Knight:
             return Piece(name: name.rawValue, position: Position(row: 0, column: 1), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Condition, positions: [Position])]?) in
                 var isLegal = false
-                
+                var conditions: [(condition: Condition, positions: [Position])]?
+
                 // the nearest square not on the same rank, file, or diagonal, L, 2 steps/1 step
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if abs(translation.row) == 2 && abs(translation.column) == 1 || abs(translation.row) == 1 && abs(translation.column) == 2{
                     isLegal = true
+                    conditions = [(.CantBeOccupiedBySelf, [translation])]
                 }
-                return (isLegal, nil)
+                return (isLegal, conditions)
             })
             
         case .Pawn:

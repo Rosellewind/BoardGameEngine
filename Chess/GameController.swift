@@ -51,8 +51,8 @@ class GameController {
             // create pieceView's
             for player in players {
                 for piece in player.pieces {///////need a tag?
-                    let ending = player.orientation == .bottom ? "Black.png" : "White.png"////add images
-                    if let image = UIImage(named: piece.name + "Black.png") {
+                    let ending = player.orientation == .bottom ? "Black" : "White"////add images
+                    if let image = UIImage(named: piece.name + ending) {
                         let pieceView = PieceView(image: image)
                         pieceView.tag = piece.tag
                         pieceView.observing = [(piece, "selected")]
@@ -108,7 +108,7 @@ class GameController {
             
         }
        
-    }
+    }////////knight, can't land on own
     
     @objc func cellTapped(sender: UITapGestureRecognizer) {
         print("cellTapped")
@@ -157,6 +157,16 @@ class GameController {
                                     }
                                 }
                             case .MustBeOccupiedByOpponent:
+                                for translation in condition.positions {
+                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
+                                    let pieceOccupying = pieceForPosition(positionToCheck)
+                                    if pieceOccupying == nil {
+                                        isStillLegal = false
+                                    } else if players[whoseTurn].pieces.contains(pieceOccupying!) {
+                                        isStillLegal = false
+                                    }
+                                }
+                            case .CantBeOccupiedBySelf:
                                 for translation in condition.positions {
                                     let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
                                     let pieceOccupying = pieceForPosition(positionToCheck)
