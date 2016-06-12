@@ -119,13 +119,13 @@ class GameController {
        
     }
     
-    func pieceConditionsAreMet(piece: Piece, conditions: [(condition: LegalIfCondition, positions: [Position])]?) -> Bool {
+    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position])]?) -> Bool {
         var conditionsAreMet = true
         for condition in conditions ?? [] where conditionsAreMet == true {
             switch condition.condition {
             case .CantBeOccupied:
                 for translation in condition.positions {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying != nil {
                         conditionsAreMet = false
@@ -135,7 +135,7 @@ class GameController {
                 
             case .MustBeOccupied:
                 for translation in condition.positions {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
                         conditionsAreMet = false
@@ -143,19 +143,19 @@ class GameController {
                 }
             case .MustBeOccupiedByOpponent:
                 for translation in condition.positions {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
                         conditionsAreMet = false
-                    } else if players[whoseTurn].pieces.contains(pieceOccupying!) {
+                    } else if player.pieces.contains(pieceOccupying!) {
                         conditionsAreMet = false
                     }
                 }
             case .CantBeOccupiedBySelf:
                 for translation in condition.positions {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
-                    if pieceOccupying != nil && players[whoseTurn].pieces.contains(pieceOccupying!) {
+                    if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
                         conditionsAreMet = false
                     }
                 }
@@ -178,7 +178,7 @@ class GameController {
                     for piece in players[nextTurn].pieces where conditionsAreMet == true {
                         let translation = calculateTranslation(piece.position, toPosition: king.position, orientation: players[nextTurn].orientation)
                         let moveFunction = piece.isLegalMove(translation: translation)
-                        if moveFunction.isLegal && pieceConditionsAreMet(piece, conditions: moveFunction.conditions){
+                        if moveFunction.isLegal && pieceConditionsAreMet(piece, player: players[nextTurn], conditions: moveFunction.conditions){
                             conditionsAreMet = false
                         }
                     }
@@ -211,7 +211,7 @@ class GameController {
             else {////conditions required, make protocol?
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, orientation: players[whoseTurn].orientation)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
-                if moveFunction.isLegal && pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions) {
+                if moveFunction.isLegal && pieceConditionsAreMet(selectedPiece!, player: players[whoseTurn], conditions: moveFunction.conditions) {
                     
                     // mark if first move and save momento
                     var momentoMarkedFirstMove = false
