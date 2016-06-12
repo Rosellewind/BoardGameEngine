@@ -6,9 +6,8 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-////// stopped here, next add taps, which square/position, which piece matches position, select it(var), next tap, if selected, ask piece if legalMove, check that conditions are met, animate piece to new spot, remove any if called for
+//// stopped here, implementing can't take king, not working
 
-//// pieceView tags aren't working, double
 
 
 import UIKit
@@ -35,6 +34,15 @@ class GameController {
             }
         }
     }
+    var nextTurn: Int {
+        get {
+            var next = whoseTurn + 1
+            if next >= players.count {
+                next = 0
+            }
+            return next
+        }
+    }
     
     init(variation: ChessVariation, gameView: UIView) {
         switch variation {
@@ -56,8 +64,8 @@ class GameController {
             
             // create pieceView's
             for player in players {
-                for piece in player.pieces {///////need a tag?
-                    let ending = player.orientation == .bottom ? "Black" : "White"////add images
+                for piece in player.pieces {
+                    let ending = player.orientation == .bottom ? "Black" : "White"
                     if let image = UIImage(named: piece.name + ending) {
                         let pieceView = PieceView(image: image)
                         pieceView.tag = piece.tag
@@ -84,6 +92,7 @@ class GameController {
             })
             
             // add turn conditions
+            turnConditions = [.CantExposeKing]
             
         case .Galaxy:
             // create the board
@@ -110,6 +119,75 @@ class GameController {
        
     }
     
+    func pieceConditionsAreMet(piece: Piece, conditions: [(condition: LegalIfCondition, positions: [Position])]?) -> Bool {
+        var conditionsAreMet = true
+        for condition in conditions ?? [] where conditionsAreMet == true {
+            switch condition.condition {
+            case .CantBeOccupied:
+                for translation in condition.positions {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying != nil {
+                        conditionsAreMet = false
+                    }
+                }
+                ///pos to trans
+                
+            case .MustBeOccupied:
+                for translation in condition.positions {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying == nil {
+                        conditionsAreMet = false
+                    }
+                }
+            case .MustBeOccupiedByOpponent:
+                for translation in condition.positions {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying == nil {
+                        conditionsAreMet = false
+                    } else if players[whoseTurn].pieces.contains(pieceOccupying!) {
+                        conditionsAreMet = false
+                    }
+                }
+            case .CantBeOccupiedBySelf:
+                for translation in condition.positions {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: players[whoseTurn].orientation)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying != nil && players[whoseTurn].pieces.contains(pieceOccupying!) {
+                        conditionsAreMet = false
+                    }
+                }
+            case .OnlyInitialMove:
+                if !piece.isFirstMove {
+                    conditionsAreMet = false
+                }
+            }
+        }
+        return conditionsAreMet
+    }
+    
+    func turnConditionsAreMet(conditions: [TurnCondition]?) -> Bool {
+        var conditionsAreMet = true
+        for condition in conditions ?? [] {
+            switch condition {
+            case .CantExposeKing:////move to different file?
+                if let king = players[whoseTurn].pieces.elementPassing({$0.name == "King"}) {
+                    // for every opponents piece in new positions, can king be taken?
+                    for piece in players[nextTurn].pieces where conditionsAreMet == true {
+                        let translation = calculateTranslation(piece.position, toPosition: king.position, orientation: players[nextTurn].orientation)
+                        let moveFunction = piece.isLegalMove(translation: translation)
+                        if moveFunction.isLegal && pieceConditionsAreMet(piece, conditions: moveFunction.conditions){
+                            conditionsAreMet = false
+                        }
+                    }
+                }
+            }
+        }
+        return conditionsAreMet
+    }
+    
     @objc func cellTapped(sender: UITapGestureRecognizer) {
         print("cellTapped")
         if let view = sender.view {
@@ -123,116 +201,90 @@ class GameController {
                 if piece != nil {// cell must be occupied for selection
                     let isPlayersOwnPiece = players[whoseTurn].pieces.contains(piece!)
                     if isPlayersOwnPiece {
-                        piece!.selected = true  ////// necessary?
+                        piece!.selected = true  //// necessary?
                         selectedPiece = piece
                     }
                 }
             }
             
             // final part of turn, choosing where to go
-            else {/////////conditions required, make protocol
+            else {////conditions required, make protocol?
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, orientation: players[whoseTurn].orientation)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
-                if moveFunction.isLegal {
-                    var isStillLegal = true
-                    var markIsFirstMoveAsFalse = false
-                    if let conditions = moveFunction.conditions {
-                        for condition in conditions where isStillLegal == true {
-                            switch condition.condition {
-                            case .CantBeOccupied:
-                                for translation in condition.positions {
-                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
-                                    let pieceOccupying = pieceForPosition(positionToCheck)
-                                    if pieceOccupying != nil {
-                                        isStillLegal = false
-                                    }
-                                }
-                            ///pos to trans
-                                
-                            case .MustBeOccupied:
-                                for translation in condition.positions {
-                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
-                                    let pieceOccupying = pieceForPosition(positionToCheck)
-                                    if pieceOccupying == nil {
-                                        isStillLegal = false
-                                    }
-                                }
-                            case .MustBeOccupiedByOpponent:
-                                for translation in condition.positions {
-                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
-                                    let pieceOccupying = pieceForPosition(positionToCheck)
-                                    if pieceOccupying == nil {
-                                        isStillLegal = false
-                                    } else if players[whoseTurn].pieces.contains(pieceOccupying!) {
-                                        isStillLegal = false
-                                    }
-                                }
-                            case .CantBeOccupiedBySelf:
-                                for translation in condition.positions {
-                                    let positionToCheck = positionFromTranslation(translation, fromPosition: selectedPiece!.position, orientation: players[whoseTurn].orientation)
-                                    let pieceOccupying = pieceForPosition(positionToCheck)
-                                    if pieceOccupying != nil && players[whoseTurn].pieces.contains(pieceOccupying!) {
-                                        isStillLegal = false
-                                    }
-                                }
-                            case .OnlyInitialMove:
-                                if !selectedPiece!.isFirstMove {
-                                    isStillLegal = false
-                                }
+                if moveFunction.isLegal && pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions) {
+                    
+                    // mark if first move and save momento
+                    var momentoMarkedFirstMove = false
+                    if selectedPiece!.isFirstMove == true {
+                        selectedPiece!.isFirstMove = false
+                        momentoMarkedFirstMove = true
+                    }
+                    
+                    // remove piece if nedded and save momento
+                    var momentoPieceRemoved: Piece?
+                    var momentoPieceRemovedPlayer: Player?
+                    if piece != nil {
+                        momentoPieceRemoved = piece
+                        for player in players where momentoPieceRemovedPlayer == nil {
+                            let index = player.pieces.indexOf(piece!)////extension
+                            if index != nil {
+                                momentoPieceRemovedPlayer = player
+                                player.pieces.removeAtIndex(index!)
                             }
                         }
                     }
-                    if isStillLegal {
-                        // check turn conditions
-                        if turnConditions != nil {
-                            for condition in turnConditions! {
-                                switch condition {
-                                case .CantExposeKing:
-                                    break
-                                }
-                            }
-                        }
-                        
-                        
-                        
-                        if selectedPiece!.isFirstMove == true {
-                            selectedPiece!.isFirstMove = false
-                        }
-                        if piece != nil {
-                            // remove it, score///////////
-                            
-                            
-                            if let match = pieceViews.elementPassing({$0.tag == piece!.tag}) {
-                                match.removeFromSuperview()
-                                for player in players {
-                                    let index = player.pieces.indexOf(piece!)
-                                    if index != nil {
-                                        player.pieces.removeAtIndex(index!)
-                                        
-                                    }
-                                }
-                            }
-                        }
+                    
+                    // update position and save momento
+                    let momentoPosition = selectedPiece!.position
+                    selectedPiece!.position = position
+
+                    // if turn conditions are met, update the view, else restore momento
+                    if turnConditionsAreMet(turnConditions) {
+                        // update the view and complete the turn
                         print("legal move")
+                        
+                        // update view, remove pieceView if needed
+                        if momentoPieceRemoved != nil {
+                            if let match = pieceViews.elementPassing({$0.tag == momentoPieceRemoved!.tag}) {
+                                match.removeFromSuperview()
+                            }
+                        }
+                        
+                        // update view, animate into position
+                        animatePiece(selectedPiece!, position: selectedPiece!.position)
+                        
+                        
                         // move the piece into new position, or listen to position change and change position
-                        animatePiece(selectedPiece!, position: position)
                         
                         selectedPiece!.selected = false
                         selectedPiece = nil
                         whoseTurn += 1
+
+                        
                     } else {
+                        // restore momento - marked as first move
+                        if momentoMarkedFirstMove {
+                            selectedPiece!.isFirstMove = true
+                        }
+                        
+                        // restore momento - return removed piece
+                        if momentoPieceRemoved != nil && momentoPieceRemovedPlayer != nil {
+                            momentoPieceRemovedPlayer!.pieces.append(momentoPieceRemoved!)
+                        }
+                        
+                        // restore momento - return moved piece
+                        selectedPiece!.position = momentoPosition
+                        
                         // delesect
                         selectedPiece!.selected = false
                         selectedPiece = nil
                     }
-                } else {    // move is not legal
-                    // delesect
+                } else {
+                    // delesect, the move isn't legal
                     selectedPiece!.selected = false
                     selectedPiece = nil
                 }
             }
-            
-
         }
     }
     
@@ -243,7 +295,7 @@ class GameController {
             let column = fromPosition.column + translation.column
             return Position(row: row, column: column)
         case .bottom:
-            let row = fromPosition.row - translation.row////////check math
+            let row = fromPosition.row - translation.row
             let column = fromPosition.column + translation.column
             return Position(row: row, column: column)
         default:
@@ -294,9 +346,6 @@ class GameController {
                 pieceView.positionConstraints = [positionX, positionY]
                 NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
             }
-            
-            // update piece position
-            piece.position = position
             
             // animate the change
             boardView.setNeedsUpdateConstraints()

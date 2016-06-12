@@ -12,8 +12,8 @@ import CoreLocation
 
 
 extension Array {
-    
-    func elementPassing(@noescape includeElement: (Element) throws -> Bool) -> Element? {
+    /// Return the first element to satify the predicate includeElement. Returns nil if not found or there is an error.
+    func elementPassing(@noescape includeElement: (Element) throws -> Bool) rethrows -> Element? {
         for element in self {
             do  {
                 let isAMatch = try includeElement(element)

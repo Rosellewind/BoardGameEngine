@@ -255,17 +255,13 @@ class PieceView: UIView {
     
     var observing: [(objectToObserve: NSObject, keyPath: String)]? {
         willSet {
-            if observing != nil {
-                for observe in observing! {
-                    observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
-                }
+            for observe in observing ?? [] {
+                observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
             }
         }
         didSet {
-            if observing != nil {
-                for observe in observing! {//////shorten?
-                    observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: .New, context: &myContext)
-                }
+            for observe in observing ?? [] {
+                observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: .New, context: &myContext)
             }
         }
     }
