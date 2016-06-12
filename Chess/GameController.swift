@@ -16,12 +16,18 @@ import UIKit
 enum ChessVariation {
     case StandardChess, Galaxy
 }
+
+enum TurnCondition {
+    case CantExposeKing
+}
+
 class GameController {
     let board: Board
     let boardView: BoardView
     let players: [Player]
     var pieceViews = [PieceView]()
     var selectedPiece: Piece?
+    var turnConditions: [TurnCondition]?
     var whoseTurn: Int = 0 {
         didSet {
             if whoseTurn >= players.count {
@@ -58,15 +64,7 @@ class GameController {
                         pieceView.observing = [(piece, "selected")]
                         pieceViews.append(pieceView)
                         let indexOfPieceOnBoard = board.index(piece.position)
-                        let correctCells = boardView.cells.filter({ (view: UIView) -> Bool in
-                            if indexOfPieceOnBoard == view.tag {////////check tag
-                                return true
-                            } else {
-                                return false
-                            }
-                        })
-                        if correctCells.count > 0 {
-                            let cell = correctCells[0]
+                        if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
                             boardView.addSubview(pieceView)
                             pieceView.translatesAutoresizingMaskIntoConstraints = false
                             let widthConstraint = NSLayoutConstraint(item: pieceView, attribute: .Width, relatedBy: .Equal, toItem: boardView.cells[0], attribute: .Width, multiplier: 1, constant: 0)
@@ -84,6 +82,8 @@ class GameController {
             boardView.cells.forEach({ (view: UIView) in
                 view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(GameController.cellTapped(_:))))
             })
+            
+            // add turn conditions
             
         case .Galaxy:
             // create the board
@@ -108,7 +108,7 @@ class GameController {
             
         }
        
-    }////////knight, can't land on own
+    }
     
     @objc func cellTapped(sender: UITapGestureRecognizer) {
         print("cellTapped")
@@ -130,7 +130,7 @@ class GameController {
             }
             
             // final part of turn, choosing where to go
-            else {
+            else {/////////conditions required, make protocol
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, orientation: players[whoseTurn].orientation)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 if moveFunction.isLegal {
@@ -183,19 +183,32 @@ class GameController {
                         }
                     }
                     if isStillLegal {
+                        // check turn conditions
+                        if turnConditions != nil {
+                            for condition in turnConditions! {
+                                switch condition {
+                                case .CantExposeKing:
+                                    break
+                                }
+                            }
+                        }
+                        
+                        
+                        
                         if selectedPiece!.isFirstMove == true {
                             selectedPiece!.isFirstMove = false
                         }
                         if piece != nil {
                             // remove it, score///////////
-                            let matching = pieceViews.filter({$0.tag == piece!.tag})
-                            if matching.count > 0 {///////animate, grow?
-                                matching[0].removeFromSuperview()
+                            
+                            
+                            if let match = pieceViews.elementPassing({$0.tag == piece!.tag}) {
+                                match.removeFromSuperview()
                                 for player in players {
                                     let index = player.pieces.indexOf(piece!)
                                     if index != nil {
                                         player.pieces.removeAtIndex(index!)
-
+                                        
                                     }
                                 }
                             }
@@ -267,10 +280,7 @@ class GameController {
     }
     
     func animatePiece(piece: Piece, position: Position) {
-        let matching = pieceViews.filter({$0.tag == piece.tag})
-        if matching.count > 0 {
-            let pieceView = matching[0]
-            
+        if let pieceView = pieceViews.elementPassing({$0.tag == piece.tag}) {
             // deactivate position constraints
             NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
             

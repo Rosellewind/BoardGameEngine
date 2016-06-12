@@ -11,6 +11,23 @@ import MapKit
 import CoreLocation
 
 
+extension Array {
+    
+    func elementPassing(@noescape includeElement: (Element) throws -> Bool) -> Element? {
+        for element in self {
+            do  {
+                let isAMatch = try includeElement(element)
+                if isAMatch {
+                    return element
+                }
+            } catch {
+                print("elementMatching includeElement() error")
+            }
+        }
+        return nil
+    }
+}
+    
 extension NSLayoutConstraint {
     class func centerHorizontally(view: UIView) -> NSLayoutConstraint {
         return NSLayoutConstraint(item: view, attribute: .CenterX, relatedBy: .Equal, toItem: view.superview, attribute: .CenterX, multiplier: 1, constant: 0)
