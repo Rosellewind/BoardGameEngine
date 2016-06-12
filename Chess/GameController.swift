@@ -6,7 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// stopped here, implementing can't take king, not working
+//// stopped here, implementing can't take king, may not be working
 
 
 
