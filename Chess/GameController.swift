@@ -20,6 +20,14 @@ enum TurnCondition {
     case CantExposeKing
 }
 
+enum GameStatus {
+    case GameOver, WhoseTurn, IllegalMove, Default
+}
+
+protocol GameControllerProtocol {
+    func gameMessage(string: String, status: GameStatus?)
+}
+
 class GameController {
     let board: Board
     let boardView: BoardView
@@ -41,6 +49,11 @@ class GameController {
                 next = 0
             }
             return next
+        }
+    }
+    var statusDelegate: GameControllerProtocol? {
+        didSet {
+            statusDelegate?.gameMessage("White Starts!", status: .WhoseTurn)
         }
     }
     
@@ -65,7 +78,7 @@ class GameController {
             // create pieceView's
             for player in players {
                 for piece in player.pieces {
-                    let ending = player.orientation == .bottom ? "Black" : "White"
+                    let ending = player.orientation.colorString()
                     if let image = UIImage(named: piece.name + ending) {
                         let pieceView = PieceView(image: image)
                         pieceView.tag = piece.tag
@@ -253,12 +266,20 @@ class GameController {
                         // update view, animate into position
                         animatePiece(selectedPiece!, position: selectedPiece!.position)
                         
+                        // check for gameOver
+                        if gameIsOver() {
+                            statusDelegate?.gameMessage(players[whoseTurn].orientation.colorString() + " Won!!!", status: .GameOver)
+
+                        }
+                        
                         
                         // move the piece into new position, or listen to position change and change position
                         
                         selectedPiece!.selected = false
                         selectedPiece = nil
                         whoseTurn += 1
+                        statusDelegate?.gameMessage(players[whoseTurn].orientation.colorString() + "'s turn", status: .WhoseTurn)
+
 
                         
                     } else {
@@ -286,6 +307,17 @@ class GameController {
                 }
             }
         }
+    }
+    
+    func gameIsOver() -> Bool {
+        var gameOver = false
+        for player in players where gameOver == false{
+            if !player.pieces.contains({$0.name == "King"}) {
+                gameOver = true
+            }
+            
+        }
+        return gameOver
     }
     
     func positionFromTranslation(translation: Position, fromPosition: Position, orientation: PlayerOrientation) -> Position {

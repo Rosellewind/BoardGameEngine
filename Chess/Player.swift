@@ -10,6 +10,18 @@ import Foundation
 
 enum PlayerOrientation: Int {
     case bottom, top, left, right
+    func colorString() -> String {
+        switch self {
+        case bottom:
+            return "White"
+        case top:
+            return "Black"
+        case left:
+            return "Red"
+        case right:
+            return "Blue"
+        }
+    }
 }
 
 
