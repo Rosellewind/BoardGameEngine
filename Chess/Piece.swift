@@ -14,7 +14,7 @@ enum ChessPiece: String {
 }
 
 enum LegalIfCondition {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, OnlyInitialMove
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove, RookIsInitialMove, RookIsAlsoLegalMove, CantBeInCheckDuring//rename IsInitialMove
 }
 
 class Piece: NSObject, NSCopying {
@@ -118,6 +118,14 @@ class Piece: NSObject, NSCopying {
                 } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){
                     isLegal = true
                     conditions = [(.CantBeOccupiedBySelf, [translation])]
+                } else if translation.row == 0 && abs(translation.column) ==  2 {
+                    // Castling:
+                    // 1. neither king nor rook has moved
+                    // 2. there are no pieces between king and rook
+                    // 3. "One may not castle out of, through, or into check."
+                    // into check is already being checked///////////every piece have can't go into check? do I need turn conditions?
+                    let signage = translation.column > 0 ? 1 : -1
+                    conditions = [(.IsInitialMove, [Position]()), (.RookIsInitialMove, [Position]()), (.RookIsAlsoLegalMove, [Position]()), (.CantBeOccupied,[translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (.CantBeInCheckDuring, [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]    
                 }
                 return (isLegal, conditions)
             })
@@ -230,7 +238,7 @@ class Piece: NSObject, NSCopying {
                     isLegal = false
                 } else if translation.row == 2 && translation.column == 0 {  // initial move, forward two
                     isLegal = true
-                    conditions = [(.CantBeOccupied, [Position(row: 1, column: 0), Position(row: 2, column: 0)]), (.OnlyInitialMove, [Position]())]
+                    conditions = [(.CantBeOccupied, [Position(row: 1, column: 0), Position(row: 2, column: 0)]), (.IsInitialMove, [Position]())]
                     return (isLegal, conditions)
                 } else if translation.row == 1 && translation.column == 0 {     // move forward one on vacant
                     isLegal = true

@@ -6,8 +6,10 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// stopped here, implementing can't take king, may not be working
-
+//// end of game, king can't be captured
+//// castling, en passant, pawn promotion, check/mate
+//// in Piece.isValidMove(), return optional positions
+//// further the momento pattern
 
 
 import UIKit
@@ -17,7 +19,7 @@ enum ChessVariation {
 }
 
 enum TurnCondition {
-    case CantExposeKing
+    case CantExposeKing, Castling
 }
 
 enum GameStatus {
@@ -172,10 +174,30 @@ class GameController {
                         conditionsAreMet = false
                     }
                 }
-            case .OnlyInitialMove:
+            case .IsInitialMove:
                 if !piece.isFirstMove {
                     conditionsAreMet = false
                 }
+            case .RookIsInitialMove:
+                if let rook = player.pieces.elementPassing({$0.name == "Rook"}) {
+                    if rook.isFirstMove == false {
+                        conditionsAreMet = false
+                    }
+                } else {
+                    // if there is no rook, conditions are not met
+                    conditionsAreMet = false
+                }
+            case .RookIsAlsoLegalMove:
+                if let rook = player.pieces.elementPassing({$0.name == "Rook"}) {
+                    for translation in condition.positions {
+                        let moveFunction = rook.isLegalMove(translation: translation)
+                        conditionsAreMet = pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions)
+                    }
+                } else {
+                    conditionsAreMet = false
+                }
+            case .CantBeInCheckDuring:
+                break////****implement
             }
         }
         return conditionsAreMet
@@ -196,7 +218,22 @@ class GameController {
                         }
                     }
                 }
+            case .Castling://// ***king has just been marked as moving
+                if selectedPiece?.name ?? "" == "King" && selectedPiece?.isFirstMove ?? false {
+                    // 1. neither king nor rook has moved
+                    if let rook = players[whoseTurn].pieces.elementPassing({$0.name == "Rook"}) {
+                        if rook.isFirstMove {
+                            // 2. there are no pieces between king and rook
+                            
+                            // 3. "One may not castle out of, through, or into check."
+                        }
+                    }
+                    
+
+                    
+                }
             }
+            
         }
         return conditionsAreMet
     }
