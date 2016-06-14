@@ -6,9 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// end of game, king can't be captured
 //// castling, en passant, pawn promotion, check/mate
-//// in Piece.isValidMove(), return optional positions
 //// further the momento pattern
 //  checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
 //// stopped here **** castling is not done, need completionblock, move()
@@ -20,7 +18,7 @@ enum ChessVariation {
 }
 
 enum TurnCondition {
-    case CantExposeKing, Castling
+    case CantExposeKing
 }
 
 enum GameStatus {
@@ -135,12 +133,12 @@ class GameController {
        
     }
     
-    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position])]?) -> Bool {
+    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
         var conditionsAreMet = true
         for condition in conditions ?? [] where conditionsAreMet == true {
             switch condition.condition {
             case .CantBeOccupied:
-                for translation in condition.positions {
+                for translation in condition.positions ?? [] {
                     let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying != nil {
@@ -150,7 +148,7 @@ class GameController {
                 ///pos to trans
                 
             case .MustBeOccupied:
-                for translation in condition.positions {
+                for translation in condition.positions ?? [] {
                     let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
@@ -158,7 +156,7 @@ class GameController {
                     }
                 }
             case .MustBeOccupiedByOpponent:
-                for translation in condition.positions {
+                for translation in condition.positions ?? [] {
                     let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
@@ -168,7 +166,7 @@ class GameController {
                     }
                 }
             case .CantBeOccupiedBySelf:
-                for translation in condition.positions {
+                for translation in condition.positions ?? [] {
                     let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
@@ -186,7 +184,7 @@ class GameController {
                 if let king = player.pieces.elementPassing({$0.name == "King"}) {
                     for rook in rooks where castlingRook == nil {
                         if rook.isFirstMove {
-                            for translation in condition.positions  where castlingRook == nil  {
+                            for translation in condition.positions ?? []  where castlingRook == nil  {
                                 let position = positionFromTranslation(translation, fromPosition: king.position, orientation: player.orientation)
                                 let translation = calculateTranslation(rook.position, toPosition: position, orientation: player.orientation)
                                 let moveFunction = rook.isLegalMove(translation: translation)
@@ -235,20 +233,6 @@ class GameController {
                             conditionsAreMet = false
                         }
                     }
-                }
-            case .Castling://// ***king has just been marked as moving
-                if selectedPiece?.name ?? "" == "King" && selectedPiece?.isFirstMove ?? false {
-                    // 1. neither king nor rook has moved
-                    if let rook = players[whoseTurn].pieces.elementPassing({$0.name == "Rook"}) {
-                        if rook.isFirstMove {
-                            // 2. there are no pieces between king and rook
-                            
-                            // 3. "One may not castle out of, through, or into check."
-                        }
-                    }
-                    
-
-                    
                 }
             }
             
