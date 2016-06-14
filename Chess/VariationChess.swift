@@ -8,6 +8,62 @@
 
 import UIKit
 
+// basic Game class
+// make board, view
+
+//subclass or class func
+// make chessboard, view, override init but nothing else
+// init(chessgame/options)
+
+class ChessGameMaker {
+    init(board: &ChessBoard, boardView: &ChessBoardView) {
+        board = ChessBoard()
+        boardView = ChessBoardView(board: board)
+    }
+}
+
+class ChessBoard: Board {
+    init () {
+        super.init(numRows: 8, numColumns: 8)
+    }
+}
+
+class ChessBoardView: BoardView {
+    init (board: Board) {
+        super.init(board: board, checkered: true, images: nil, backgroundColors: [UIColor.redColor(), UIColor.blackColor()])
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class ChessPlayer: Player {
+    init() {
+        super.init(index: <#T##Int#>, pieces: <#T##[Piece]#>)
+    }
+}
+
+// add the boardView
+gameView.addSubview(boardView)
+boardView.translatesAutoresizingMaskIntoConstraints = false
+NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+
+
+
+
+
+
+//smarter to subclass?
+protocol Boardz {
+    func index(position: Position) -> Int
+    func position(index: Int) -> [Int]
+}
+protocol BoardViewz {
+    func makeCells(board: Boardz)
+}
+
+
 enum ChessVariation {
     case StandardChess, Galaxy
 }

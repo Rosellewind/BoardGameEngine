@@ -26,7 +26,7 @@ class Board {
     let numCells: Int
     let skipCells: [Int]?
     
-    init(numRows: Int, numColumns: Int, skipCells: [Int]?) {
+    init(numRows: Int, numColumns: Int, skipCells: [Int]? = nil) {
         self.numRows = numRows
         self.numColumns = numColumns
         self.numCells = numRows * numColumns

@@ -13,7 +13,7 @@ class ViewController: UIViewController, GameControllerProtocol {
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!
     
-    var gameController: GameController!
+    var game: Game!
 
     
     override func viewDidLoad() {
@@ -30,8 +30,8 @@ class ViewController: UIViewController, GameControllerProtocol {
     }
     
     func setupGame() {
-        gameController = GameController(variation: .StandardChess, gameView: gameView)
-        gameController.statusDelegate = self
+        game = ChessGameFactory(variation: .StandardChess, gameView: gameView)
+        game.statusDelegate = self
         //        gameController = GameController(variation: .Galaxy, gameView: gameView)
     }
     

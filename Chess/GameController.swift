@@ -11,6 +11,10 @@
 //  checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
 //// stopped here **** castling is not done, need completionblock, move()
 
+
+
+
+//// be able to creat the game,choose different pieces/moves/rules, basic turns the same
 import UIKit
 
 // Abstract Product
@@ -68,6 +72,12 @@ enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
 }
 
+extension GameController {
+    class func ChessGamee() -> GameController{
+        
+    }
+}
+
 class GameController {
     let board: Board
     let boardView: BoardView
@@ -102,10 +112,10 @@ class GameController {
         case .StandardChess:////**** I only want chess specific here
             
             // create the board
-            board = Board(numRows: 8, numColumns: 8, skipCells: nil)
+            board = ChessBoard()
             
             // create the boardView
-            boardView = BoardView(board: board, checkered: true, images: nil, backgroundColors: [UIColor.redColor(), UIColor.blackColor()])
+            boardView = ChessBoardView(board: board)
             
             // add the boardView
             gameView.addSubview(boardView)
