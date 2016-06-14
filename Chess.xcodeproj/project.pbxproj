@@ -28,6 +28,7 @@
 		4A0F34371CED798C00C25E7D /* PawnBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34311CED798C00C25E7D /* PawnBlack.png */; };
 		4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34321CED798C00C25E7D /* QueenBlack.png */; };
 		4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34331CED798C00C25E7D /* RookBlack.png */; };
+		4A3BD31F1D0FB4A4008A14AF /* VariationChess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* VariationChess.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		4A0F34311CED798C00C25E7D /* PawnBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PawnBlack.png; sourceTree = "<group>"; };
 		4A0F34321CED798C00C25E7D /* QueenBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QueenBlack.png; sourceTree = "<group>"; };
 		4A0F34331CED798C00C25E7D /* RookBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RookBlack.png; sourceTree = "<group>"; };
+		4A3BD31E1D0FB4A4008A14AF /* VariationChess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VariationChess.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +92,7 @@
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
 				4A0F34281CEA67D800C25E7D /* GameController.swift */,
+				4A3BD31E1D0FB4A4008A14AF /* VariationChess.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
@@ -204,6 +207,7 @@
 			files = (
 				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
 				4A0F34291CEA67D800C25E7D /* GameController.swift in Sources */,
+				4A3BD31F1D0FB4A4008A14AF /* VariationChess.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */,
 				4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
@@ -361,6 +365,7 @@
 				4A0F33DA1CE9358B00C25E7D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

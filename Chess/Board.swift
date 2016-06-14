@@ -17,19 +17,20 @@ func ==(lhs: Position, rhs: Position) -> Bool {
 }
 
 
+
+/// Grid of rows and columns. numCells is calculated. skipped cells are empty at indicated index
+
 class Board {
     let numRows: Int
     let numColumns: Int
     let numCells: Int
     let skipCells: [Int]?
-    let checkered: Bool
     
-    init(numRows: Int, numColumns: Int, skipCells: [Int]?, checkered: Bool) {
+    init(numRows: Int, numColumns: Int, skipCells: [Int]?) {
         self.numRows = numRows
         self.numColumns = numColumns
         self.numCells = numRows * numColumns
         self.skipCells = skipCells
-        self.checkered = checkered
     }
     
     func index(position: Position) -> Int {
@@ -41,15 +42,20 @@ class Board {
     }
 }
 
+
+/// Will make a checkered board from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
+
 class BoardView: UIView {
     var cells = [UIView]()
     let images: [UIImage]?
-    let colors: [UIColor]?
+    let backgroundColors: [UIColor]?
+    let checkered: Bool
+
     
-    
-    init (board: Board, images: [UIImage]?, colors: [UIColor]?) {
+    init (board: Board, checkered: Bool, images: [UIImage]?, backgroundColors: [UIColor]?) {
+        self.checkered = checkered
         self.images = images
-        self.colors = colors
+        self.backgroundColors = backgroundColors
         super.init(frame: CGRectZero)
         makeCells(board)
         
@@ -59,7 +65,7 @@ class BoardView: UIView {
             didSet {if imageIndex >= images?.count {imageIndex = 0}}
         }
         var colorIndex = 0 {
-            didSet {if colorIndex >= colors?.count {colorIndex = 0}}
+            didSet {if colorIndex >= backgroundColors?.count {colorIndex = 0}}
         }
         
         for i in 0..<board.numCells {
@@ -70,7 +76,7 @@ class BoardView: UIView {
             
             // set the image or color
             let evenNumberColumns = board.numColumns % 2 == 0
-            if board.checkered && evenNumberColumns{
+            if checkered && evenNumberColumns{
                 let inFirstColumn = board.position(i).column == 0
                 if inFirstColumn {
                     let onOddRow = board.position(i).row % 2 != 0
@@ -94,8 +100,8 @@ class BoardView: UIView {
                     imageView.translatesAutoresizingMaskIntoConstraints = false
                     NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
                 }
-                if colorIndex < colors?.count {
-                    cell.backgroundColor = colors![colorIndex]
+                if colorIndex < backgroundColors?.count {
+                    cell.backgroundColor = backgroundColors![colorIndex]
                 }
             }
             imageIndex += 1
@@ -110,6 +116,7 @@ class BoardView: UIView {
     }
     
     func addConstraintsToCells(board: Board) {
+        
         //autolayout cells
         var constraints = [NSLayoutConstraint]()
         
@@ -140,15 +147,6 @@ class BoardView: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-//    override func layoutSubviews() {
-//        print("center:....\(self.center)")
-//        for view in subviews {
-//            view.needsUpdateConstraints()
-//            print("center:....\(view.center)")
-//
-//        }
-//    }
 }
 
 

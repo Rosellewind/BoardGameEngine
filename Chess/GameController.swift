@@ -13,13 +13,7 @@
 
 import UIKit
 
-enum ChessVariation {
-    case StandardChess, Galaxy
-}
 
-enum TurnCondition {
-    case CantExposeKing
-}
 
 enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
@@ -60,13 +54,13 @@ class GameController {
     
     init(variation: ChessVariation, gameView: UIView) {
         switch variation {
-        case .StandardChess:
+        case .StandardChess:////**** I only want chess specific here
             
             // create the board
-            board = Board(numRows: 8, numColumns: 8, skipCells: nil, checkered: true)
+            board = Board(numRows: 8, numColumns: 8, skipCells: nil)
             
             // create the boardView
-            boardView = BoardView(board: board, images: nil, colors: [UIColor.redColor(), UIColor.blackColor()])
+            boardView = BoardView(board: board, checkered: true, images: nil, backgroundColors: [UIColor.redColor(), UIColor.blackColor()])
             
             // add the boardView
             gameView.addSubview(boardView)
@@ -110,7 +104,7 @@ class GameController {
             
         case .Galaxy:
             // create the board
-            board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20], checkered: true)
+            board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
             
             // create the boardView
             var images = [UIImage]()
@@ -119,7 +113,7 @@ class GameController {
                     images.append(image)
                 }
             }
-            boardView = BoardView(board: board, images: images, colors: nil)
+            boardView = BoardView(board: board, checkered: false, images: images, backgroundColors: nil)
             
             // add the view
             gameView.addSubview(boardView)
