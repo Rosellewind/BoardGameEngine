@@ -13,14 +13,59 @@
 
 import UIKit
 
+// Abstract Product
+protocol Game {
+    
+}
+
+// Abstract Factory
+protocol GameAbstractFactory {
+    func createGame() -> Game
+}
+
+
+// Concrete Products
+class ChessGame: Game {
+    
+}
+class KittyGame: Game {
+    
+}
+
+// Concrete Factories
+class ChessGameFactory: GameAbstractFactory {
+    static let sharedInstance = ChessGameFactory()
+    func createGame() -> Game {
+        
+    }
+
+}
+class KittyGameFactory: GameAbstractFactory {
+    static let sharedInstance = KittyGameFactory()
+    func createGame() -> Game {
+        
+    }
+
+}
+
+
+
+class gamez {
+    //option1- GameController conforms to protocol, has board, boardView, 
+    //option2- ChessGame conforms to protocol, has board, boardView
+    //option3- ChessGameMaker conforms to protocol, has board, boardView, etc
+}
+
+
+
+
+protocol GameControllerProtocol {
+    func gameMessage(string: String, status: GameStatus?)
+}
 
 
 enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
-}
-
-protocol GameControllerProtocol {
-    func gameMessage(string: String, status: GameStatus?)
 }
 
 class GameController {
@@ -68,7 +113,7 @@ class GameController {
             NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
 
             // create the players with pieces
-            players = [Player(variation: .StandardChess, orientation: .bottom), Player(variation: .StandardChess, orientation: .top)]
+            players = [Player(index: 0, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 0)!)), Player(index: 1, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 1)!))]
             
             // create pieceView's
             for player in players {
@@ -406,7 +451,7 @@ class GameController {
         return isCheckMate
     }
     
-    func positionFromTranslation(translation: Position, fromPosition: Position, orientation: PlayerOrientation) -> Position {
+    func positionFromTranslation(translation: Position, fromPosition: Position, orientation: ChessPlayer) -> Position {
         switch orientation {
         case .top:
             let row = fromPosition.row + translation.row
@@ -421,7 +466,7 @@ class GameController {
         }
     }
     
-    func calculateTranslation(fromPosition:Position, toPosition: Position, orientation: PlayerOrientation) -> Position {
+    func calculateTranslation(fromPosition:Position, toPosition: Position, orientation: ChessPlayer) -> Position {
         
         switch orientation {
         case .top:

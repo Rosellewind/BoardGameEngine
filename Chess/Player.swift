@@ -8,34 +8,16 @@
 
 import Foundation
 
-enum PlayerOrientation: Int {
-    case bottom, top, left, right
-    func colorString() -> String {
-        switch self {
-        case bottom:
-            return "White"
-        case top:
-            return "Black"
-        case left:
-            return "Red"
-        case right:
-            return "Blue"
-        }
-    }
-}
+
 
 
 class Player {
-    let orientation: PlayerOrientation
+    let index: Int
+    var name: String?
     var pieces: [Piece]
     
-    init(orientation: PlayerOrientation, pieces: [Piece]) {
-        self.orientation = orientation
+    init(index: Int, pieces: [Piece]) {
+        self.index = index
         self.pieces = pieces
-    }
-    
-    init(variation: ChessVariation, orientation: PlayerOrientation) {
-        self.orientation = orientation
-        self.pieces = Piece.standardPieces(variation, playerOrientation: orientation)
     }
 }
