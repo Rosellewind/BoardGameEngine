@@ -10,7 +10,8 @@
 //// castling, en passant, pawn promotion, check/mate
 //// in Piece.isValidMove(), return optional positions
 //// further the momento pattern
-
+//// checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
+//// stopped here **** castling is not done
 
 import UIKit
 
@@ -304,9 +305,11 @@ class GameController {
                         animatePiece(selectedPiece!, position: selectedPiece!.position)
                         
                         // check for gameOver
-                        if gameIsOver() {
-                            statusDelegate?.gameMessage(players[whoseTurn].orientation.colorString() + " Won!!!", status: .GameOver)
-
+                        for player in players {
+                            isCheck(player)
+                            if isCheckMate(player) {
+                                statusDelegate?.gameMessage(player.orientation.colorString() + " Is In Checkmate!!!", status: .GameOver)
+                            }
                         }
                         
                         
@@ -346,15 +349,66 @@ class GameController {
         }
     }
     
-    func gameIsOver() -> Bool {
-        var gameOver = false
-        for player in players where gameOver == false{
-            if !player.pieces.contains({$0.name == "King"}) {
-                gameOver = true
+    func isCheck(player: Player) -> Bool {
+        // all other players pieces can not take king
+        var isCheck = false
+        if let king = player.pieces.elementPassing({$0.name == "King"}) {
+            for otherPlayer in players where isCheck == false {
+                if otherPlayer === player {
+                    continue
+                } else {
+                    for piece in otherPlayer.pieces where isCheck == false {
+                        let translation = calculateTranslation(piece.position, toPosition: king.position, orientation: otherPlayer.orientation)
+                        let moveFunction = piece.isLegalMove(translation: translation)
+                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions)
+                    }
+                }
             }
-            
         }
-        return gameOver
+        print("\(player.orientation.colorString()) is in Check: \(isCheck)")
+        return isCheck
+    }
+    
+    func isCheckMate(player: Player) -> Bool {
+        var isCheckMate = true
+        let otherPlayers = players.filter({$0 !== player})
+        if let king = player.pieces.elementPassing({$0.name == "King"}) {
+            var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
+                                    Position(row: king.position.row - 1, column: king.position.column),
+                                    Position(row: king.position.row - 1, column: king.position.column + 1),
+                                    Position(row: king.position.row, column: king.position.column - 1),
+                                    Position(row: king.position.row, column: king.position.column),
+                                    Position(row: king.position.row, column: king.position.column + 1),
+                                    Position(row: king.position.row + 1, column: king.position.column - 1),
+                                    Position(row: king.position.row + 1, column: king.position.column),
+                                    Position(row: king.position.row + 1, column: king.position.column + 1)]
+            // trim positions that are off the board
+            positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
+            
+            // trim positions that are already occupied   ////castling/otherrules?
+            positionsToCheck = positionsToCheck.filter({pieceForPosition($0) == nil})
+            if positionsToCheck.count > 0 {
+                for position in positionsToCheck where isCheckMate == true {
+                    var positionIsSafe = true
+                    for otherPlayer in otherPlayers where positionIsSafe == true {
+                        for piece in otherPlayer.pieces where positionIsSafe == true {
+                            let translation = calculateTranslation(piece.position, toPosition: position, orientation: otherPlayer.orientation)
+                            let moveFunction = piece.isLegalMove(translation: translation)
+                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions))
+                        }
+                    }
+                    if positionIsSafe {
+                        isCheckMate = false
+                    }
+                }
+            } else {
+                isCheckMate = false
+            }
+
+        }
+        print("\(player.orientation.colorString()) is in checkmate: \(isCheckMate)")
+
+        return isCheckMate
     }
     
     func positionFromTranslation(translation: Position, fromPosition: Position, orientation: PlayerOrientation) -> Position {
