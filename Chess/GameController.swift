@@ -10,8 +10,8 @@
 //// castling, en passant, pawn promotion, check/mate
 //// in Piece.isValidMove(), return optional positions
 //// further the momento pattern
-//// checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
-//// stopped here **** castling is not done
+//  checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
+//// stopped here **** castling is not done, need completionblock, move()
 
 import UIKit
 
@@ -179,25 +179,42 @@ class GameController {
                 if !piece.isFirstMove {
                     conditionsAreMet = false
                 }
-            case .RookIsInitialMove:
-                if let rook = player.pieces.elementPassing({$0.name == "Rook"}) {
-                    if rook.isFirstMove == false {
-                        conditionsAreMet = false
+            case .RookCanCastle://///king?////test
+                let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
+                var castlingRook: Piece?
+                var rookLandingSpot: Position
+                if let king = player.pieces.elementPassing({$0.name == "King"}) {
+                    for rook in rooks where castlingRook == nil {
+                        if rook.isFirstMove {
+                            for translation in condition.positions  where castlingRook == nil  {
+                                let position = positionFromTranslation(translation, fromPosition: king.position, orientation: player.orientation)
+                                let translation = calculateTranslation(rook.position, toPosition: position, orientation: player.orientation)
+                                let moveFunction = rook.isLegalMove(translation: translation)
+                                if pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions) {
+                                    castlingRook = rook
+                                    let rookOffset = position.column < rook.position.column ? -1 : 1
+                                    rookLandingSpot = Position(row: position.row, column: position.column + rookOffset)
+                                }
+                            }
+                        }
                     }
+                }
+                if castlingRook != nil {
+                    ////****move rook to rookLandingSpot
+//                    let completionBlock = move(rook, rookLandingSpot)
                 } else {
-                    // if there is no rook, conditions are not met
                     conditionsAreMet = false
                 }
-            case .RookIsAlsoLegalMove:
-                if let rook = player.pieces.elementPassing({$0.name == "Rook"}) {
-                    for translation in condition.positions {
-                        let moveFunction = rook.isLegalMove(translation: translation)
-                        conditionsAreMet = pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions)
-                    }
-                } else {
+            case .CantBeInCheckDuring:////test
+                ////temp
+                if isCheck(player) {
                     conditionsAreMet = false
                 }
-            case .CantBeInCheckDuring:
+                
+                
+//                for translation in condition.positions {
+//                    
+//                }
                 break////****implement
             }
         }
