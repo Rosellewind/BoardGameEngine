@@ -1,5 +1,5 @@
 //
-//  VariationChess.swift
+//  AllChess.swift
 //  Chess
 //
 //  Created by Roselle Milvich on 6/13/16.
@@ -15,11 +15,33 @@ import UIKit
 // make chessboard, view, override init but nothing else
 // init(chessgame/options)
 
-class ChessGameMaker {
-    init(board: &ChessBoard, boardView: &ChessBoardView) {
-        board = ChessBoard()
-        boardView = ChessBoardView(board: board)
+enum ChessVariation: Int {
+    case StandardChess, GalaxyChess
+}
+
+enum TurnCondition {
+    case CantExposeKing
+}
+
+
+enum ChessPlayerId: Int {
+    case bottom, top, left, right
+    func name() -> String {
+        switch self {
+        case bottom:
+            return "White"
+        case top:
+            return "Black"
+        case left:
+            return "Red"
+        case right:
+            return "Blue"
+        }
     }
+}
+
+enum ChessPiece: String {
+    case King, Queen, Rook, Bishop, Knight, Pawn
 }
 
 class ChessBoard: Board {
@@ -39,69 +61,19 @@ class ChessBoardView: BoardView {
 }
 
 class ChessPlayer: Player {
-    init() {
-        super.init(index: <#T##Int#>, pieces: <#T##[Piece]#>)
+    init(index: Int) {
+        let chessPlayerId = ChessPlayerId.init(rawValue: index) ?? ChessPlayerId.bottom
+        let pieces = ChessPieceCreator.sharedInstance.makePieces(ChessVariation.StandardChess.rawValue, playerId: chessPlayerId.rawValue)
+        super.init(name: chessPlayerId.name(), index: chessPlayerId.rawValue, pieces: pieces)
     }
 }
 
-// add the boardView
-gameView.addSubview(boardView)
-boardView.translatesAutoresizingMaskIntoConstraints = false
-NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
-
-
-
-
-
-
-//smarter to subclass?
-protocol Boardz {
-    func index(position: Position) -> Int
-    func position(index: Int) -> [Int]
-}
-protocol BoardViewz {
-    func makeCells(board: Boardz)
-}
-
-
-enum ChessVariation {
-    case StandardChess, Galaxy
-}
-
-enum TurnCondition {
-    case CantExposeKing
-}
-
-enum ChessPlayer: Int {
-    case bottom, top, left, right
-    func colorString() -> String {
-        switch self {
-        case bottom:
-            return "White"
-        case top:
-            return "Black"
-        case left:
-            return "Red"
-        case right:
-            return "Blue"
-        }
-    }
-}
-
-enum ChessPiece: String {
-    case King, Queen, Rook, Bishop, Knight, Pawn
-}
-
-
-class ChessGamez {
-    func makeChessGame(board: &Board, boardView: BoardView, players: [Player], pieceViews = [PieceView], turnConditions: [TurnCondition]?) {
-        board
-    }
-    
-    
-    static func standardPieces(variation: ChessVariation, chessPlayer: ChessPlayer) -> [Piece]{
+class ChessPieceCreator: PiecesCreator {
+    static let sharedInstance = ChessPieceCreator()
+    func makePieces(variation: ChessVariation.RawValue, playerId: ChessPlayerId.RawValue) -> [Piece] {
+        let chessPlayerId = ChessPlayerId(rawValue: playerId) ?? ChessPlayerId.bottom
         var pieces = [Piece]()
-        switch variation {
+        switch ChessVariation(rawValue: variation) ?? ChessVariation.StandardChess {
         case .StandardChess:
             let king = self.chessPiece(.King)
             let queen = self.chessPiece(.Queen)
@@ -116,7 +88,7 @@ class ChessGamez {
             var pawns = [Piece]()
             
             
-            if chessPlayer == .top || chessPlayer == .bottom {
+            if chessPlayerId == .top || chessPlayerId == .bottom {
                 rook2.position = Position(row: 0, column: 7)
                 bishop2.position = Position(row: 0, column: 5)
                 knight2.position = Position(row: 0, column: 6)
@@ -128,7 +100,7 @@ class ChessGamez {
                     pawns.append(pawnI)
                 }
                 
-                if chessPlayer == .bottom {
+                if chessPlayerId == .bottom {
                     for piece in royalty {
                         piece.position = Position(row: 7, column: piece.position.column)
                     }
@@ -143,7 +115,7 @@ class ChessGamez {
             pieces.appendContentsOf(royalty)
             pieces.appendContentsOf(pawns)
             
-        case .Galaxy:
+        case .GalaxyChess:
             let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) in
                 return (true, nil)
             })
@@ -151,15 +123,14 @@ class ChessGamez {
         }
         
         // set the tag
-        let offset = chessPlayer.rawValue * pieces.count
+        let offset = chessPlayerId.rawValue * pieces.count
         for i in 0..<pieces.count {
             pieces[i].tag = i + offset
         }
         return pieces
     }
-
     
-    static func chessPiece(name: ChessPiece) -> Piece {
+    func chessPiece(name: ChessPiece) -> Piece {
         switch name {
         case .King:
             return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) in
@@ -307,5 +278,14 @@ class ChessGamez {
             return piece
         }
     }
+
 }
+
+
+
+
+
+
+
+
 

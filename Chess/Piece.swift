@@ -9,10 +9,12 @@
 
 import UIKit
 
-
+protocol PiecesCreator {
+    func makePieces(variation: Int, playerId: Int) -> [Piece]
+}
 
 enum LegalIfCondition {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove, RookCanCastle, CantBeInCheckDuring//rename IsInitialMove
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove, RookCanCastle, CantBeInCheckDuring
 }
 
 class Piece: NSObject, NSCopying {

@@ -16,7 +16,8 @@ class Player {
     var name: String?
     var pieces: [Piece]
     
-    init(index: Int, pieces: [Piece]) {
+    init(name: String?, index: Int, pieces: [Piece]) {
+        self.name = name
         self.index = index
         self.pieces = pieces
     }

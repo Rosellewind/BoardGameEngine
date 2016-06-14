@@ -21,15 +21,14 @@ func ==(lhs: Position, rhs: Position) -> Bool {
 /// Grid of rows and columns. numCells is calculated. skipped cells are empty at indicated index
 
 class Board {
-    let numRows: Int
-    let numColumns: Int
-    let numCells: Int
+    var numRows: Int
+    var numColumns: Int
+    var numCells: Int {get {numRows * numColumns}}
     let skipCells: [Int]?
     
     init(numRows: Int, numColumns: Int, skipCells: [Int]? = nil) {
         self.numRows = numRows
         self.numColumns = numColumns
-        self.numCells = numRows * numColumns
         self.skipCells = skipCells
     }
     
@@ -37,13 +36,17 @@ class Board {
         return position.column + position.row * numColumns
     }
     
-    func position(index: Int) -> Position {//0
-        return Position(row: index / numColumns, column: index % numColumns)
+    func position(index: Int) -> Position {
+        if numColumns > 0  {
+            return Position(row: index / numColumns, column: index % numColumns)
+        } else {
+            return Position(row: 0, column: 0)
+        }
     }
 }
 
 
-/// Will make a checkered board from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
+/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
 
 class BoardView: UIView {
     var cells = [UIView]()
