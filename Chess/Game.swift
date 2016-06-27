@@ -1,5 +1,5 @@
 //
-//  GameController.swift
+//  Game.swift
 //  Chess
 //
 //  Created by Roselle Milvich on 5/16/16.
@@ -12,11 +12,11 @@
 //// stopped here **** castling is not done, need completionblock, move()
 
 
+import UIKit
 
 
 
-
-protocol GameControllerProtocol {
+protocol GameProtocol {
     func gameMessage(string: String, status: GameStatus?)
 }
 
@@ -25,10 +25,10 @@ enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
 }
 
-class GameController {
-    let board: Board
-    let boardView: BoardView
-    let players: [Player]
+class Game {
+    var board: Board
+    var boardView: BoardView
+    var players: [Player]
     var pieceViews = [PieceView]()
     var selectedPiece: Piece?
     var turnConditions: [TurnCondition]?
@@ -48,86 +48,55 @@ class GameController {
             return next
         }
     }
-    var statusDelegate: GameControllerProtocol? {
+    var statusDelegate: GameProtocol? {
         didSet {
-            statusDelegate?.gameMessage("White Starts!", status: .WhoseTurn)
+            statusDelegate?.gameMessage(players[whoseTurn].name ?? "" + " Starts!", status: .WhoseTurn)
         }
     }
     
-    init(variation: ChessVariation, gameView: UIView) {
-        switch variation {
-        case .StandardChess:////**** I only want chess specific here
-            
-            // create the board
-            board = ChessBoard()
-            
-            // create the boardView
-            boardView = ChessBoardView(board: board)
-            
-            // add the boardView
-            gameView.addSubview(boardView)
-            boardView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
-
-            // create the players with pieces
-            players = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
-//            players = [Player(index: 0, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 0)!)), Player(index: 1, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 1)!))]
-            
-            // create pieceView's
-            for player in players {
-                for piece in player.pieces {
-                    let ending = player.orientation.colorString()
-                    if let image = UIImage(named: piece.name + ending) {
-                        let pieceView = PieceView(image: image)
-                        pieceView.tag = piece.tag
-                        pieceView.observing = [(piece, "selected")]
-                        pieceViews.append(pieceView)
-                        let indexOfPieceOnBoard = board.index(piece.position)
-                        if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
-                            boardView.addSubview(pieceView)
-                            pieceView.translatesAutoresizingMaskIntoConstraints = false
-                            let widthConstraint = NSLayoutConstraint(item: pieceView, attribute: .Width, relatedBy: .Equal, toItem: boardView.cells[0], attribute: .Width, multiplier: 1, constant: 0)
-                            let heightConstraint = NSLayoutConstraint(item: pieceView, attribute: .Height, relatedBy: .Equal, toItem: boardView.cells[0], attribute: .Height, multiplier: 1, constant: 0)
-                            let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
-                            let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
-                            pieceView.positionConstraints = [positionX, positionY]
-                            NSLayoutConstraint.activateConstraints([widthConstraint, heightConstraint, positionX, positionY])
-                        }
+    init(gameView: UIView) {
+        // create the board
+        board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
+        
+        // create the boardView
+        var images = [UIImage]()
+        for i in 1...3 {
+            if let image = UIImage(named: "\(i).jpg") {
+                images.append(image)
+            }
+        }
+        boardView = BoardView(board: board, checkered: false, images: images, backgroundColors: nil)
+        
+        // add the view
+        gameView.addSubview(boardView)
+        boardView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+        
+        // create the players with pieces
+        players = [Player(name: "alien", index: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
+        
+        // create pieceView's
+        for player in players {
+            for piece in player.pieces {
+                if let image = UIImage(named: piece.name + (player.name ?? "")) {
+                    let pieceView = PieceView(image: image)
+                    pieceView.tag = piece.tag
+                    pieceView.observing = [(piece, "selected")]
+                    pieceViews.append(pieceView)
+                    
+                    let indexOfPieceOnBoard = board.index(piece.position)
+                    if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
+                        boardView.addSubview(pieceView)
+                        pieceView.constrainToCell(cell)
                     }
                 }
             }
-            
-            // add taps to cells on boardView
-            boardView.cells.forEach({ (view: UIView) in
-                view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(GameController.cellTapped(_:))))
-            })
-            
-            // add turn conditions
-            turnConditions = [.CantExposeKing]
-            
-        case .Galaxy:
-            // create the board
-            board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
-            
-            // create the boardView
-            var images = [UIImage]()
-            for i in 1...3 {
-                if let image = UIImage(named: "\(i).jpg") {
-                    images.append(image)
-                }
-            }
-            boardView = BoardView(board: board, checkered: false, images: images, backgroundColors: nil)
-            
-            // add the view
-            gameView.addSubview(boardView)
-            boardView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
-            
-            // create the players with pieces
-            players = [Player(variation: .Galaxy, orientation: .bottom)]
-            
         }
-       
+        
+        // add taps to cells on boardView
+        boardView.cells.forEach({ (view: UIView) in
+            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
+        })
     }
     
     func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
@@ -136,7 +105,7 @@ class GameController {
             switch condition.condition {
             case .CantBeOccupied:
                 for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying != nil {
                         conditionsAreMet = false
@@ -146,7 +115,7 @@ class GameController {
                 
             case .MustBeOccupied:
                 for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
                         conditionsAreMet = false
@@ -154,7 +123,7 @@ class GameController {
                 }
             case .MustBeOccupiedByOpponent:
                 for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying == nil {
                         conditionsAreMet = false
@@ -164,7 +133,7 @@ class GameController {
                 }
             case .CantBeOccupiedBySelf:
                 for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, orientation: player.orientation)
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
                     let pieceOccupying = pieceForPosition(positionToCheck)
                     if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
                         conditionsAreMet = false
@@ -182,8 +151,8 @@ class GameController {
                     for rook in rooks where castlingRook == nil {
                         if rook.isFirstMove {
                             for translation in condition.positions ?? []  where castlingRook == nil  {
-                                let position = positionFromTranslation(translation, fromPosition: king.position, orientation: player.orientation)
-                                let translation = calculateTranslation(rook.position, toPosition: position, orientation: player.orientation)
+                                let position = positionFromTranslation(translation, fromPosition: king.position, direction: player.forwardDirection)
+                                let translation = calculateTranslation(rook.position, toPosition: position, direction: player.forwardDirection)
                                 let moveFunction = rook.isLegalMove(translation: translation)
                                 if pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions) {
                                     castlingRook = rook
@@ -224,7 +193,7 @@ class GameController {
                 if let king = players[whoseTurn].pieces.elementPassing({$0.name == "King"}) {
                     // for every opponents piece in new positions, can king be taken?
                     for piece in players[nextTurn].pieces where conditionsAreMet == true {
-                        let translation = calculateTranslation(piece.position, toPosition: king.position, orientation: players[nextTurn].orientation)
+                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: players[nextTurn].forwardDirection)
                         let moveFunction = piece.isLegalMove(translation: translation)
                         if moveFunction.isLegal && pieceConditionsAreMet(piece, player: players[nextTurn], conditions: moveFunction.conditions){
                             conditionsAreMet = false
@@ -258,7 +227,7 @@ class GameController {
             
             // final part of turn, choosing where to go
             else {////conditions required, make protocol?
-                let translation = calculateTranslation(selectedPiece!.position, toPosition: position, orientation: players[whoseTurn].orientation)
+                let translation = calculateTranslation(selectedPiece!.position, toPosition: position, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 if moveFunction.isLegal && pieceConditionsAreMet(selectedPiece!, player: players[whoseTurn], conditions: moveFunction.conditions) {
                     
@@ -306,7 +275,7 @@ class GameController {
                         for player in players {
                             isCheck(player)
                             if isCheckMate(player) {
-                                statusDelegate?.gameMessage(player.orientation.colorString() + " Is In Checkmate!!!", status: .GameOver)
+                                statusDelegate?.gameMessage(player.name ?? "" + " Is In Checkmate!!!", status: .GameOver)
                             }
                         }
                         
@@ -316,7 +285,7 @@ class GameController {
                         selectedPiece!.selected = false
                         selectedPiece = nil
                         whoseTurn += 1
-                        statusDelegate?.gameMessage(players[whoseTurn].orientation.colorString() + "'s turn", status: .WhoseTurn)
+                        statusDelegate?.gameMessage(players[whoseTurn].name ?? "" + "'s turn", status: .WhoseTurn)
 
 
                         
@@ -356,14 +325,14 @@ class GameController {
                     continue
                 } else {
                     for piece in otherPlayer.pieces where isCheck == false {
-                        let translation = calculateTranslation(piece.position, toPosition: king.position, orientation: otherPlayer.orientation)
+                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
                         let moveFunction = piece.isLegalMove(translation: translation)
                         isCheck = moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions)
                     }
                 }
             }
         }
-        print("\(player.orientation.colorString()) is in Check: \(isCheck)")
+        print("\(player.name) is in Check: \(isCheck)")
         return isCheck
     }
     
@@ -390,7 +359,7 @@ class GameController {
                     var positionIsSafe = true
                     for otherPlayer in otherPlayers where positionIsSafe == true {
                         for piece in otherPlayer.pieces where positionIsSafe == true {
-                            let translation = calculateTranslation(piece.position, toPosition: position, orientation: otherPlayer.orientation)
+                            let translation = calculateTranslation(piece.position, toPosition: position, direction: otherPlayer.forwardDirection)
                             let moveFunction = piece.isLegalMove(translation: translation)
                             positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions))
                         }
@@ -404,18 +373,18 @@ class GameController {
             }
 
         }
-        print("\(player.orientation.colorString()) is in checkmate: \(isCheckMate)")
+        print("\(player.name) is in checkmate: \(isCheckMate)")
 
         return isCheckMate
     }
     
-    func positionFromTranslation(translation: Position, fromPosition: Position, orientation: ChessPlayer) -> Position {
-        switch orientation {
-        case .top:
+    func positionFromTranslation(translation: Position, fromPosition: Position, direction: Direction) -> Position {
+        switch direction {
+        case .bottom:
             let row = fromPosition.row + translation.row
             let column = fromPosition.column + translation.column
             return Position(row: row, column: column)
-        case .bottom:
+        case .top:
             let row = fromPosition.row - translation.row
             let column = fromPosition.column + translation.column
             return Position(row: row, column: column)
@@ -424,14 +393,14 @@ class GameController {
         }
     }
     
-    func calculateTranslation(fromPosition:Position, toPosition: Position, orientation: ChessPlayer) -> Position {
+    func calculateTranslation(fromPosition:Position, toPosition: Position, direction: Direction) -> Position {
         
-        switch orientation {
-        case .top:
+        switch direction {
+        case .bottom:
             let row = toPosition.row - fromPosition.row
             let column = toPosition.column - fromPosition.column
             return Position(row: row, column: column)
-        case .bottom:
+        case .top:
             let row = fromPosition.row - toPosition.row
             let column = toPosition.column - fromPosition.column
             return Position(row: row, column: column)

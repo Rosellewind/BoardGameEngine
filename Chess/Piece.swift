@@ -9,6 +9,7 @@
 
 import UIKit
 
+
 protocol PiecesCreator {
     func makePieces(variation: Int, playerId: Int) -> [Piece]
 }
@@ -100,5 +101,15 @@ class PieceView: UIView {
     
     deinit {
         observing = nil
+    }
+    
+    func constrainToCell(cell: UIView) {
+        translatesAutoresizingMaskIntoConstraints = false
+        let widthConstraint = NSLayoutConstraint(item: self, attribute: .Width, relatedBy: .Equal, toItem: cell, attribute: .Width, multiplier: 1, constant: 0)
+        let heightConstraint = NSLayoutConstraint(item: self, attribute: .Height, relatedBy: .Equal, toItem: cell, attribute: .Height, multiplier: 1, constant: 0)
+        let positionX = NSLayoutConstraint(item: self, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
+        let positionY = NSLayoutConstraint(item: self, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+        positionConstraints = [positionX, positionY]
+        NSLayoutConstraint.activateConstraints([widthConstraint, heightConstraint, positionX, positionY])
     }
 }

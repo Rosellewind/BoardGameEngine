@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, GameControllerProtocol {
+class ViewController: UIViewController, GameProtocol {
     @IBOutlet weak var topLabel: UILabel!
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!
@@ -30,9 +30,9 @@ class ViewController: UIViewController, GameControllerProtocol {
     }
     
     func setupGame() {
-        game = ChessGameFactory(variation: .StandardChess, gameView: gameView)
+        game = ChessGame(variation: .StandardChess, gameView: gameView)
         game.statusDelegate = self
-        //        gameController = GameController(variation: .Galaxy, gameView: gameView)
+        game = Game(gameView: gameView)
     }
     
     func gameMessage(string: String, status: GameStatus?) {

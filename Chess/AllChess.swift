@@ -23,10 +23,9 @@ enum TurnCondition {
     case CantExposeKing
 }
 
-
-enum ChessPlayerId: Int {
+enum PlayerOrientation: Int {
     case bottom, top, left, right
-    func name() -> String {
+    func color() -> String {
         switch self {
         case bottom:
             return "White"
@@ -38,11 +37,68 @@ enum ChessPlayerId: Int {
             return "Blue"
         }
     }
+    func defaultColor() -> String {
+        return "White"
+    }
 }
 
 enum ChessPiece: String {
     case King, Queen, Rook, Bishop, Knight, Pawn
 }
+
+class ChessGame: Game {
+    init(variation: ChessVariation, gameView: UIView) {
+        super.init(gameView: gameView)/////////////////not right
+
+        switch variation {
+        case .StandardChess:////**** I only want chess specific here
+            
+            // create the board
+            board = ChessBoard()
+            
+            // create the boardView
+            boardView = ChessBoardView(board: board)
+            
+            // add the boardView
+            gameView.addSubview(boardView)
+            boardView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+            
+            // create the players with pieces
+            players = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
+            //            players = [Player(index: 0, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 0)!)), Player(index: 1, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 1)!))]
+            
+            // create pieceView's
+            for player in players {
+                for piece in player.pieces {
+                    if let image = UIImage(named: piece.name + (player.name ?? "")) {
+                        let pieceView = PieceView(image: image)
+                        pieceView.tag = piece.tag
+                        pieceView.observing = [(piece, "selected")]
+                        pieceViews.append(pieceView)
+                        
+                        let indexOfPieceOnBoard = board.index(piece.position)
+                        if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
+                            boardView.addSubview(pieceView)
+                            pieceView.constrainToCell(cell)
+                        }
+                    }
+                }
+            }
+            
+            // add taps to cells on boardView
+            boardView.cells.forEach({ (view: UIView) in
+                view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
+            })
+            
+            // add turn conditions
+            turnConditions = [.CantExposeKing]////////change to moveConditions?
+        default:
+            break
+    }
+
+}
+
 
 class ChessBoard: Board {
     init () {
@@ -61,17 +117,20 @@ class ChessBoardView: BoardView {
 }
 
 class ChessPlayer: Player {
+    var orientation: PlayerOrientation {
+        return PlayerOrientation(rawValue: self.index) ?? PlayerOrientation.bottom
+    }
     init(index: Int) {
-        let chessPlayerId = ChessPlayerId.init(rawValue: index) ?? ChessPlayerId.bottom
-        let pieces = ChessPieceCreator.sharedInstance.makePieces(ChessVariation.StandardChess.rawValue, playerId: chessPlayerId.rawValue)
-        super.init(name: chessPlayerId.name(), index: chessPlayerId.rawValue, pieces: pieces)
+        let pieces = ChessPieceCreator.sharedInstance.makePieces(ChessVariation.StandardChess.rawValue, playerId: index)
+        super.init(name: nil, index: index, forwardDirection: nil, pieces: pieces)
+        self.name = self.orientation.color()
     }
 }
 
 class ChessPieceCreator: PiecesCreator {
     static let sharedInstance = ChessPieceCreator()
-    func makePieces(variation: ChessVariation.RawValue, playerId: ChessPlayerId.RawValue) -> [Piece] {
-        let chessPlayerId = ChessPlayerId(rawValue: playerId) ?? ChessPlayerId.bottom
+    func makePieces(variation: ChessVariation.RawValue, playerId: Int) -> [Piece] {
+        let position = PlayerOrientation(rawValue: playerId) ?? PlayerOrientation.bottom
         var pieces = [Piece]()
         switch ChessVariation(rawValue: variation) ?? ChessVariation.StandardChess {
         case .StandardChess:
@@ -88,7 +147,7 @@ class ChessPieceCreator: PiecesCreator {
             var pawns = [Piece]()
             
             
-            if chessPlayerId == .top || chessPlayerId == .bottom {
+            if position == .top || position == .bottom {
                 rook2.position = Position(row: 0, column: 7)
                 bishop2.position = Position(row: 0, column: 5)
                 knight2.position = Position(row: 0, column: 6)
@@ -100,7 +159,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if chessPlayerId == .bottom {
+                if position == .bottom {
                     for piece in royalty {
                         piece.position = Position(row: 7, column: piece.position.column)
                     }
@@ -123,7 +182,7 @@ class ChessPieceCreator: PiecesCreator {
         }
         
         // set the tag
-        let offset = chessPlayerId.rawValue * pieces.count
+        let offset = position.rawValue * pieces.count
         for i in 0..<pieces.count {
             pieces[i].tag = i + offset
         }
@@ -276,10 +335,10 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             })
             return piece
-        }
+        }}
     }
-
 }
+
 
 
 
