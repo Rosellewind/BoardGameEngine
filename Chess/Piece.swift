@@ -20,12 +20,12 @@ enum LegalIfCondition {
 
 class Piece: NSObject, NSCopying {
     var name: String
+    var tag = 0
     var position: Position
     let startingPosition: Position
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?)
-    dynamic var selected = false
-    var tag = 0
     var isFirstMove = true
+    dynamic var selected = false
     
     init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?)) {
         self.name = name
@@ -41,6 +41,7 @@ class Piece: NSObject, NSCopying {
         self.startingPosition = toCopy.position
         self.isLegalMove = toCopy.isLegalMove
         self.isFirstMove = toCopy.isFirstMove
+        self.selected = toCopy.selected
     }
     
     func copyWithZone(zone: NSZone) -> AnyObject {
@@ -68,11 +69,13 @@ class PieceView: UIView {
         }
     }
 
-    init(image: UIImage) {
+    init(image: UIImage, pieceTag: Int) {
         self.image = image
         super.init(frame: CGRectZero)
+        self.tag = pieceTag
         self.userInteractionEnabled = false
         
+        // add imageView as subview
         let imageView = UIImageView(image:image)
         self.addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false

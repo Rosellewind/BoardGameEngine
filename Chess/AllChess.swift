@@ -47,74 +47,149 @@ enum ChessPiece: String {
 }
 
 class ChessGame: Game {
-    init(variation: ChessVariation, gameView: UIView) {
-        super.init(gameView: gameView)/////////////////not right
+    init(chessVariation: ChessVariation, gameView: UIView) {
+        
+        // create the board
+        let chessBoard = Board(numRows: 8, numColumns: 8)
+        
+        // create the boardView
+        let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.redColor(), UIColor.blackColor()])
+        
+        // create the players with pieces
+        let chessPlayers = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
+        
 
-        switch variation {
-        case .StandardChess:////**** I only want chess specific here
-            
-            // create the board
-            board = ChessBoard()
-            
-            // create the boardView
-            boardView = ChessBoardView(board: board)
-            
-            // add the boardView
-            gameView.addSubview(boardView)
-            boardView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
-            
-            // create the players with pieces
-            players = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
-            //            players = [Player(index: 0, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 0)!)), Player(index: 1, pieces: Piece.standardPieces(variation, chessPlayer: ChessPlayer(rawValue: 1)!))]
-            
-            // create pieceView's
-            for player in players {
-                for piece in player.pieces {
-                    if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                        let pieceView = PieceView(image: image)
-                        pieceView.tag = piece.tag
-                        pieceView.observing = [(piece, "selected")]
-                        pieceViews.append(pieceView)
-                        
-                        let indexOfPieceOnBoard = board.index(piece.position)
-                        if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
-                            boardView.addSubview(pieceView)
-                            pieceView.constrainToCell(cell)
+        // create pieceView's
+        var chessPieceViews = [PieceView]()
+        for player in chessPlayers {
+            for piece in player.pieces {
+                if let image = UIImage(named: piece.name + (player.name ?? "")) {
+                    let pieceView = PieceView(image: image, pieceTag: piece.tag)
+                    chessPieceViews.append(pieceView)
+                }
+            }
+        }
+        
+        super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers, pieceViews: chessPieceViews)
+
+        // chessVariation rules
+        switch chessVariation {
+        case .StandardChess:
+            // add turn conditions
+            turnConditions = [.CantExposeKing]////////change to moveConditions?
+        default:
+            break
+        }
+    }
+    
+    override func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
+        var conditionsAreMet = true
+        for condition in conditions ?? [] where conditionsAreMet == true {
+            switch condition.condition {
+            case .CantBeOccupied:
+                for translation in condition.positions ?? [] {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying != nil {
+                        conditionsAreMet = false
+                    }
+                }
+                ///pos to trans
+                
+            case .MustBeOccupied:
+                for translation in condition.positions ?? [] {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying == nil {
+                        conditionsAreMet = false
+                    }
+                }
+            case .MustBeOccupiedByOpponent:
+                for translation in condition.positions ?? [] {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying == nil {
+                        conditionsAreMet = false
+                    } else if player.pieces.contains(pieceOccupying!) {
+                        conditionsAreMet = false
+                    }
+                }
+            case .CantBeOccupiedBySelf:
+                for translation in condition.positions ?? [] {
+                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                    let pieceOccupying = pieceForPosition(positionToCheck)
+                    if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
+                        conditionsAreMet = false
+                    }
+                }
+            case .IsInitialMove:
+                if !piece.isFirstMove {
+                    conditionsAreMet = false
+                }
+            case .RookCanCastle://///king?////test
+                let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
+                var castlingRook: Piece?
+                var rookLandingSpot: Position
+                if let king = player.pieces.elementPassing({$0.name == "King"}) {
+                    for rook in rooks where castlingRook == nil {
+                        if rook.isFirstMove {
+                            for translation in condition.positions ?? []  where castlingRook == nil  {
+                                let position = positionFromTranslation(translation, fromPosition: king.position, direction: player.forwardDirection)
+                                let translation = calculateTranslation(rook.position, toPosition: position, direction: player.forwardDirection)
+                                let moveFunction = rook.isLegalMove(translation: translation)
+                                if pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions) {
+                                    castlingRook = rook
+                                    let rookOffset = position.column < rook.position.column ? -1 : 1
+                                    rookLandingSpot = Position(row: position.row, column: position.column + rookOffset)
+                                }
+                            }
+                        }
+                    }
+                }
+                if castlingRook != nil {
+                    ////****move rook to rookLandingSpot
+                    //                    let completionBlock = move(rook, rookLandingSpot)
+                } else {
+                    conditionsAreMet = false
+                }
+            case .CantBeInCheckDuring:////test
+                ////temp
+                if isCheck(player) {
+                    conditionsAreMet = false
+                }
+                
+                
+                //                for translation in condition.positions {
+                //
+                //                }
+                break////****implement
+            }
+        }
+        return conditionsAreMet
+    }
+    
+    override func turnConditionsAreMet(conditions: [TurnCondition]?) -> Bool {
+        var conditionsAreMet = true
+        for condition in conditions ?? [] {
+            switch condition {
+            case .CantExposeKing:////move to different file?
+                if let king = players[whoseTurn].pieces.elementPassing({$0.name == "King"}) {
+                    // for every opponents piece in new positions, can king be taken?
+                    for piece in players[nextTurn].pieces where conditionsAreMet == true {
+                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: players[nextTurn].forwardDirection)
+                        let moveFunction = piece.isLegalMove(translation: translation)
+                        if moveFunction.isLegal && pieceConditionsAreMet(piece, player: players[nextTurn], conditions: moveFunction.conditions){
+                            conditionsAreMet = false
                         }
                     }
                 }
             }
             
-            // add taps to cells on boardView
-            boardView.cells.forEach({ (view: UIView) in
-                view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
-            })
-            
-            // add turn conditions
-            turnConditions = [.CantExposeKing]////////change to moveConditions?
-        default:
-            break
-    }
-
-}
-
-
-class ChessBoard: Board {
-    init () {
-        super.init(numRows: 8, numColumns: 8)
+        }
+        return conditionsAreMet
     }
 }
 
-class ChessBoardView: BoardView {
-    init (board: Board) {
-        super.init(board: board, checkered: true, images: nil, backgroundColors: [UIColor.redColor(), UIColor.blackColor()])
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
 
 class ChessPlayer: Player {
     var orientation: PlayerOrientation {
@@ -337,7 +412,7 @@ class ChessPieceCreator: PiecesCreator {
             return piece
         }}
     }
-}
+
 
 
 

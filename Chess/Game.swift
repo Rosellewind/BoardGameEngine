@@ -16,20 +16,20 @@ import UIKit
 
 
 
-protocol GameProtocol {
+protocol GameMessageProtocol {
     func gameMessage(string: String, status: GameStatus?)
 }
-
 
 enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
 }
 
+
 class Game {
     var board: Board
     var boardView: BoardView
     var players: [Player]
-    var pieceViews = [PieceView]()
+    var pieceViews: [PieceView]
     var selectedPiece: Piece?
     var turnConditions: [TurnCondition]?
     var whoseTurn: Int = 0 {
@@ -48,47 +48,37 @@ class Game {
             return next
         }
     }
-    var statusDelegate: GameProtocol? {
+    var statusDelegate: GameMessageProtocol? {
         didSet {
             statusDelegate?.gameMessage(players[whoseTurn].name ?? "" + " Starts!", status: .WhoseTurn)
         }
     }
     
-    init(gameView: UIView) {
-        // create the board
-        board = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
+    
+
+
+    init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
+        self.board = board
+        self.boardView = boardView
+        self.players = players
+        self.pieceViews = pieceViews
         
-        // create the boardView
-        var images = [UIImage]()
-        for i in 1...3 {
-            if let image = UIImage(named: "\(i).jpg") {
-                images.append(image)
-            }
-        }
-        boardView = BoardView(board: board, checkered: false, images: images, backgroundColors: nil)
-        
-        // add the view
+        // boardView layout
         gameView.addSubview(boardView)
         boardView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
         
-        // create the players with pieces
-        players = [Player(name: "alien", index: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
-        
-        // create pieceView's
-        for player in players {
-            for piece in player.pieces {
-                if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                    let pieceView = PieceView(image: image)
-                    pieceView.tag = piece.tag
-                    pieceView.observing = [(piece, "selected")]
-                    pieceViews.append(pieceView)
-                    
-                    let indexOfPieceOnBoard = board.index(piece.position)
-                    if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
-                        boardView.addSubview(pieceView)
-                        pieceView.constrainToCell(cell)
-                    }
+        // pieceView layout and observing
+        pieceViews.forEach { (pieceView: PieceView) in
+            if let piece = pieceForPieceView(pieceView) {
+                // add observing
+                pieceView.observing = [(piece, "selected")]
+                
+                // pieceView layout
+                let indexOfPieceOnBoard = board.index(piece.position)
+                if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
+                    boardView.addSubview(pieceView)
+                    pieceView.constrainToCell(cell)
                 }
             }
         }
@@ -97,113 +87,47 @@ class Game {
         boardView.cells.forEach({ (view: UIView) in
             view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
         })
+
+        
     }
     
-    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
-        var conditionsAreMet = true
-        for condition in conditions ?? [] where conditionsAreMet == true {
-            switch condition.condition {
-            case .CantBeOccupied:
-                for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
-                    let pieceOccupying = pieceForPosition(positionToCheck)
-                    if pieceOccupying != nil {
-                        conditionsAreMet = false
-                    }
-                }
-                ///pos to trans
-                
-            case .MustBeOccupied:
-                for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
-                    let pieceOccupying = pieceForPosition(positionToCheck)
-                    if pieceOccupying == nil {
-                        conditionsAreMet = false
-                    }
-                }
-            case .MustBeOccupiedByOpponent:
-                for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
-                    let pieceOccupying = pieceForPosition(positionToCheck)
-                    if pieceOccupying == nil {
-                        conditionsAreMet = false
-                    } else if player.pieces.contains(pieceOccupying!) {
-                        conditionsAreMet = false
-                    }
-                }
-            case .CantBeOccupiedBySelf:
-                for translation in condition.positions ?? [] {
-                    let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
-                    let pieceOccupying = pieceForPosition(positionToCheck)
-                    if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
-                        conditionsAreMet = false
-                    }
-                }
-            case .IsInitialMove:
-                if !piece.isFirstMove {
-                    conditionsAreMet = false
-                }
-            case .RookCanCastle://///king?////test
-                let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
-                var castlingRook: Piece?
-                var rookLandingSpot: Position
-                if let king = player.pieces.elementPassing({$0.name == "King"}) {
-                    for rook in rooks where castlingRook == nil {
-                        if rook.isFirstMove {
-                            for translation in condition.positions ?? []  where castlingRook == nil  {
-                                let position = positionFromTranslation(translation, fromPosition: king.position, direction: player.forwardDirection)
-                                let translation = calculateTranslation(rook.position, toPosition: position, direction: player.forwardDirection)
-                                let moveFunction = rook.isLegalMove(translation: translation)
-                                if pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions) {
-                                    castlingRook = rook
-                                    let rookOffset = position.column < rook.position.column ? -1 : 1
-                                    rookLandingSpot = Position(row: position.row, column: position.column + rookOffset)
-                                }
-                            }
-                        }
-                    }
-                }
-                if castlingRook != nil {
-                    ////****move rook to rookLandingSpot
-//                    let completionBlock = move(rook, rookLandingSpot)
-                } else {
-                    conditionsAreMet = false
-                }
-            case .CantBeInCheckDuring:////test
-                ////temp
-                if isCheck(player) {
-                    conditionsAreMet = false
-                }
-                
-                
-//                for translation in condition.positions {
-//                    
-//                }
-                break////****implement
+    /// creates a default board for testing purposes
+    convenience init(gameView: UIView) {
+        
+        // create the board
+        let defaultBoard = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
+        
+        // create the boardView
+        var images = [UIImage]()
+        for i in 1...3 {
+            if let image = UIImage(named: "\(i).jpg") {
+                images.append(image)
             }
         }
-        return conditionsAreMet
+        let defaultBoardView = BoardView(board: defaultBoard, checkered: false, images: images, backgroundColors: nil)
+        
+        // create the players with pieces
+        let defaultPlayers = [Player(name: "alien", index: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
+        
+        // create pieceView's
+        var defaultPieceViews = [PieceView]()
+        for player in defaultPlayers {
+            for piece in player.pieces {
+                if let image = UIImage(named: piece.name + (player.name ?? "")) {
+                    let pieceView = PieceView(image: image, pieceTag: piece.tag)
+                    defaultPieceViews.append(pieceView)
+                }
+            }
+        }
+        self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
+    }
+    
+     func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
+        return true
     }
     
     func turnConditionsAreMet(conditions: [TurnCondition]?) -> Bool {
-        var conditionsAreMet = true
-        for condition in conditions ?? [] {
-            switch condition {
-            case .CantExposeKing:////move to different file?
-                if let king = players[whoseTurn].pieces.elementPassing({$0.name == "King"}) {
-                    // for every opponents piece in new positions, can king be taken?
-                    for piece in players[nextTurn].pieces where conditionsAreMet == true {
-                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: players[nextTurn].forwardDirection)
-                        let moveFunction = piece.isLegalMove(translation: translation)
-                        if moveFunction.isLegal && pieceConditionsAreMet(piece, player: players[nextTurn], conditions: moveFunction.conditions){
-                            conditionsAreMet = false
-                        }
-                    }
-                }
-            }
-            
-        }
-        return conditionsAreMet
+        return true
     }
     
     @objc func cellTapped(sender: UITapGestureRecognizer) {
@@ -419,6 +343,15 @@ class Game {
             }
         }
         return pieceFound
+    }
+    
+    func pieceForPieceView(pieceView: PieceView) -> Piece? {
+        for player in players {
+            for piece in player.pieces {
+                if piece.tag == pieceView.tag {return piece}
+            }
+        }
+        return nil
     }
     
     func animatePiece(piece: Piece, position: Position) {

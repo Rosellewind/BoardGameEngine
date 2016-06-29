@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, GameProtocol {
+class ViewController: UIViewController, GameMessageProtocol {
     @IBOutlet weak var topLabel: UILabel!
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!

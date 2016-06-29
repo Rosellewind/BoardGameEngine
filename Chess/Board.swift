@@ -23,8 +23,12 @@ func ==(lhs: Position, rhs: Position) -> Bool {
 class Board {
     var numRows: Int
     var numColumns: Int
-    var numCells: Int {get {numRows * numColumns}}
+    var numCells: Int {get {return numRows * numColumns}}
     let skipCells: [Int]?
+    
+    convenience init() {
+        self.init(numRows: 5, numColumns: 5)
+    }
     
     init(numRows: Int, numColumns: Int, skipCells: [Int]? = nil) {
         self.numRows = numRows
@@ -52,8 +56,13 @@ class BoardView: UIView {
     var cells = [UIView]()
     let images: [UIImage]?
     let backgroundColors: [UIColor]?
-    let checkered: Bool
+    var checkered = true
 
+    init() {
+        images = nil
+        self.backgroundColors = nil
+        super.init(frame: CGRectZero)
+    }
     
     init (board: Board, checkered: Bool, images: [UIImage]?, backgroundColors: [UIColor]?) {
         self.checkered = checkered
