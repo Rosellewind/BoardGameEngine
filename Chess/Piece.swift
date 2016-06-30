@@ -14,8 +14,12 @@ protocol PiecesCreator {
     func makePieces(variation: Int, playerId: Int) -> [Piece]
 }
 
-enum LegalIfCondition {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove, RookCanCastle, CantBeInCheckDuring
+enum LegalIfCondition: Int {
+    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove
+    static var count = 5
+    static func allValues() -> [LegalIfCondition] {
+        return [.MustBeOccupied, .CantBeOccupied, .MustBeOccupiedByOpponent, .CantBeOccupiedBySelf, .IsInitialMove]
+    }
 }
 
 class Piece: NSObject, NSCopying {
@@ -23,11 +27,11 @@ class Piece: NSObject, NSCopying {
     var tag = 0
     var position: Position
     let startingPosition: Position
-    var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?)
+    var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
     var isFirstMove = true
     dynamic var selected = false
     
-    init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?)) {
+    init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
         self.name = name
         self.position = position
         self.startingPosition = position

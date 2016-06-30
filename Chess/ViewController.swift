@@ -30,9 +30,9 @@ class ViewController: UIViewController, GameMessageProtocol {
     }
     
     func setupGame() {
-        game = ChessGame(variation: .StandardChess, gameView: gameView)
+        game = ChessGame(chessVariation: .StandardChess, gameView: gameView)
         game.statusDelegate = self
-        game = Game(gameView: gameView)
+//        game = Game(gameView: gameView)
     }
     
     func gameMessage(string: String, status: GameStatus?) {

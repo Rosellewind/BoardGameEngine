@@ -50,7 +50,7 @@ class Game {
     }
     var statusDelegate: GameMessageProtocol? {
         didSet {
-            statusDelegate?.gameMessage(players[whoseTurn].name ?? "" + " Starts!", status: .WhoseTurn)
+            statusDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .WhoseTurn)
         }
     }
     
@@ -122,9 +122,57 @@ class Game {
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
     }
     
-     func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: LegalIfCondition, positions: [Position]?)]?) -> Bool {
-        return true
+    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?) -> Bool {
+        var conditionsAreMet = true
+        for condition in conditions ?? [] where conditionsAreMet == true {
+            if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
+                switch legalIfCondition {
+                case .CantBeOccupied:
+                    for translation in condition.positions ?? [] {
+                        let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                        let pieceOccupying = pieceForPosition(positionToCheck)
+                        if pieceOccupying != nil {
+                            conditionsAreMet = false
+                        }
+                    }
+                    ///pos to trans
+                    
+                case .MustBeOccupied:
+                    for translation in condition.positions ?? [] {
+                        let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                        let pieceOccupying = pieceForPosition(positionToCheck)
+                        if pieceOccupying == nil {
+                            conditionsAreMet = false
+                        }
+                    }
+                case .MustBeOccupiedByOpponent:
+                    for translation in condition.positions ?? [] {
+                        let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                        let pieceOccupying = pieceForPosition(positionToCheck)
+                        if pieceOccupying == nil {
+                            conditionsAreMet = false
+                        } else if player.pieces.contains(pieceOccupying!) {
+                            conditionsAreMet = false
+                        }
+                    }
+                case .CantBeOccupiedBySelf:
+                    for translation in condition.positions ?? [] {
+                        let positionToCheck = positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+                        let pieceOccupying = pieceForPosition(positionToCheck)
+                        if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
+                            conditionsAreMet = false
+                        }
+                    }
+                case .IsInitialMove:
+                    if !piece.isFirstMove {
+                        conditionsAreMet = false
+                    }
+                }
+            }
+        }
+        return conditionsAreMet
     }
+
     
     func turnConditionsAreMet(conditions: [TurnCondition]?) -> Bool {
         return true
@@ -196,20 +244,14 @@ class Game {
                         animatePiece(selectedPiece!, position: selectedPiece!.position)
                         
                         // check for gameOver
-                        for player in players {
-                            isCheck(player)
-                            if isCheckMate(player) {
-                                statusDelegate?.gameMessage(player.name ?? "" + " Is In Checkmate!!!", status: .GameOver)
-                            }
-                        }
-                        
+                        gameOver()
                         
                         // move the piece into new position, or listen to position change and change position
                         
                         selectedPiece!.selected = false
                         selectedPiece = nil
                         whoseTurn += 1
-                        statusDelegate?.gameMessage(players[whoseTurn].name ?? "" + "'s turn", status: .WhoseTurn)
+                        statusDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
 
 
                         
@@ -240,67 +282,16 @@ class Game {
         }
     }
     
-    func isCheck(player: Player) -> Bool {
-        // all other players pieces can not take king
-        var isCheck = false
-        if let king = player.pieces.elementPassing({$0.name == "King"}) {
-            for otherPlayer in players where isCheck == false {
-                if otherPlayer === player {
-                    continue
-                } else {
-                    for piece in otherPlayer.pieces where isCheck == false {
-                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = piece.isLegalMove(translation: translation)
-                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions)
-                    }
-                }
+    func gameOver() -> Bool {
+        for player in players {
+            if player.pieces.count <= 0 {
+                return true
             }
         }
-        print("\(player.name) is in Check: \(isCheck)")
-        return isCheck
+        return false
     }
     
-    func isCheckMate(player: Player) -> Bool {
-        var isCheckMate = true
-        let otherPlayers = players.filter({$0 !== player})
-        if let king = player.pieces.elementPassing({$0.name == "King"}) {
-            var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
-                                    Position(row: king.position.row - 1, column: king.position.column),
-                                    Position(row: king.position.row - 1, column: king.position.column + 1),
-                                    Position(row: king.position.row, column: king.position.column - 1),
-                                    Position(row: king.position.row, column: king.position.column),
-                                    Position(row: king.position.row, column: king.position.column + 1),
-                                    Position(row: king.position.row + 1, column: king.position.column - 1),
-                                    Position(row: king.position.row + 1, column: king.position.column),
-                                    Position(row: king.position.row + 1, column: king.position.column + 1)]
-            // trim positions that are off the board
-            positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
-            
-            // trim positions that are already occupied   ////castling/otherrules?
-            positionsToCheck = positionsToCheck.filter({pieceForPosition($0) == nil})
-            if positionsToCheck.count > 0 {
-                for position in positionsToCheck where isCheckMate == true {
-                    var positionIsSafe = true
-                    for otherPlayer in otherPlayers where positionIsSafe == true {
-                        for piece in otherPlayer.pieces where positionIsSafe == true {
-                            let translation = calculateTranslation(piece.position, toPosition: position, direction: otherPlayer.forwardDirection)
-                            let moveFunction = piece.isLegalMove(translation: translation)
-                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions))
-                        }
-                    }
-                    if positionIsSafe {
-                        isCheckMate = false
-                    }
-                }
-            } else {
-                isCheckMate = false
-            }
 
-        }
-        print("\(player.name) is in checkmate: \(isCheckMate)")
-
-        return isCheckMate
-    }
     
     func positionFromTranslation(translation: Position, fromPosition: Position, direction: Direction) -> Position {
         switch direction {
