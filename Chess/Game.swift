@@ -6,10 +6,9 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// castling, en passant, pawn promotion, check/mate
+//// cantbeincheckduring, en passant, pawn promotion, check/mate
 //// further the momento pattern
 //  checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
-//// stopped here **** castling is not done, need completionblock, move()
 
 
 import UIKit
@@ -110,7 +109,7 @@ class Game {
         let defaultBoardView = BoardView(board: defaultBoard, checkered: false, images: images, backgroundColors: nil)
         
         // create the players with pieces
-        let defaultPlayers = [Player(name: "alien", index: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
+        let defaultPlayers = [Player(name: "alien", id: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
         
         // create pieceView's
         var defaultPieceViews = [PieceView]()
@@ -202,14 +201,14 @@ class Game {
                 if piece != nil {// cell must be occupied for selection
                     let isPlayersOwnPiece = players[whoseTurn].pieces.contains(piece!)
                     if isPlayersOwnPiece {
-                        piece!.selected = true  //// necessary?
+                        piece!.selected = true
                         selectedPiece = piece
                     }
                 }
             }
             
             // final part of turn, choosing where to go
-            else {////conditions required, make protocol?
+            else {
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 let pieceConditions = pieceConditionsAreMet(selectedPiece!, player: players[whoseTurn], conditions: moveFunction.conditions)
@@ -266,23 +265,11 @@ class Game {
                         
                         // check for gameOver
                         gameOver()
-                        
-//                        selectedPiece!.selected = false
-//                        selectedPiece = nil
                         whoseTurn += 1
                         presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
-
-
-                        
                     } else {
                         restoreMemento()
-//                        selectedPiece!.selected = false
-//                        selectedPiece = nil
                     }
-                } else {
-//                    // delesect, the move isn't legal
-//                    selectedPiece!.selected = false
-//                    selectedPiece = nil
                 }
                 selectedPiece!.selected = false
                 selectedPiece = nil

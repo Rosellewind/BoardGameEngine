@@ -19,14 +19,14 @@ enum Direction: Int {
 
 class Player {
     var name: String?
-    let index: Int  //// id?
+    let id: Int
     var forwardDirection: Direction
     var pieces: [Piece]
 
-    init(name: String?, index: Int, forwardDirection: Direction?, pieces: [Piece]) {
+    init(name: String?, id: Int, forwardDirection: Direction?, pieces: [Piece]) {
         self.name = name
-        self.index = index
-        self.forwardDirection = forwardDirection ?? Direction(loopingRawValue: index)
+        self.id = id
+        self.forwardDirection = forwardDirection ?? Direction(loopingRawValue: id)
         self.pieces = pieces
     }
 }

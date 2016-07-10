@@ -75,7 +75,7 @@ class ChessGame: Game {
         switch chessVariation {
         case .StandardChess:
             // add turn conditions
-            turnConditions = [ChessTurnCondition.CantExposeKing.rawValue]////////change to moveConditions?
+            turnConditions = [ChessTurnCondition.CantExposeKing.rawValue]
         default:
             break
         }
@@ -166,8 +166,6 @@ class ChessGame: Game {
         rook.isFirstMove = false
         rook.position = position
         animatePiece(rook, position: position)
-        // check for game over?//// what if cancelled?
-
     }
 
     func moveARook(rooks: [Piece], position: Position) {
@@ -175,17 +173,13 @@ class ChessGame: Game {
             
             // find the direction the player is moving
             var playerOrientation = PlayerOrientation.bottom
-            if let player = self.players.filter({$0.pieces.contains(rooks[0])}) as? [ChessPlayer] {////check works?
+            if let player = self.players.filter({$0.pieces.contains(rooks[0])}) as? [ChessPlayer] {
                 if player.count > 0 {
                     playerOrientation = player[0].orientation
                 }
             }
             
-            
-
-            
-            
-            // have the presenting VC ask which castle to use
+            // have the presenting VC ask which rook to use
             let alert = UIAlertController(title: "Castling", message: "Which rook do you want to use?", preferredStyle: .Alert)
             let leftAction = UIAlertAction(title: "Left", style: .Default, handler: { (action: UIAlertAction) in
                 let leftRook: Piece
@@ -200,7 +194,6 @@ class ChessGame: Game {
                     leftRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
                 }
                 self.rookChosenForCastling(leftRook, position: position)
-                
                 alert.dismissViewControllerAnimated(true, completion: nil)
             })
             alert.addAction(leftAction)
@@ -217,7 +210,6 @@ class ChessGame: Game {
                     rightRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
                 }
                 self.rookChosenForCastling(rightRook, position: position)
-                
                 alert.dismissViewControllerAnimated(true, completion: nil)
             })
             alert.addAction(rightAction)
@@ -329,11 +321,11 @@ class ChessGame: Game {
 
 class ChessPlayer: Player {
     private var orientation: PlayerOrientation {
-        return PlayerOrientation(rawValue: self.index) ?? PlayerOrientation.bottom
+        return PlayerOrientation(rawValue: self.id) ?? PlayerOrientation.bottom
     }
     init(index: Int) {
         let pieces = ChessPieceCreator.sharedInstance.makePieces(ChessVariation.StandardChess.rawValue, playerId: index)
-        super.init(name: nil, index: index, forwardDirection: nil, pieces: pieces)
+        super.init(name: nil, id: index, forwardDirection: nil, pieces: pieces)
         self.name = self.orientation.color()
     }
 }
