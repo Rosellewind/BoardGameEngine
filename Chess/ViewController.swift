@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, GameMessageProtocol {
+class ViewController: UIViewController, GamePresenterProtocol {
     @IBOutlet weak var topLabel: UILabel!
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!
@@ -31,7 +31,7 @@ class ViewController: UIViewController, GameMessageProtocol {
     
     func setupGame() {
         game = ChessGame(chessVariation: .StandardChess, gameView: gameView)
-        game.statusDelegate = self
+        game.presenterDelegate = self
 //        game = Game(gameView: gameView)
     }
     
@@ -47,7 +47,9 @@ class ViewController: UIViewController, GameMessageProtocol {
         }
     }
 
-
+    func showAlert(alert: UIViewController) {
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
 
 }
 

@@ -16,10 +16,6 @@ protocol PiecesCreator {
 
 enum LegalIfCondition: Int {
     case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove
-    static var count = 5
-    static func allValues() -> [LegalIfCondition] {
-        return [.MustBeOccupied, .CantBeOccupied, .MustBeOccupiedByOpponent, .CantBeOccupiedBySelf, .IsInitialMove]
-    }
 }
 
 class Piece: NSObject, NSCopying {

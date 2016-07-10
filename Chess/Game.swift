@@ -16,12 +16,18 @@ import UIKit
 
 
 
-protocol GameMessageProtocol {
+protocol GamePresenterProtocol {
     func gameMessage(string: String, status: GameStatus?)
+    func showAlert(alert: UIViewController)
 }
+
 
 enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
+}
+
+enum TurnCondition: Int {
+    case None
 }
 
 
@@ -31,7 +37,7 @@ class Game {
     var players: [Player]
     var pieceViews: [PieceView]
     var selectedPiece: Piece?
-    var turnConditions: [TurnCondition]?
+    var turnConditions: [TurnCondition.RawValue]?
     var whoseTurn: Int = 0 {
         didSet {
             if whoseTurn >= players.count {
@@ -48,14 +54,11 @@ class Game {
             return next
         }
     }
-    var statusDelegate: GameMessageProtocol? {
+    var presenterDelegate: GamePresenterProtocol? {
         didSet {
-            statusDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .WhoseTurn)
+            presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .WhoseTurn)
         }
     }
-    
-    
-
 
     init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
         self.board = board
@@ -122,7 +125,7 @@ class Game {
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
     }
     
-    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?) -> Bool {
+    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?) -> (isMet: Bool, completions: [(() -> Void)]?) {
         var conditionsAreMet = true
         for condition in conditions ?? [] where conditionsAreMet == true {
             if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
@@ -170,11 +173,19 @@ class Game {
                 }
             }
         }
-        return conditionsAreMet
+        return (conditionsAreMet, nil)
     }
 
     
-    func turnConditionsAreMet(conditions: [TurnCondition]?) -> Bool {
+    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?) -> Bool {
+        for condition in conditions ?? [] {
+            if let turnCondition = TurnCondition(rawValue: condition) {
+                switch turnCondition {
+                case .None:
+                    return true
+                }
+            }
+        }
         return true
     }
     
@@ -201,31 +212,34 @@ class Game {
             else {////conditions required, make protocol?
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: position, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
-                if moveFunction.isLegal && pieceConditionsAreMet(selectedPiece!, player: players[whoseTurn], conditions: moveFunction.conditions) {
-                    
-                    // mark if first move and save momento
-                    var momentoMarkedFirstMove = false
-                    if selectedPiece!.isFirstMove == true {
-                        selectedPiece!.isFirstMove = false
-                        momentoMarkedFirstMove = true
-                    }
-                    
-                    // remove piece if nedded and save momento
-                    var momentoPieceRemoved: Piece?
-                    var momentoPieceRemovedPlayer: Player?
+                let pieceConditions = pieceConditionsAreMet(selectedPiece!, player: players[whoseTurn], conditions: moveFunction.conditions)
+                
+                // check if move is legal and conditions are met
+                if moveFunction.isLegal && pieceConditions.isMet {
+
+
+                    // remove piece if nedded
+                    var mementoPieceRemoved: Piece?
+                    var mementoPieceRemovedPlayer: Player?
                     if piece != nil {
-                        momentoPieceRemoved = piece
-                        for player in players where momentoPieceRemovedPlayer == nil {
-                            let index = player.pieces.indexOf(piece!)////extension
-                            if index != nil {
-                                momentoPieceRemovedPlayer = player
-                                player.pieces.removeAtIndex(index!)
+                        mementoPieceRemoved = piece
+                        for player in players where mementoPieceRemovedPlayer == nil {
+                            if let index = player.pieces.indexOf(piece!) {
+                                mementoPieceRemovedPlayer = player
+                                player.pieces.removeAtIndex(index)
                             }
                         }
                     }
                     
-                    // update position and save momento
-                    let momentoPosition = selectedPiece!.position
+                    // save memento
+                    memento = (piece: selectedPiece!, selectedPiece!.isFirstMove, selectedPiece!.position, mementoPieceRemoved, mementoPieceRemovedPlayer)
+                    
+                    // mark isFirstMove
+                    if selectedPiece!.isFirstMove == true {
+                        selectedPiece!.isFirstMove = false
+                    }
+                    
+                    // update position
                     selectedPiece!.position = position
 
                     // if turn conditions are met, update the view, else restore momento
@@ -234,8 +248,8 @@ class Game {
                         print("legal move")
                         
                         // update view, remove pieceView if needed
-                        if momentoPieceRemoved != nil {
-                            if let match = pieceViews.elementPassing({$0.tag == momentoPieceRemoved!.tag}) {
+                        if mementoPieceRemoved != nil {
+                            if let match = pieceViews.elementPassing({$0.tag == mementoPieceRemoved!.tag}) {
                                 match.removeFromSuperview()
                             }
                         }
@@ -243,41 +257,46 @@ class Game {
                         // update view, animate into position
                         animatePiece(selectedPiece!, position: selectedPiece!.position)
                         
+                        
+                        if let completions = pieceConditions.completions {
+                            for completion in completions {
+                                completion()
+                            }
+                        }
+                        
                         // check for gameOver
                         gameOver()
                         
-                        // move the piece into new position, or listen to position change and change position
-                        
-                        selectedPiece!.selected = false
-                        selectedPiece = nil
+//                        selectedPiece!.selected = false
+//                        selectedPiece = nil
                         whoseTurn += 1
-                        statusDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
+                        presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
 
 
                         
                     } else {
-                        // restore momento - marked as first move
-                        if momentoMarkedFirstMove {
-                            selectedPiece!.isFirstMove = true
-                        }
-                        
-                        // restore momento - return removed piece
-                        if momentoPieceRemoved != nil && momentoPieceRemovedPlayer != nil {
-                            momentoPieceRemovedPlayer!.pieces.append(momentoPieceRemoved!)
-                        }
-                        
-                        // restore momento - return moved piece
-                        selectedPiece!.position = momentoPosition
-                        
-                        // delesect
-                        selectedPiece!.selected = false
-                        selectedPiece = nil
+                        restoreMemento()
+//                        selectedPiece!.selected = false
+//                        selectedPiece = nil
                     }
                 } else {
-                    // delesect, the move isn't legal
-                    selectedPiece!.selected = false
-                    selectedPiece = nil
+//                    // delesect, the move isn't legal
+//                    selectedPiece!.selected = false
+//                    selectedPiece = nil
                 }
+                selectedPiece!.selected = false
+                selectedPiece = nil
+            }
+        }
+    }
+    var memento: (piece: Piece, isFirstMove: Bool, position: Position, pieceRemoved: Piece?, pieceRemovedPlayer: Player?)?
+    
+    func restoreMemento() {
+        if let thisMemento = memento {
+            thisMemento.piece.isFirstMove = thisMemento.isFirstMove
+            thisMemento.piece.position = thisMemento.position
+            if let pieceToRestore = thisMemento.pieceRemoved, player = thisMemento.pieceRemovedPlayer {
+                player.pieces.append(pieceToRestore)
             }
         }
     }
