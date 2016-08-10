@@ -29,4 +29,8 @@ class Player {
         self.forwardDirection = forwardDirection ?? Direction(loopingRawValue: id)
         self.pieces = pieces
     }
+    
+    func copy() -> Player {
+        return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({($0.copy() as! Piece)}))
+    }
 }

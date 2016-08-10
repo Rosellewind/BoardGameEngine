@@ -29,8 +29,21 @@ enum TurnCondition: Int {
     case None
 }
 
+struct GameSnapshot {
+    var board: Board
+    var players: [Player]
+    var selectedPiece: Piece?
+    var whoseTurn: Int
+    var nextTurn: Int
+}
 
-class Game {
+class GameMomentoManager {  ////////del?
+    static let sharedInstance = GameMomentoManager()
+    var momentos = [Game]()
+}
+
+
+class Game: PieceViewProtocol {
     var board: Board
     var boardView: BoardView
     var players: [Player]
@@ -58,6 +71,15 @@ class Game {
             presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .WhoseTurn)
         }
     }
+    var allPieces: [Piece] {
+        get {
+            var pieces = [Piece]()
+            for player in players {
+                pieces += player.pieces
+            }
+            return pieces
+        }
+    }
 
     init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
         self.board = board
@@ -74,7 +96,7 @@ class Game {
         pieceViews.forEach { (pieceView: PieceView) in
             if let piece = pieceForPieceView(pieceView) {
                 // add observing
-                pieceView.observing = [(piece, "selected")]
+                pieceView.observing = [(piece, "selected"), (piece, "position")]
                 
                 // pieceView layout
                 let indexOfPieceOnBoard = board.index(piece.position)
@@ -116,7 +138,7 @@ class Game {
         for player in defaultPlayers {
             for piece in player.pieces {
                 if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                    let pieceView = PieceView(image: image, pieceTag: piece.tag)
+                    let pieceView = PieceView(image: image, pieceTag: piece.id)
                     defaultPieceViews.append(pieceView)
                 }
             }
@@ -124,7 +146,7 @@ class Game {
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
     }
     
-    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?) -> (isMet: Bool, completions: [(() -> Void)]?) {
+    func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?, gameSnapshot: GameSnapshot) -> (isMet: Bool, completions: [(() -> Void)]?) {
         var conditionsAreMet = true
         for condition in conditions ?? [] where conditionsAreMet == true {
             if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
@@ -176,9 +198,9 @@ class Game {
     }
 
     
-    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?) -> Bool {
+    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, gameSnapshot: GameSnapshot) -> Bool {
         for condition in conditions ?? [] {
-            if let turnCondition = TurnCondition(rawValue: condition) {
+            if let turnCondition = TurnCondition(rawValue: condition) { // implement later
                 switch turnCondition {
                 case .None:
                     return true
@@ -239,10 +261,11 @@ class Game {
                     }
                     
                     // update position
-                    selectedPiece!.position = position
+//                    selectedPiece!.position = position
 
                     // if turn conditions are met, update the view, else restore momento
-                    if turnConditionsAreMet(turnConditions) {
+                    let gameSnapshot = gameSnapshotWithChange([(piece: selectedPiece!, position: position)])
+                    if turnConditionsAreMet(turnConditions, gameSnapshot) {
                         // update the view and complete the turn
                         print("legal move")
                         
@@ -253,9 +276,9 @@ class Game {
                             }
                         }
                         
-                        // update view, animate into position
-                        animatePiece(selectedPiece!, position: selectedPiece!.position)
-                        
+                        // move the piece
+                        selectedPiece!.position = position
+
                         
                         if let completions = pieceConditions.completions {
                             for completion in completions {
@@ -276,6 +299,54 @@ class Game {
             }
         }
     }
+    
+    struct Move {
+        let piece: Piece
+        let remove: Bool
+        let position: Position?
+    }
+    
+    func makeMove(move: Move) {
+        if move.remove {
+            for player in players {
+                if let index = player.pieces.indexOf(move.piece) {
+                    player.pieces.removeAtIndex(index)
+                }
+            }
+        } else if move.position != nil {
+            move.piece.position = move.position!
+        }
+    }
+    
+    func makeMoves(moves: [Move]) {
+        for move in moves {
+            makeMove(move)
+        }
+    }
+    
+    func gameSnapshotWithChange(changes: [(piece: Piece, position: Position)]) -> GameSnapshot {
+        
+        // make a copy of the game      //// copy board and selectedPiece?, implement later
+        let playersCopy = players.map({$0.copy()})
+        let snapshot = GameSnapshot(board: board, players: playersCopy, selectedPiece: selectedPiece)//copy
+        
+        // get all pieces
+        var allPiecesCopy = [Piece]()
+        for player in players {
+            allPiecesCopy += player.pieces
+        }
+        
+        // make the changes
+        for change in changes {
+            if let piece = allPiecesCopy.elementPassing({$0.id == change.piece.id}) {
+                piece.position = change.position
+            }
+        }
+        
+        return snapshot
+    }
+    
+    
     var memento: (piece: Piece, isFirstMove: Bool, position: Position, pieceRemoved: Piece?, pieceRemovedPlayer: Player?)?
     
     func restoreMemento() {
@@ -332,46 +403,62 @@ class Game {
     
     func pieceForPosition(position: Position) -> Piece? {
         var pieceFound: Piece?
-        for player in players {
-            for piece in player.pieces {
-                if piece.position == position {
-                    pieceFound = piece
-                }
+        for piece in allPieces {
+            if piece.position == position {
+                pieceFound = piece
             }
         }
         return pieceFound
     }
     
     func pieceForPieceView(pieceView: PieceView) -> Piece? {
-        for player in players {
-            for piece in player.pieces {
-                if piece.tag == pieceView.tag {return piece}
-            }
+        for piece in allPieces {
+            if piece.id == pieceView.tag {return piece}
         }
         return nil
     }
     
-    func animatePiece(piece: Piece, position: Position) {
-        if let pieceView = pieceViews.elementPassing({$0.tag == piece.tag}) {
-            // deactivate position constraints
-            NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
-            
-            // activate new position constraints
-            let cellIndex = board.index(position)
-            let matchingCells = boardView.cells.filter({$0.tag == cellIndex})
-            if matchingCells.count > 0 {
-                let cell = matchingCells[0]
-                let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
-                let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
-                pieceView.positionConstraints = [positionX, positionY]
-                NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
-            }
-            
-            // animate the change
-            boardView.setNeedsUpdateConstraints()
-            UIView.animateWithDuration(0.5) {
-                self.boardView.layoutIfNeeded()
-            }
+//    func animatePiece(piece: Piece, position: Position) {
+//        if let pieceView = pieceViews.elementPassing({$0.tag == piece.tag}) {
+//            // deactivate position constraints
+//            NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
+//            
+//            // activate new position constraints
+//            let cellIndex = board.index(position)
+//            let matchingCells = boardView.cells.filter({$0.tag == cellIndex})
+//            if matchingCells.count > 0 {
+//                let cell = matchingCells[0]
+//                let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
+//                let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+//                pieceView.positionConstraints = [positionX, positionY]
+//                NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
+//            }
+//            
+//            // animate the change
+//            boardView.setNeedsUpdateConstraints()
+//            UIView.animateWithDuration(0.5) {
+//                self.boardView.layoutIfNeeded()
+//            }
+//        }
+//    }
+    func animateMove(pieceView: PieceView, position: Position, duration: NSTimeInterval) {
+        
+        // deactivate position constraints
+        NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
+        
+        // activate new position constraints matching cell constraints
+        let cellIndex = board.index(position)
+        if let cell = boardView.cells.elementPassing({$0.tag == cellIndex}) {
+            let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
+            let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+            pieceView.positionConstraints = [positionX, positionY]
+            NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
+        }
+        
+        // animate the change
+        boardView.setNeedsUpdateConstraints()
+        UIView.animateWithDuration(duration) {
+            self.boardView.layoutIfNeeded()
         }
     }
 }

@@ -57,9 +57,9 @@ class ChessGame: Game {
         // create the players with pieces
         let chessPlayers = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
         
-
         // create pieceView's
         var chessPieceViews = [PieceView]()
+        
         for player in chessPlayers {
             for piece in player.pieces {
                 if let image = UIImage(named: piece.name + (player.name ?? "")) {
@@ -81,8 +81,8 @@ class ChessGame: Game {
         }
     }
     
-    override func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?) -> (isMet: Bool, completions: [(() -> Void)]?) {
-        var conditionsAreMet = super.pieceConditionsAreMet(piece, player: player, conditions: conditions)
+    override func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?, gameSnapshot: GameSnapshot) -> (isMet: Bool, completions: [(() -> Void)]?) {
+        var conditionsAreMet = super.pieceConditionsAreMet(piece, player: player, conditions: conditions, gameSnapshot: gameSnapshot)
         for condition in conditions ?? [] where conditionsAreMet.isMet == true {
             if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
                 switch chessLegalIfCondition {
@@ -152,10 +152,9 @@ class ChessGame: Game {
                         conditionsAreMet = (false, nil)
                     }
                     
-                    
-                    //                for translation in condition.positions {
-                    //
-                    //                }
+                    for translation in condition.positions {
+    
+                    }
                     break////****implement
                 }
             }
@@ -223,18 +222,18 @@ class ChessGame: Game {
         }
     }
     
-    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?) -> Bool {
-        var conditionsAreMet = super.turnConditionsAreMet(conditions)
+    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, gameSnapshot: GameSnapshot) -> Bool {
+        var conditionsAreMet = super.turnConditionsAreMet(conditions, gameSnapshot: gameSnapshot)
         for condition in conditions ?? [] where conditionsAreMet == true {
             if let chessTurnCondition =  ChessTurnCondition(rawValue: condition) {
                 switch chessTurnCondition {
                 case .CantExposeKing:
-                    if let king = players[whoseTurn].pieces.elementPassing({$0.name == "King"}) {
+                    if let king = gameSnapshot.players[gameSnapshot.whoseTurn].pieces.elementPassing({$0.name == "King"}) {
                         // for every opponents piece in new positions, can king be taken?
-                        for piece in players[nextTurn].pieces where conditionsAreMet == true {
-                            let translation = calculateTranslation(piece.position, toPosition: king.position, direction: players[nextTurn].forwardDirection)
+                        for piece in gameSnapshot.players[gameSnapshot.nextTurn].pieces where conditionsAreMet == true {
+                            let translation = calculateTranslation(piece.position, toPosition: king.position, direction: gameSnapshot.players[gameSnapshot.nextTurn].forwardDirection)
                             let moveFunction = piece.isLegalMove(translation: translation)
-                            if moveFunction.isLegal && pieceConditionsAreMet(piece, player: players[nextTurn], conditions: moveFunction.conditions).isMet{
+                            if moveFunction.isLegal && pieceConditionsAreMet(piece, player: gameSnapshot.players[gameSnapshot.nextTurn], conditions: moveFunction.conditions, gameSnapshot: gameSnapshot).isMet{
                                 conditionsAreMet = false
                             }
                         }

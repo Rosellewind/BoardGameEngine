@@ -8,9 +8,15 @@
 
 import UIKit
 
-struct Position: Equatable {
+
+class Position: Equatable {
     var row: Int
     var column: Int
+    
+    init(row: Int, column: Int) {
+        self.row = row
+        self.column = column
+    }
 }
 func ==(lhs: Position, rhs: Position) -> Bool {
     return lhs.row == rhs.row && lhs.column == rhs.column
