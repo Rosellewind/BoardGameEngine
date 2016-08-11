@@ -222,8 +222,8 @@ class ChessGame: Game {
         }
     }
     
-    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, gameSnapshot: GameSnapshot) -> Bool {
-        var conditionsAreMet = super.turnConditionsAreMet(conditions, gameSnapshot: gameSnapshot)
+    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?) -> Bool {
+        var conditionsAreMet = super.turnConditionsAreMet(conditions, gameSnapshot: GameSnapshot)
         for condition in conditions ?? [] where conditionsAreMet == true {
             if let chessTurnCondition =  ChessTurnCondition(rawValue: condition) {
                 switch chessTurnCondition {

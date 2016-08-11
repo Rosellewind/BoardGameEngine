@@ -28,6 +28,7 @@ class Player {
         self.id = id
         self.forwardDirection = forwardDirection ?? Direction(loopingRawValue: id)
         self.pieces = pieces
+        pieces.forEach({$0.player = self})
     }
     
     func copy() -> Player {

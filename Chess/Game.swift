@@ -29,17 +29,28 @@ enum TurnCondition: Int {
     case None
 }
 
-struct GameSnapshot {
+class GameSnapshot {
     var board: Board
     var players: [Player]
     var selectedPiece: Piece?
     var whoseTurn: Int
     var nextTurn: Int
-}
-
-class GameMomentoManager {  ////////del?
-    static let sharedInstance = GameMomentoManager()
-    var momentos = [Game]()
+    var allPieces: [Piece] {
+        get {
+            var pieces = [Piece]()
+            for player in players {
+                pieces += player.pieces
+            }
+            return pieces
+        }
+    }
+    init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int) {
+        self.board = board
+        self.players = players
+        self.selectedPiece = selectedPiece
+        self.whoseTurn = whoseTurn
+        self.nextTurn = nextTurn
+    }
 }
 
 
@@ -80,6 +91,7 @@ class Game: PieceViewProtocol {
             return pieces
         }
     }
+    var gameSnapshot: GameSnapshot?
 
     init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
         self.board = board
@@ -111,7 +123,7 @@ class Game: PieceViewProtocol {
         boardView.cells.forEach({ (view: UIView) in
             view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
         })
-
+        
         
     }
     
@@ -324,28 +336,49 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func gameSnapshotWithChange(changes: [(piece: Piece, position: Position)]) -> GameSnapshot {
-        
-        // make a copy of the game      //// copy board and selectedPiece?, implement later
-        let playersCopy = players.map({$0.copy()})
-        let snapshot = GameSnapshot(board: board, players: playersCopy, selectedPiece: selectedPiece)//copy
-        
-        // get all pieces
-        var allPiecesCopy = [Piece]()
-        for player in players {
-            allPiecesCopy += player.pieces
-        }
-        
-        // make the changes
-        for change in changes {
-            if let piece = allPiecesCopy.elementPassing({$0.id == change.piece.id}) {
-                piece.position = change.position
+    func makeMoveInSnapshot(move: Move, snapshot: GameSnapshot) {
+        if let snapshotPiece = snapshot.allPieces.elementPassing({$0.id == move.piece.id && $0.player != nil && $0.player!.id == move.piece.player!.id}) {
+            if move.remove {
+                for player in snapshot.players {
+                    if let index = player.pieces.indexOf(snapshotPiece) {
+                        player.pieces.removeAtIndex(index)
+                    }
+                }
+            } else if move.position != nil {
+                snapshotPiece.position = move.position!
             }
         }
-        
-        return snapshot
+
     }
     
+    func makeMovesInSnapshot(moves: [Move], snapshot: GameSnapshot) {
+        for move in moves {
+            makeMoveInSnapshot(move, snapshot: snapshot)
+        }
+    }
+    
+    /// updates or creates a new snapShot of the current game/////reuse default snapshot in class?
+    func refreshSnapshot(inout snapshot: GameSnapshot?) -> GameSnapshot {
+        
+        // deep copies
+        let playersCopy = players.map({$0.copy()})
+        let boardCopy = board.copy()
+        
+        if let theSnapshot = snapshot {
+            
+            // update the snapshot
+            theSnapshot.board = boardCopy
+            theSnapshot.players = playersCopy
+            theSnapshot.selectedPiece = selectedPiece
+            theSnapshot.whoseTurn = whoseTurn
+            theSnapshot.nextTurn = nextTurn
+        } else {
+            
+            // create a new snapshot
+            snapshot = GameSnapshot(board: boardCopy, players: playersCopy, selectedPiece: selectedPiece, whoseTurn: whoseTurn, nextTurn: nextTurn)
+        }
+        return snapshot!
+    }
     
     var memento: (piece: Piece, isFirstMove: Bool, position: Position, pieceRemoved: Piece?, pieceRemovedPlayer: Player?)?
     

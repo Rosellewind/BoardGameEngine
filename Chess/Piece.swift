@@ -26,6 +26,7 @@ class Piece: NSObject, NSCopying {
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
     var isFirstMove = true
     dynamic var selected = false
+    weak var player: Player?
     
     init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
         self.name = name
@@ -42,6 +43,7 @@ class Piece: NSObject, NSCopying {
         self.isLegalMove = toCopy.isLegalMove
         self.isFirstMove = toCopy.isFirstMove
         self.selected = toCopy.selected
+        self.player = toCopy.player
     }
     
     func copyWithZone(zone: NSZone) -> AnyObject {

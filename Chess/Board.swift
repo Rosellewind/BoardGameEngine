@@ -53,6 +53,10 @@ class Board {
             return Position(row: 0, column: 0)
         }
     }
+    
+    func copy() -> Board {
+        return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
+    }
 }
 
 
