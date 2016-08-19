@@ -182,10 +182,8 @@ class ChessGame: Game {
             
             // find the direction the player is moving
             var playerOrientation = PlayerOrientation.bottom
-            if let player = self.players.filter({$0.pieces.contains(rooks[0])}) as? [ChessPlayer] {
-                if player.count > 0 {
-                    playerOrientation = player[0].orientation
-                }
+            if let player = rooks[0].player as? ChessPlayer {
+                playerOrientation = player.orientation
             }
             
             // have the presenting VC ask which rook to use

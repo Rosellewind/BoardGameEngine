@@ -20,16 +20,13 @@ protocol GamePresenterProtocol {
     func showAlert(alert: UIViewController)
 }
 
-
 enum GameStatus {
     case GameOver, WhoseTurn, IllegalMove, Default
 }
 
-enum TurnCondition: Int {
+enum TurnCondition: Int {   // subclasses may add their own
     case None
 }
-
-typealias Conditions = TurnCondition.Type
 
 class GameSnapshot {
     var board: Board
@@ -242,39 +239,55 @@ class Game: PieceViewProtocol {
     @objc func cellTapped(sender: UITapGestureRecognizer) {
         print("cellTapped")
         if let view = sender.view {
-            let position = board.position(view.tag)
-            let piece = pieceForPosition(position, snapshot: nil)
+            let positionTapped = board.position(view.tag)
+            let pieceTapped = pieceForPosition(positionTapped, snapshot: nil)
             
             // beginning of turn, selecting the piece
             let isBeginningOfTurn = selectedPiece == nil
             if isBeginningOfTurn {
                 // get the piece
-                if piece != nil {// cell must be occupied for selection
-                    let isPlayersOwnPiece = players[whoseTurn].pieces.contains(piece!)
+                if pieceTapped != nil {// cell must be occupied for selection
+                    let isPlayersOwnPiece = players[whoseTurn].pieces.contains(pieceTapped!)
                     if isPlayersOwnPiece {
-                        piece!.selected = true
-                        selectedPiece = piece
+                        pieceTapped!.selected = true
+                        selectedPiece = pieceTapped
                     }
                 }
             }
             
             // final part of turn, choosing where to go
             else {
-                let translation = calculateTranslation(selectedPiece!.position, toPosition: position, direction: players[whoseTurn].forwardDirection)
+                let translation = calculateTranslation(selectedPiece!.position, toPosition: positionTapped, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: nil)
                 
                 // check if move is legal and conditions are met
                 if moveFunction.isLegal && pieceConditions.isMet {
 
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
 
                     // remove piece if nedded
                     var mementoPieceRemoved: Piece?
                     var mementoPieceRemovedPlayer: Player?
-                    if piece != nil {
-                        mementoPieceRemoved = piece
+                    if pieceTapped != nil {
+                        mementoPieceRemoved = pieceTapped
                         for player in players where mementoPieceRemovedPlayer == nil {
-                            if let index = player.pieces.indexOf(piece!) {
+                            if let index = player.pieces.indexOf(pieceTapped!) {
                                 mementoPieceRemovedPlayer = player
                                 player.pieces.removeAtIndex(index)
                             }
@@ -292,7 +305,7 @@ class Game: PieceViewProtocol {
 
                     // if turn conditions are met, update the view, else restore momento
                     reusableGameSnapshot = GameSnapshot(game: self)
-                    makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: position) , snapshot: reusableGameSnapshot!)
+                    makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: positionTapped) , snapshot: reusableGameSnapshot!)
                     
                     if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
                         // update the view and complete the turn
@@ -306,7 +319,7 @@ class Game: PieceViewProtocol {
                         }
                         
                         // move the piece
-                        selectedPiece!.position = position
+                        selectedPiece!.position = positionTapped
 
                         
                         if let completions = pieceConditions.completions {
