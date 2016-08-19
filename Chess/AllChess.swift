@@ -84,8 +84,9 @@ class ChessGame: Game {
     override func pieceConditionsAreMet(piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
+        var conditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
+
         if let player = thisPiece.player {
-            var conditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
             for condition in conditions ?? [] where conditionsAreMet.isMet == true {
                 if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
                     switch chessLegalIfCondition {
@@ -156,8 +157,8 @@ class ChessGame: Game {
                         }
                         
                         for translation in condition.positions ?? [] {
-                            let thisGameSnapshot = snapshot.copy() ?? refreshSnapshot(self.gameSnapshot)
-                            if let pieceInthisGameSnapshot = thisGameSnapshot.allPieces.elementPassing({$0.id == thisPiece.id}), thisPlayer = pieceInthisGameSnapshot.player {
+                            reusableGameSnapshot = GameSnapshot(game: self)
+                            if let pieceInthisGameSnapshot = reusableGameSnapshot!.allPieces.elementPassing({$0.id == thisPiece.id}), thisPlayer = pieceInthisGameSnapshot.player {
                                 pieceInthisGameSnapshot.position = positionFromTranslation(translation, fromPosition: pieceInthisGameSnapshot.position, direction: thisPlayer.forwardDirection)
                                 
                             }
@@ -166,14 +167,14 @@ class ChessGame: Game {
                     }
                 }
             }
-            return conditionsAreMet
         }
+        return conditionsAreMet
     }
     
     func rookChosenForCastling(rook: Piece, position: Position) {
         rook.isFirstMove = false
         rook.position = position
-        animatePiece(rook, position: position)
+//        animatePiece(rook, position: position)
     }
 
     func moveARook(rooks: [Piece], position: Position) {
@@ -231,18 +232,21 @@ class ChessGame: Game {
         }
     }
     
-    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?) -> Bool {
-        var conditionsAreMet = super.turnConditionsAreMet(conditions, gameSnapshot: GameSnapshot)
+    override func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
+        var conditionsAreMet = super.turnConditionsAreMet(conditions, snapshot: snapshot)
+        let thisPlayers = snapshot?.players ?? players
+        let thisWhoseTurn = snapshot?.whoseTurn ?? whoseTurn
+        let thisNextTurn = snapshot?.nextTurn ?? nextTurn
         for condition in conditions ?? [] where conditionsAreMet == true {
             if let chessTurnCondition =  ChessTurnCondition(rawValue: condition) {
                 switch chessTurnCondition {
                 case .CantExposeKing:
-                    if let king = gameSnapshot.players[gameSnapshot.whoseTurn].pieces.elementPassing({$0.name == "King"}) {
+                    if let king = thisPlayers[thisWhoseTurn].pieces.elementPassing({$0.name == "King"}) {
                         // for every opponents piece in new positions, can king be taken?
-                        for piece in gameSnapshot.players[gameSnapshot.nextTurn].pieces where conditionsAreMet == true {
-                            let translation = calculateTranslation(piece.position, toPosition: king.position, direction: gameSnapshot.players[gameSnapshot.nextTurn].forwardDirection)
-                            let moveFunction = piece.isLegalMove(translation: translation)
-                            if moveFunction.isLegal && pieceConditionsAreMet(piece, player: gameSnapshot.players[gameSnapshot.nextTurn], conditions: moveFunction.conditions, snapshot: gameSnapshot).isMet{
+                        for nextPlayersPiece in thisPlayers[thisNextTurn].pieces where conditionsAreMet == true {
+                            let translation = calculateTranslation(nextPlayersPiece.position, toPosition: king.position, direction: thisPlayers[thisNextTurn].forwardDirection)
+                            let moveFunction = nextPlayersPiece.isLegalMove(translation: translation)
+                            if moveFunction.isLegal && pieceConditionsAreMet(nextPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet{
                                 conditionsAreMet = false
                             }
                         }
@@ -255,7 +259,7 @@ class ChessGame: Game {
     
     override func gameOver() -> Bool {
         for player in players {
-            if isCheckMate(player) {
+            if isCheckMate(player, snapshot: nil) {
                 presenterDelegate?.gameMessage((player.name ?? "") + " Is In Checkmate!!!", status: .GameOver)
                 return true
             }
@@ -302,15 +306,15 @@ class ChessGame: Game {
             positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
             
             // trim positions that are already occupied   ////castling/otherrules?
-            positionsToCheck = positionsToCheck.filter({pieceForPosition($0) == nil})
+            positionsToCheck = positionsToCheck.filter({pieceForPosition($0, snapshot: nil) == nil})
             if positionsToCheck.count > 0 {
                 for position in positionsToCheck where isCheckMate == true {
                     var positionIsSafe = true
                     for otherPlayer in otherPlayers where positionIsSafe == true {
-                        for piece in otherPlayer.pieces where positionIsSafe == true {
-                            let translation = calculateTranslation(piece.position, toPosition: position, direction: otherPlayer.forwardDirection)
-                            let moveFunction = piece.isLegalMove(translation: translation)
-                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
+                        for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
+                            let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
+                            let moveFunction = otherPlayersPiece.isLegalMove(translation: translation)
+                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
                         }
                     }
                     if positionIsSafe {
@@ -397,7 +401,7 @@ class ChessPieceCreator: PiecesCreator {
         // set the tag
         let offset = position.rawValue * pieces.count
         for i in 0..<pieces.count {
-            pieces[i].tag = i + offset
+            pieces[i].id = i + offset
         }
         return pieces
     }

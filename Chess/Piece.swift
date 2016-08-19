@@ -28,7 +28,7 @@ class Piece: NSObject, NSCopying {
     dynamic var selected = false
     weak var player: Player?
     
-    init(name: String, position: Position, isLegalMove: (Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
+    init(name: String, position: Position, isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
         self.name = name
         self.position = position
         self.startingPosition = position

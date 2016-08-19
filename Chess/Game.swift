@@ -29,6 +29,8 @@ enum TurnCondition: Int {
     case None
 }
 
+typealias Conditions = TurnCondition.Type
+
 class GameSnapshot {
     var board: Board
     var players: [Player]
@@ -43,6 +45,13 @@ class GameSnapshot {
             }
             return pieces
         }
+    }
+    init(game: Game) {
+        self.board = game.board
+        self.players = game.players
+        self.selectedPiece = game.selectedPiece
+        self.whoseTurn = game.whoseTurn
+        self.nextTurn = game.nextTurn
     }
     init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int) {
         self.board = board
@@ -95,7 +104,7 @@ class Game: PieceViewProtocol {
             return pieces
         }
     }
-    var gameSnapshot: GameSnapshot?
+    var reusableGameSnapshot: GameSnapshot?
 
     init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
         self.board = board
@@ -218,7 +227,7 @@ class Game: PieceViewProtocol {
         return (conditionsAreMet, nil)
     }
     
-    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, gameSnapshot: GameSnapshot) -> Bool {
+    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
         for condition in conditions ?? [] {
             if let turnCondition = TurnCondition(rawValue: condition) { // implement later
                 switch turnCondition {
@@ -282,10 +291,10 @@ class Game: PieceViewProtocol {
 
 
                     // if turn conditions are met, update the view, else restore momento
-                    let snapshot = refreshSnapshot(&gameSnapshot)
-                    makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: position) , snapshot: snapshot)
+                    reusableGameSnapshot = GameSnapshot(game: self)
+                    makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: position) , snapshot: reusableGameSnapshot!)
                     
-                    if turnConditionsAreMet(turnConditions, gameSnapshot: snapshot) {
+                    if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
                         // update the view and complete the turn
                         print("legal move")
                         
@@ -363,29 +372,6 @@ class Game: PieceViewProtocol {
         for move in moves {
             makeMoveInSnapshot(move, snapshot: snapshot)
         }
-    }
-    
-    /// updates or creates a new snapShot of the current game/////reuse default snapshot in class?
-    func refreshSnapshot(inout snapshot: GameSnapshot?) -> GameSnapshot {//////del enout
-        
-        // deep copies
-        let playersCopy = players.map({$0.copy()})
-        let boardCopy = board.copy()
-        
-        if let theSnapshot = snapshot {
-            
-            // update the snapshot
-            theSnapshot.board = boardCopy
-            theSnapshot.players = playersCopy
-            theSnapshot.selectedPiece = selectedPiece
-            theSnapshot.whoseTurn = whoseTurn
-            theSnapshot.nextTurn = nextTurn
-        } else {
-            
-            // create a new snapshot
-            snapshot = GameSnapshot(board: boardCopy, players: playersCopy, selectedPiece: selectedPiece, whoseTurn: whoseTurn, nextTurn: nextTurn)
-        }
-        return snapshot!
     }
     
     var memento: (piece: Piece, isFirstMove: Bool, position: Position, pieceRemoved: Piece?, pieceRemovedPlayer: Player?)?
