@@ -134,9 +134,8 @@ class PieceView: UIView {
                 
                 
                 
-                if let piece = object as? Piece {
-                    if
-                    delegate?.animateMove(pieceView: self, position: piece.position, duration: 0.5)
+                if let piece = object as? Piece {///////////////////
+                    delegate?.animateMove(self, position: piece.position, duration: 0.5)
                     
                     
                     if piece.selected == true {

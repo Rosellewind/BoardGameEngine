@@ -63,7 +63,7 @@ class ChessGame: Game {
         for player in chessPlayers {
             for piece in player.pieces {
                 if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                    let pieceView = PieceView(image: image, pieceTag: piece.tag)
+                    let pieceView = PieceView(image: image, pieceTag: piece.id)
                     chessPieceViews.append(pieceView)
                 }
             }
@@ -81,86 +81,95 @@ class ChessGame: Game {
         }
     }
     
-    override func pieceConditionsAreMet(piece: Piece, player: Player, conditions: [(condition: Int, positions: [Position]?)]?, gameSnapshot: GameSnapshot) -> (isMet: Bool, completions: [(() -> Void)]?) {
-        var conditionsAreMet = super.pieceConditionsAreMet(piece, player: player, conditions: conditions, gameSnapshot: gameSnapshot)
-        for condition in conditions ?? [] where conditionsAreMet.isMet == true {
-            if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
-                switch chessLegalIfCondition {
-                case .RookCanCastle:
-                    // king moves 2 horizontally, rook goes where king just crossed
-                    // 1. neither the king nor the rook may have been previously moved
-                    // 2. there must not be pieces between the king and rook
-                    // 3. the king may not be in check, nor may the king pass through squares athat are under attack by eney pieces, nor move to a square where it is in check
-                    
-
-
-                    // rules needing to be checked here: 
-                    //      rook can't be previously moved
-                    //      can't be occupied to rook landing spot(isLegalMove/pieceConditionsAreMet)
-                    // also verify:
-                    //      CantBeInCheckDuring[0,0][0, abs-1]
-                    //  still need:
-                    //      move castle
-                    
-                    let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
-                    var castlingRooks = [Piece]()
-                    var landingPositionForRook = Position(row: 0, column: 0)
-                    if let king = player.pieces.elementPassing({$0.name == "King"}) {
-                        for rook in rooks {
-                            
-                            // checks half of rule 1, rook can't be previously moved
-                            if rook.isFirstMove {
+    override func pieceConditionsAreMet(piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first
+        let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
+        let thisPiece = pieceInSnapshot ?? piece
+        if let player = thisPiece.player {
+            var conditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
+            for condition in conditions ?? [] where conditionsAreMet.isMet == true {
+                if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
+                    switch chessLegalIfCondition {
+                    case .RookCanCastle:
+                        // king moves 2 horizontally, rook goes where king just crossed
+                        // 1. neither the king nor the rook may have been previously moved
+                        // 2. there must not be pieces between the king and rook
+                        // 3. the king may not be in check, nor may the king pass through squares athat are under attack by eney pieces, nor move to a square where it is in check
+                        
+                        
+                        
+                        // rules needing to be checked here:
+                        //      rook can't be previously moved
+                        //      can't be occupied to rook landing spot(isLegalMove/pieceConditionsAreMet)
+                        // also verify:
+                        //      CantBeInCheckDuring[0,0][0, abs-1]
+                        //  still need:
+                        //      move castle
+                        
+                        let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
+                        var castlingRooks = [Piece]()
+                        var landingPositionForRook = Position(row: 0, column: 0)
+                        if let king = player.pieces.elementPassing({$0.name == "King"}) {
+                            for rook in rooks {
                                 
-                                if let rookLandingTranslationRelativeToKing = condition.positions?[0] {
+                                // checks half of rule 1, rook can't be previously moved
+                                if rook.isFirstMove {
                                     
-                                    // checks half of rule 2, can't be pieces between rook and where rook is landing OR between the rook and king if rook crosses past kings initial position
-                                    var translation: Position
-                                    landingPositionForRook = positionFromTranslation(rookLandingTranslationRelativeToKing, fromPosition: king.position, direction: player.forwardDirection)
-                                    
-                                    let startingSide = king.position.column - rook.position.column < 0 ? -1 : 1
-                                    let endingSide = king.position.column - landingPositionForRook.column < 0 ? -1 : 1
-                                    let rookCrossesKing = startingSide != endingSide
-                                    if rookCrossesKing {
-                                        let positionOneBackFromKing = Position(row: king.position.row, column: king.position.column + endingSide)
-                                        translation = calculateTranslation(rook.position, toPosition: positionOneBackFromKing, direction: player.forwardDirection)
-                                    } else {
-                                        translation = calculateTranslation(rook.position, toPosition: landingPositionForRook, direction: player.forwardDirection)
-
-                                    }
-
-                                    let moveFunction = rook.isLegalMove(translation: translation)
-                                    if pieceConditionsAreMet(rook, player: player, conditions: moveFunction.conditions).isMet {
-                                        castlingRooks.append(rook)
+                                    if let rookLandingTranslationRelativeToKing = condition.positions?[0] {
+                                        
+                                        // checks half of rule 2, can't be pieces between rook and where rook is landing OR between the rook and king if rook crosses past kings initial position
+                                        var translation: Position
+                                        landingPositionForRook = positionFromTranslation(rookLandingTranslationRelativeToKing, fromPosition: king.position, direction: player.forwardDirection)
+                                        
+                                        let startingSide = king.position.column - rook.position.column < 0 ? -1 : 1
+                                        let endingSide = king.position.column - landingPositionForRook.column < 0 ? -1 : 1
+                                        let rookCrossesKing = startingSide != endingSide
+                                        if rookCrossesKing {
+                                            let positionOneBackFromKing = Position(row: king.position.row, column: king.position.column + endingSide)
+                                            translation = calculateTranslation(rook.position, toPosition: positionOneBackFromKing, direction: player.forwardDirection)
+                                        } else {
+                                            translation = calculateTranslation(rook.position, toPosition: landingPositionForRook, direction: player.forwardDirection)
+                                            
+                                        }
+                                        
+                                        let moveFunction = rook.isLegalMove(translation: translation)
+                                        if pieceConditionsAreMet(rook, conditions: moveFunction.conditions, snapshot: snapshot).isMet {
+                                            castlingRooks.append(rook)
+                                        }
                                     }
                                 }
                             }
                         }
+                        if castlingRooks.count == 0 {
+                            conditionsAreMet = (false, nil)
+                        } else {
+                            // move the rook
+                            var completions = conditionsAreMet.completions ?? Array<()->Void>()
+                            let completion: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
+                            completions.append(completion)
+                            conditionsAreMet = (true, completions)
+                        }
+                        
+                    case .CantBeInCheckDuring:////test
+                        ////temp
+                        if isCheck(player, snapshot: nil) {/////////////////////////////
+                            conditionsAreMet = (false, nil)
+                        }
+                        
+                        for translation in condition.positions ?? [] {
+                            let thisGameSnapshot = snapshot.copy() ?? refreshSnapshot(self.gameSnapshot)
+                            if let pieceInthisGameSnapshot = thisGameSnapshot.allPieces.elementPassing({$0.id == thisPiece.id}), thisPlayer = pieceInthisGameSnapshot.player {
+                                pieceInthisGameSnapshot.position = positionFromTranslation(translation, fromPosition: pieceInthisGameSnapshot.position, direction: thisPlayer.forwardDirection)
+                                
+                            }
+                        }
+                        break////****implement
                     }
-                    if castlingRooks.count == 0 {
-                        conditionsAreMet = (false, nil)
-                    } else {
-                        // move the rook
-                        var completions = conditionsAreMet.completions ?? Array<()->Void>()
-                        let completion: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
-                        completions.append(completion)
-                        conditionsAreMet = (true, completions)
-                    }
-
-                case .CantBeInCheckDuring:////test
-                    ////temp
-                    if isCheck(player) {
-                        conditionsAreMet = (false, nil)
-                    }
-                    
-                    for translation in condition.positions {
-    
-                    }
-                    break////****implement
                 }
             }
+            return conditionsAreMet
         }
-        return conditionsAreMet
     }
+    
     func rookChosenForCastling(rook: Piece, position: Position) {
         rook.isFirstMove = false
         rook.position = position
@@ -233,7 +242,7 @@ class ChessGame: Game {
                         for piece in gameSnapshot.players[gameSnapshot.nextTurn].pieces where conditionsAreMet == true {
                             let translation = calculateTranslation(piece.position, toPosition: king.position, direction: gameSnapshot.players[gameSnapshot.nextTurn].forwardDirection)
                             let moveFunction = piece.isLegalMove(translation: translation)
-                            if moveFunction.isLegal && pieceConditionsAreMet(piece, player: gameSnapshot.players[gameSnapshot.nextTurn], conditions: moveFunction.conditions, gameSnapshot: gameSnapshot).isMet{
+                            if moveFunction.isLegal && pieceConditionsAreMet(piece, player: gameSnapshot.players[gameSnapshot.nextTurn], conditions: moveFunction.conditions, snapshot: gameSnapshot).isMet{
                                 conditionsAreMet = false
                             }
                         }
@@ -254,27 +263,29 @@ class ChessGame: Game {
         return false
     }
     
-    func isCheck(player: Player) -> Bool {
+    func isCheck(player: Player, snapshot: GameSnapshot?) -> Bool {
         // all other players pieces can not take king
         var isCheck = false
-        if let king = player.pieces.elementPassing({$0.name == "King"}) {
-            for otherPlayer in players where isCheck == false {
-                if otherPlayer === player {
+        let thisPlayer = snapshot?.players.elementPassing({$0.id == player.id}) ?? player
+        let thisPlayers = snapshot?.players ?? players
+        if let king = thisPlayer.pieces.elementPassing({$0.name == "King"}) {
+            for otherPlayer in thisPlayers where isCheck == false {
+                if otherPlayer === thisPlayer {
                     continue
                 } else {
-                    for piece in otherPlayer.pieces where isCheck == false {
-                        let translation = calculateTranslation(piece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = piece.isLegalMove(translation: translation)
-                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions).isMet
+                    for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
+                        let translation = calculateTranslation(otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
+                        let moveFunction = otherPlayerPiece.isLegalMove(translation: translation)
+                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(otherPlayerPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet
                     }
                 }
             }
         }
-        print("\(player.name) is in Check: \(isCheck)")
+        print("\(thisPlayer.name) is in Check: \(isCheck)")
         return isCheck
     }
     
-    func isCheckMate(player: Player) -> Bool {
+    func isCheckMate(player: Player, snapshot: GameSnapshot?) -> Bool {
         var isCheckMate = true
         let otherPlayers = players.filter({$0 !== player})
         if let king = player.pieces.elementPassing({$0.name == "King"}) {
@@ -299,7 +310,7 @@ class ChessGame: Game {
                         for piece in otherPlayer.pieces where positionIsSafe == true {
                             let translation = calculateTranslation(piece.position, toPosition: position, direction: otherPlayer.forwardDirection)
                             let moveFunction = piece.isLegalMove(translation: translation)
-                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions).isMet)
+                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(piece, player: otherPlayer, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
                         }
                     }
                     if positionIsSafe {
