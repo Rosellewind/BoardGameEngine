@@ -271,14 +271,10 @@ class Game: PieceViewProtocol {
                     makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: positionTapped) , snapshot: reusableGameSnapshot!)
                     
                     if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
-                        // remove occupying piece if needed
-                        if pieceTapped != nil {
-                            if let player = pieceTapped!.player {
-                                if let index = player.pieces.indexOf(pieceTapped!) {
-                                    player.pieces.removeAtIndex(index)
-                                }
-                            }
-                        }
+                        // remove occupying piece if needed //// put this is completions
+//                        if pieceTapped != nil {
+//                            makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
+//                        }
                         
                         // move the piece
                         makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
@@ -313,6 +309,9 @@ class Game: PieceViewProtocol {
         if move.remove {
             for player in players {
                 if let index = player.pieces.indexOf(move.piece) {
+                    if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == move.piece.id}) {
+                        pieceViewToRemove.removeFromSuperview()
+                    }
                     player.pieces.removeAtIndex(index)
                 }
             }

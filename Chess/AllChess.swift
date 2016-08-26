@@ -104,7 +104,7 @@ class ChessGame: Game {
                         // also verify:
                         //      CantBeInCheckDuring[0,0][0, abs-1]
                         //  still need:
-                        //      move castle
+                        //      king can't have moved before
                         
                         let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
                         var castlingRooks = [Piece]()
