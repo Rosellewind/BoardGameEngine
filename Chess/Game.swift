@@ -117,6 +117,8 @@ class Game: PieceViewProtocol {
         // pieceView layout and observing
         pieceViews.forEach { (pieceView: PieceView) in
             if let piece = pieceForPieceView(pieceView) {
+                // add delegate
+                pieceView.delegate = self
                 // add observing
                 pieceView.observing = [(piece, "selected"), (piece, "position")]
                 
@@ -237,7 +239,6 @@ class Game: PieceViewProtocol {
     }
     
     @objc func cellTapped(sender: UITapGestureRecognizer) {
-        print("cellTapped")
         if let view = sender.view {
             let positionTapped = board.position(view.tag)
             let pieceTapped = pieceForPosition(positionTapped, snapshot: nil)
@@ -261,67 +262,28 @@ class Game: PieceViewProtocol {
                 let moveFunction = selectedPiece!.isLegalMove(translation: translation)
                 let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: nil)
                 
-                // check if move is legal and conditions are met
+                // check if move is legal and turn conditions are met
                 if moveFunction.isLegal && pieceConditions.isMet {
-
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-
-                    // remove piece if nedded
-                    var mementoPieceRemoved: Piece?
-                    var mementoPieceRemovedPlayer: Player?
-                    if pieceTapped != nil {
-                        mementoPieceRemoved = pieceTapped
-                        for player in players where mementoPieceRemovedPlayer == nil {
-                            if let index = player.pieces.indexOf(pieceTapped!) {
-                                mementoPieceRemovedPlayer = player
-                                player.pieces.removeAtIndex(index)
-                            }
-                        }
-                    }
-                    
-                    // save memento
-                    memento = (piece: selectedPiece!, selectedPiece!.isFirstMove, selectedPiece!.position, mementoPieceRemoved, mementoPieceRemovedPlayer)
-                    
-                    // mark isFirstMove
-                    if selectedPiece!.isFirstMove == true {
-                        selectedPiece!.isFirstMove = false
-                    }
-
-
-                    // if turn conditions are met, update the view, else restore momento
+                    // create snapshot, check if turn conditions will be met
+                    ///////////what if more than one move? implement
                     reusableGameSnapshot = GameSnapshot(game: self)
                     makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: positionTapped) , snapshot: reusableGameSnapshot!)
                     
                     if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
-                        // update the view and complete the turn
-                        print("legal move")
-                        
-                        // update view, remove pieceView if needed
-                        if mementoPieceRemoved != nil {
-                            if let match = pieceViews.elementPassing({$0.tag == mementoPieceRemoved!.id}) {
-                                match.removeFromSuperview()
+                        // remove occupying piece if needed
+                        if pieceTapped != nil {
+                            if let player = pieceTapped!.player {
+                                if let index = player.pieces.indexOf(pieceTapped!) {
+                                    player.pieces.removeAtIndex(index)
+                                }
                             }
                         }
                         
                         // move the piece
-                        selectedPiece!.position = positionTapped
-
+                        makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
                         
+                        // completions
                         if let completions = pieceConditions.completions {
                             for completion in completions {
                                 completion()
@@ -332,8 +294,7 @@ class Game: PieceViewProtocol {
                         gameOver()
                         whoseTurn += 1
                         presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
-                    } else {
-                        restoreMemento()
+                        
                     }
                 }
                 selectedPiece!.selected = false

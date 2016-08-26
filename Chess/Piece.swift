@@ -21,10 +21,15 @@ enum LegalIfCondition: Int {
 class Piece: NSObject, NSCopying {
     var name: String
     var id = 0
-    var position: Position
+    dynamic var position: Position
+//        {
+//        didSet {
+//            self.isFirstMove = false
+//        }
+//    }
     let startingPosition: Position
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
-    var isFirstMove = true
+    var isFirstMove: Bool
     dynamic var selected = false
     weak var player: Player?
     
@@ -33,6 +38,7 @@ class Piece: NSObject, NSCopying {
         self.position = position
         self.startingPosition = position
         self.isLegalMove = isLegalMove
+        self.isFirstMove = true
     }
     
     required init(toCopy: Piece) {
@@ -94,55 +100,16 @@ class PieceView: UIView {
     override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if context == &myContext {
             if keyPath == "selected" {
-//                if let theChange = change as? [String: Bool], new = theChange[NSKeyValueChangeNewKey] {
-//                    if new == true {
-//                        self.alpha = 0.4
-//                    } else {
-//                        self.alpha = 1.0
-//                    }
-//                }
-                
-                if let theChange = change as? [String: Bool] {
-                    if let new = theChange[NSKeyValueChangeNewKey] {
-                        if new == true {
-                            self.alpha = 0.4
-                        } else {
-                            self.alpha = 1.0
-                        }
-                    }
-                }
-                
-                
-//                if let piece = object as? Piece {
-//                    if piece.selected == true {
-//                        self.alpha = 0.4
-//                    } else {
-//                        self.alpha = 1.0
-//                    }
-//                }
-            } else if keyPath == "position" {
-                if let theChange = change as? [String: Position] {
-                    if let new = theChange[NSKeyValueChangeNewKey] {
-                        if let old = theChange[NSKeyValueChangeOldKey] {
-                            if new != old {
-                                delegate?.animateMove(self, position: new, duration: 0.5)
-
-                            }
-                        }
-                    }
-                }
-                
-                
-                
-                if let piece = object as? Piece {///////////////////
-                    delegate?.animateMove(self, position: piece.position, duration: 0.5)
-                    
-                    
-                    if piece.selected == true {
+                if let new = change?[NSKeyValueChangeNewKey] as? Bool {
+                    if new == true {
                         self.alpha = 0.4
                     } else {
                         self.alpha = 1.0
                     }
+                }
+            } else if keyPath == "position" {
+                if let new = change?[NSKeyValueChangeNewKey] as? Position {
+                    delegate?.animateMove(self, position: new, duration: 0.5)
                 }
             }
         } else {

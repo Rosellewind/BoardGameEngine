@@ -9,7 +9,7 @@
 import UIKit
 
 
-class Position: Equatable {
+class Position: NSObject {
     var row: Int
     var column: Int
     

@@ -396,10 +396,11 @@ class ChessPieceCreator: PiecesCreator {
             pieces.append(piece)
         }
         
-        // set the tag
+        // set the tag and isFirstMove
         let offset = position.rawValue * pieces.count
         for i in 0..<pieces.count {
             pieces[i].id = i + offset
+            pieces[i].isFirstMove = true
         }
         return pieces
     }
