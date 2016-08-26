@@ -43,19 +43,15 @@ class GameSnapshot {
             return pieces
         }
     }
-    init(game: Game) {
-        self.board = game.board
-        self.players = game.players
-        self.selectedPiece = game.selectedPiece
-        self.whoseTurn = game.whoseTurn
-        self.nextTurn = game.nextTurn
+    convenience init(game: Game) {
+        self.init(board: game.board, players: game.players, selectedPiece: game.selectedPiece, whoseTurn: game.whoseTurn, nextTurn: game.nextTurn)
     }
     init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int) {
-        self.board = board
-        self.players = players
-        self.selectedPiece = selectedPiece
+        self.board = board.copy()
+        self.players = players.map({$0.copy()})
         self.whoseTurn = whoseTurn
         self.nextTurn = nextTurn
+        self.selectedPiece = self.allPieces.elementPassing({$0.id == selectedPiece?.id})
     }
     
     func copy() -> GameSnapshot {
@@ -271,11 +267,12 @@ class Game: PieceViewProtocol {
                     makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: positionTapped) , snapshot: reusableGameSnapshot!)
                     
                     if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
-                        // remove occupying piece if needed //// put this is completions
-//                        if pieceTapped != nil {
-//                            makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
-//                        }
                         
+                        // remove occupying piece if needed
+                        if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
+                            makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
+                        }
+
                         // move the piece
                         makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
                         
@@ -297,6 +294,11 @@ class Game: PieceViewProtocol {
                 selectedPiece = nil
             }
         }
+    }
+    
+    func removePieceOccupyingPosition (position: Position) {
+        
+        
     }
     
     struct Move {

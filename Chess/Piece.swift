@@ -29,6 +29,8 @@ class Piece: NSObject, NSCopying {
 //    }
     let startingPosition: Position
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
+//    var completionsAfterMoving: [(() -> Void)]?
+    var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool
     dynamic var selected = false
     weak var player: Player?

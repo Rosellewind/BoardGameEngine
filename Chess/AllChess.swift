@@ -85,6 +85,15 @@ class ChessGame: Game {
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
         var conditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
+        
+//        // add completion to remove piece that occupies destination
+//        var completions = conditionsAreMet.completions ?? Array<()->Void>()
+//        let chessCompletionRemoveOccupying: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
+//        completions.append(completion)
+        
+        
+        
+        
 
         if let player = thisPiece.player {
             for condition in conditions ?? [] where conditionsAreMet.isMet == true {
@@ -287,45 +296,47 @@ class ChessGame: Game {
         return isCheck
     }
     
-    func isCheckMate(player: Player, snapshot: GameSnapshot?) -> Bool {
+    func isCheckMate(player: Player, snapshot: GameSnapshot?) -> Bool {////is being called twice, once for each player
+        
         var isCheckMate = true
-        let otherPlayers = players.filter({$0 !== player})
-        if let king = player.pieces.elementPassing({$0.name == "King"}) {
-            var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
-                                    Position(row: king.position.row - 1, column: king.position.column),
-                                    Position(row: king.position.row - 1, column: king.position.column + 1),
-                                    Position(row: king.position.row, column: king.position.column - 1),
-                                    Position(row: king.position.row, column: king.position.column),
-                                    Position(row: king.position.row, column: king.position.column + 1),
-                                    Position(row: king.position.row + 1, column: king.position.column - 1),
-                                    Position(row: king.position.row + 1, column: king.position.column),
-                                    Position(row: king.position.row + 1, column: king.position.column + 1)]
-            // trim positions that are off the board
-            positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
-            
-            // trim positions that are already occupied   ////castling/otherrules?
-            positionsToCheck = positionsToCheck.filter({pieceForPosition($0, snapshot: nil) == nil})
-            if positionsToCheck.count > 0 {
-                for position in positionsToCheck where isCheckMate == true {
-                    var positionIsSafe = true
-                    for otherPlayer in otherPlayers where positionIsSafe == true {
-                        for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
-                            let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
-                            let moveFunction = otherPlayersPiece.isLegalMove(translation: translation)
-                            positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
+        if !isCheck(player, snapshot: snapshot) {
+            isCheckMate = false
+        } else {
+            let otherPlayers = players.filter({$0 !== player})
+            if let king = player.pieces.elementPassing({$0.name == "King"}) {
+                var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
+                                        Position(row: king.position.row - 1, column: king.position.column),
+                                        Position(row: king.position.row - 1, column: king.position.column + 1),
+                                        Position(row: king.position.row, column: king.position.column - 1),
+                                        Position(row: king.position.row, column: king.position.column),
+                                        Position(row: king.position.row, column: king.position.column + 1),
+                                        Position(row: king.position.row + 1, column: king.position.column - 1),
+                                        Position(row: king.position.row + 1, column: king.position.column),
+                                        Position(row: king.position.row + 1, column: king.position.column + 1)]
+                // trim positions that are off the board
+                positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
+                
+                // trim positions that are already occupied
+                positionsToCheck = positionsToCheck.filter({pieceForPosition($0, snapshot: nil) == nil})
+                if positionsToCheck.count > 0 {
+                    for position in positionsToCheck where isCheckMate == true {
+                        var positionIsSafe = true
+                        for otherPlayer in otherPlayers where positionIsSafe == true {
+                            for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
+                                let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
+                                let moveFunction = otherPlayersPiece.isLegalMove(translation: translation)
+                                positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
+                            }
+                        }
+                        if positionIsSafe {
+                            isCheckMate = false
                         }
                     }
-                    if positionIsSafe {
-                        isCheckMate = false
-                    }
+                } else {
+                    isCheckMate = false
                 }
-            } else {
-                isCheckMate = false
             }
-            
         }
-        print("\(player.name) is in checkmate: \(isCheckMate)")
-        
         return isCheckMate
     }
 }
@@ -361,7 +372,7 @@ class ChessPieceCreator: PiecesCreator {
             let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
             var pawns = [Piece]()
             
-            
+            // set starting positions
             if position == .top || position == .bottom {
                 rook2.position = Position(row: 0, column: 7)
                 bishop2.position = Position(row: 0, column: 5)
@@ -385,7 +396,7 @@ class ChessPieceCreator: PiecesCreator {
             } else {
                 
             }
-            
+                        
             pieces.appendContentsOf(royalty)
             pieces.appendContentsOf(pawns)
             
