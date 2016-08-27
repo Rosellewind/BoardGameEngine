@@ -295,7 +295,7 @@ class ChessGame: Game {
         print("\(thisPlayer.name) is in Check: \(isCheck)")
         return isCheck
     }
-    
+    // midTurn, between moves,
     func isCheckMate(player: Player, snapshot: GameSnapshot?) -> Bool {////is being called twice, once for each player
         
         var isCheckMate = true
