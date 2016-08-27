@@ -22,14 +22,13 @@ class Piece: NSObject, NSCopying {
     var name: String
     var id = 0
     dynamic var position: Position
-//        {
-//        didSet {
-//            self.isFirstMove = false
-//        }
-//    }
+        {
+        didSet {
+            self.isFirstMove = false
+        }
+    }
     let startingPosition: Position
     var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
-//    var completionsAfterMoving: [(() -> Void)]?
     var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool
     dynamic var selected = false
