@@ -13,7 +13,7 @@ import CoreLocation
 
 extension Array {
     /// Return the first element to satify the predicate includeElement. Returns nil if not found or there is an error.
-    func elementPassing(@noescape includeElement: (Element) throws -> Bool) rethrows -> Element? {
+    func elementPassing(_ includeElement: (Element) throws -> Bool) rethrows -> Element? {
         for element in self {
             do  {
                 let isAMatch = try includeElement(element)
@@ -29,44 +29,44 @@ extension Array {
 }
     
 extension NSLayoutConstraint {
-    class func centerHorizontally(view: UIView) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .CenterX, relatedBy: .Equal, toItem: view.superview, attribute: .CenterX, multiplier: 1, constant: 0)
+    class func centerHorizontally(_ view: UIView) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .centerX, relatedBy: .equal, toItem: view.superview, attribute: .centerX, multiplier: 1, constant: 0)
     }
-    class func centerVertically(view: UIView) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .CenterY, relatedBy: .Equal, toItem: view.superview, attribute: .CenterY, multiplier: 1, constant: 0)
+    class func centerVertically(_ view: UIView) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .centerY, relatedBy: .equal, toItem: view.superview, attribute: .centerY, multiplier: 1, constant: 0)
     }
-    class func bindLeftRight(view: UIView) -> [NSLayoutConstraint] {
-        return NSLayoutConstraint.constraintsWithVisualFormat("H:|[view]|", options: .DirectionLeadingToTrailing, metrics: nil, views: ["view" :view])
+    class func bindLeftRight(_ view: UIView) -> [NSLayoutConstraint] {
+        return NSLayoutConstraint.constraints(withVisualFormat: "H:|[view]|", options: NSLayoutFormatOptions(), metrics: nil, views: ["view" :view])
     }
-    class func bindTopBottom(view: UIView) -> [NSLayoutConstraint] {
-        return NSLayoutConstraint.constraintsWithVisualFormat("V:|[view]|", options: .DirectionLeadingToTrailing, metrics: nil, views: ["view" :view])
+    class func bindTopBottom(_ view: UIView) -> [NSLayoutConstraint] {
+        return NSLayoutConstraint.constraints(withVisualFormat: "V:|[view]|", options: NSLayoutFormatOptions(), metrics: nil, views: ["view" :view])
     }
     
-    class func bindTopBottomLeftRight(view: UIView) -> [NSLayoutConstraint] {
+    class func bindTopBottomLeftRight(_ view: UIView) -> [NSLayoutConstraint] {
         return bindTopBottom(view) + bindLeftRight(view)
     }
-    class func keepRatio(view: UIView) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Width, relatedBy: NSLayoutRelation.Equal, toItem: view, attribute: .Height, multiplier: 1, constant: 0)
+    class func keepRatio(_ view: UIView) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .width, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: .height, multiplier: 1, constant: 0)
     }
-    class func equalWidths(views: [UIView]) -> [NSLayoutConstraint] {
+    class func equalWidths(_ views: [UIView]) -> [NSLayoutConstraint] {
         var constraints = [NSLayoutConstraint]()
         for i in 1..<views.count {
-            let width = NSLayoutConstraint(item: views[i], attribute: .Width, relatedBy: .Equal, toItem: views[i-1], attribute: .Width, multiplier: 1, constant: 0)
+            let width = NSLayoutConstraint(item: views[i], attribute: .width, relatedBy: .equal, toItem: views[i-1], attribute: .width, multiplier: 1, constant: 0)
             constraints.append(width)
         }
         return constraints
     }
-    class func equalHeights(views: [UIView]) -> [NSLayoutConstraint] {
+    class func equalHeights(_ views: [UIView]) -> [NSLayoutConstraint] {
         var constraints = [NSLayoutConstraint]()
         for i in 1..<views.count {
-            let height = NSLayoutConstraint(item: views[i], attribute: .Height, relatedBy: .Equal, toItem: views[i-1], attribute: .Height, multiplier: 1, constant: 0)
+            let height = NSLayoutConstraint(item: views[i], attribute: .height, relatedBy: .equal, toItem: views[i-1], attribute: .height, multiplier: 1, constant: 0)
             constraints.append(height)
         }
         return constraints
     }
     
     /// H:|[view1][view2][view3]|
-    class func bindHorizontally(views: [UIView]) -> [NSLayoutConstraint] {
+    class func bindHorizontally(_ views: [UIView]) -> [NSLayoutConstraint] {
         var constraints = [NSLayoutConstraint]()
         for i in 0..<views.count {
             let view = views[i]
@@ -74,16 +74,16 @@ extension NSLayoutConstraint {
             // leading
             var leading: NSLayoutConstraint
             if i == 0 { // bind first leading to superview
-                leading = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Leading, relatedBy: .Equal, toItem: view.superview, attribute: .Leading, multiplier: 1, constant: 0)
+                leading = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.leading, relatedBy: .equal, toItem: view.superview, attribute: .leading, multiplier: 1, constant: 0)
             } else {    // bind all others to the previous view
-                leading = NSLayoutConstraint(item: view, attribute: .Leading, relatedBy: .Equal, toItem: views[i-1], attribute: .Trailing, multiplier: 1, constant: 0)
+                leading = NSLayoutConstraint(item: view, attribute: .leading, relatedBy: .equal, toItem: views[i-1], attribute: .trailing, multiplier: 1, constant: 0)
             }
             leading.identifier = "...leading i: \(i)"
             constraints.append(leading)
         }
         
         if views.last != nil {
-            let trailing = NSLayoutConstraint(item: views.last!, attribute: .Trailing, relatedBy: .Equal, toItem: views.last!.superview, attribute: .Trailing, multiplier: 1, constant: 0)
+            let trailing = NSLayoutConstraint(item: views.last!, attribute: .trailing, relatedBy: .equal, toItem: views.last!.superview, attribute: .trailing, multiplier: 1, constant: 0)
             trailing.identifier = "...trailing view: \(views.count)"
             constraints.append(trailing)
         }
@@ -92,7 +92,7 @@ extension NSLayoutConstraint {
     }
     
     /// V:|[view1][view2][view3]|
-    class func bindVertically(views: [UIView]) -> [NSLayoutConstraint] {
+    class func bindVertically(_ views: [UIView]) -> [NSLayoutConstraint] {
         var constraints = [NSLayoutConstraint]()
         for i in 0..<views.count {
             let view = views[i]
@@ -102,11 +102,11 @@ extension NSLayoutConstraint {
             if i == 0 {
                 
                 // bind first top to superview
-                top = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view.superview, attribute: .Top, multiplier: 1, constant: 0)
+                top = NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.top, relatedBy: .equal, toItem: view.superview, attribute: .top, multiplier: 1, constant: 0)
             } else {
                 
                 // bind all others to the previous view
-                top = NSLayoutConstraint(item: view, attribute: .Top, relatedBy: .Equal, toItem: views[i-1], attribute: .Bottom, multiplier: 1, constant: 0)
+                top = NSLayoutConstraint(item: view, attribute: .top, relatedBy: .equal, toItem: views[i-1], attribute: .bottom, multiplier: 1, constant: 0)
             }
             constraints.append(top)
         }
@@ -115,7 +115,7 @@ extension NSLayoutConstraint {
         var bottom: NSLayoutConstraint
         if views.last != nil {
             // bind last bottom to superview
-            bottom = NSLayoutConstraint(item: views.last!, attribute: .Bottom, relatedBy: .Equal, toItem: views.last!.superview, attribute: .Bottom, multiplier: 1, constant: 0)
+            bottom = NSLayoutConstraint(item: views.last!, attribute: .bottom, relatedBy: .equal, toItem: views.last!.superview, attribute: .bottom, multiplier: 1, constant: 0)
             bottom.identifier = "...last: \(views.count)"
             constraints.append(bottom)
         }

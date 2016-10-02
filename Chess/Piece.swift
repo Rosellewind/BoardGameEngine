@@ -11,11 +11,11 @@ import UIKit
 
 
 protocol PiecesCreator {
-    func makePieces(variation: Int, playerId: Int) -> [Piece]
+    func makePieces(_ variation: Int, playerId: Int) -> [Piece]
 }
 
 enum LegalIfCondition: Int {
-    case MustBeOccupied, CantBeOccupied, MustBeOccupiedByOpponent, CantBeOccupiedBySelf, IsInitialMove
+    case mustBeOccupied, cantBeOccupied, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
 }
 
 class Piece: NSObject, NSCopying {
@@ -28,13 +28,13 @@ class Piece: NSObject, NSCopying {
         }
     }
     let startingPosition: Position
-    var isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
+    var isLegalMove: (_ translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
     var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool
     dynamic var selected = false
     weak var player: Player?
     
-    init(name: String, position: Position, isLegalMove: (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
+    init(name: String, position: Position, isLegalMove: @escaping (_ translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)) {
         self.name = name
         self.position = position
         self.startingPosition = position
@@ -53,15 +53,15 @@ class Piece: NSObject, NSCopying {
         self.player = toCopy.player
     }
     
-    func copyWithZone(zone: NSZone) -> AnyObject {
-        return self.dynamicType.init(toCopy: self)
+    func copy(with zone: NSZone?) -> Any {
+        return type(of: self).init(toCopy: self)
     }
 }
 
 
 private var myContext = 0
 protocol PieceViewProtocol {
-    func animateMove(pieceView: PieceView, position: Position, duration: NSTimeInterval)
+    func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval)
 }
 
 class PieceView: UIView {
@@ -76,32 +76,32 @@ class PieceView: UIView {
         }
         didSet {
             for observe in observing ?? [] {
-                observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: [.New, .Old], context: &myContext)
+                observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: [.new, .old], context: &myContext)
             }
         }
     }
 
     init(image: UIImage, pieceTag: Int) {
         self.image = image
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         self.tag = pieceTag
-        self.userInteractionEnabled = false
+        self.isUserInteractionEnabled = false
         
         // add imageView as subview
         let imageView = UIImageView(image:image)
         self.addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
+        NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if context == &myContext {
             if keyPath == "selected" {
-                if let new = change?[NSKeyValueChangeNewKey] as? Bool {
+                if let new = change?[NSKeyValueChangeKey.newKey] as? Bool {
                     if new == true {
                         self.alpha = 0.4
                     } else {
@@ -109,12 +109,12 @@ class PieceView: UIView {
                     }
                 }
             } else if keyPath == "position" {
-                if let new = change?[NSKeyValueChangeNewKey] as? Position {
+                if let new = change?[NSKeyValueChangeKey.newKey] as? Position {
                     delegate?.animateMove(self, position: new, duration: 0.5)
                 }
             }
         } else {
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
@@ -122,13 +122,13 @@ class PieceView: UIView {
         observing = nil
     }
     
-    func constrainToCell(cell: UIView) {
+    func constrainToCell(_ cell: UIView) {
         translatesAutoresizingMaskIntoConstraints = false
-        let widthConstraint = NSLayoutConstraint(item: self, attribute: .Width, relatedBy: .Equal, toItem: cell, attribute: .Width, multiplier: 1, constant: 0)
-        let heightConstraint = NSLayoutConstraint(item: self, attribute: .Height, relatedBy: .Equal, toItem: cell, attribute: .Height, multiplier: 1, constant: 0)
-        let positionX = NSLayoutConstraint(item: self, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
-        let positionY = NSLayoutConstraint(item: self, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+        let widthConstraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: .equal, toItem: cell, attribute: .width, multiplier: 1, constant: 0)
+        let heightConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: cell, attribute: .height, multiplier: 1, constant: 0)
+        let positionX = NSLayoutConstraint(item: self, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
+        let positionY = NSLayoutConstraint(item: self, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
         positionConstraints = [positionX, positionY]
-        NSLayoutConstraint.activateConstraints([widthConstraint, heightConstraint, positionX, positionY])
+        NSLayoutConstraint.activate([widthConstraint, heightConstraint, positionX, positionY])
     }
 }

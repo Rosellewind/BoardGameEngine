@@ -7,6 +7,26 @@
 //
 
 import UIKit
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l >= r
+  default:
+    return !(lhs < rhs)
+  }
+}
+
 
 
 class Position: NSObject {
@@ -42,11 +62,11 @@ class Board {
         self.skipCells = skipCells
     }
     
-    func index(position: Position) -> Int {
+    func index(_ position: Position) -> Int {
         return position.column + position.row * numColumns
     }
     
-    func position(index: Int) -> Position {
+    func position(_ index: Int) -> Position {
         if numColumns > 0  {
             return Position(row: index / numColumns, column: index % numColumns)
         } else {
@@ -71,18 +91,18 @@ class BoardView: UIView {
     init() {
         images = nil
         self.backgroundColors = nil
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
     }
     
     init (board: Board, checkered: Bool, images: [UIImage]?, backgroundColors: [UIColor]?) {
         self.checkered = checkered
         self.images = images
         self.backgroundColors = backgroundColors
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         makeCells(board)
         
               }
-    func makeCells(board: Board) {
+    func makeCells(_ board: Board) {
         var imageIndex = 0 {
             didSet {if imageIndex >= images?.count {imageIndex = 0}}
         }
@@ -113,14 +133,14 @@ class BoardView: UIView {
                 }
             }
             
-            if let skips = board.skipCells where skips.contains(i) {
-                cell.backgroundColor = UIColor.clearColor()
+            if let skips = board.skipCells , skips.contains(i) {
+                cell.backgroundColor = UIColor.clear
             } else {
                 if imageIndex < images?.count {
                     let imageView = UIImageView(image: images![imageIndex])
                     cell.addSubview(imageView)
                     imageView.translatesAutoresizingMaskIntoConstraints = false
-                    NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
+                    NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
                 }
                 if colorIndex < backgroundColors?.count {
                     cell.backgroundColor = backgroundColors![colorIndex]
@@ -137,33 +157,33 @@ class BoardView: UIView {
         addConstraintsToCells(board)
     }
     
-    func addConstraintsToCells(board: Board) {
+    func addConstraintsToCells(_ board: Board) {
         
         //autolayout cells
         var constraints = [NSLayoutConstraint]()
         
         // add horizontal constraints
-        for i in 0.stride(to: board.numCells, by: board.numColumns) {
+        for i in stride(from: 0, to: board.numCells, by: board.numColumns) {
             let range = i..<i + board.numColumns
             let slice: Array<UIView> = Array(cells[range])
             let horizontal = NSLayoutConstraint.bindHorizontally(slice)
-            constraints.appendContentsOf(horizontal)
+            constraints.append(contentsOf: horizontal)
             let widths = NSLayoutConstraint.equalWidths(slice)
-            constraints.appendContentsOf(widths)
+            constraints.append(contentsOf: widths)
         }
         
         // add vertical constraints
         for i in 0..<board.numColumns {
             var verticalCells = [UIView]()
-            for j in i.stride(to: board.numCells, by: board.numColumns)  {
+            for j in stride(from: i, to: board.numCells, by: board.numColumns)  {
                 verticalCells.append(cells[j])
             }
             let vertical = NSLayoutConstraint.bindVertically(verticalCells)
-            constraints.appendContentsOf(vertical)
+            constraints.append(contentsOf: vertical)
             let heights = NSLayoutConstraint.equalHeights(verticalCells)
-            constraints.appendContentsOf(heights)
+            constraints.append(contentsOf: heights)
         }
-        NSLayoutConstraint.activateConstraints(constraints)
+        NSLayoutConstraint.activate(constraints)
     }
     
     required init?(coder aDecoder: NSCoder) {

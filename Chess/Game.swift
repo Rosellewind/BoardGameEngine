@@ -15,16 +15,16 @@ import UIKit
 
 
 protocol GamePresenterProtocol {
-    func gameMessage(string: String, status: GameStatus?)
-    func showAlert(alert: UIViewController)
+    func gameMessage(_ string: String, status: GameStatus?)
+    func showAlert(_ alert: UIViewController)
 }
 
 enum GameStatus {
-    case GameOver, WhoseTurn, IllegalMove, Default
+    case gameOver, whoseTurn, illegalMove, `default`
 }
 
 enum TurnCondition: Int {   // subclasses may add their own
-    case None
+    case none
 }
 
 class GameSnapshot {
@@ -84,7 +84,7 @@ class Game: PieceViewProtocol {
     }
     var presenterDelegate: GamePresenterProtocol? {
         didSet {
-            presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .WhoseTurn)
+            presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .whoseTurn)
         }
     }
     var allPieces: [Piece] {
@@ -107,7 +107,7 @@ class Game: PieceViewProtocol {
         // boardView layout
         gameView.addSubview(boardView)
         boardView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activateConstraints(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
+        NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
         
         // pieceView layout and observing
         pieceViews.forEach { (pieceView: PieceView) in
@@ -165,7 +165,7 @@ class Game: PieceViewProtocol {
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
     }
     
-    func pieceConditionsAreMet(piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {
+    func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
         
@@ -174,7 +174,7 @@ class Game: PieceViewProtocol {
             for condition in conditions ?? [] where conditionsAreMet == true {
                 if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
                     switch legalIfCondition {
-                    case .CantBeOccupied:
+                    case .cantBeOccupied:
                         for translation in condition.positions ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
@@ -184,7 +184,7 @@ class Game: PieceViewProtocol {
                         }
                         ////pos to trans
                         
-                    case .MustBeOccupied:
+                    case .mustBeOccupied:
                         for translation in condition.positions ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
@@ -192,7 +192,7 @@ class Game: PieceViewProtocol {
                                 conditionsAreMet = false
                             }
                         }
-                    case .MustBeOccupiedByOpponent:
+                    case .mustBeOccupiedByOpponent:
                         for translation in condition.positions ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
@@ -202,7 +202,7 @@ class Game: PieceViewProtocol {
                                 conditionsAreMet = false
                             }
                         }
-                    case .CantBeOccupiedBySelf:
+                    case .cantBeOccupiedBySelf:
                         for translation in condition.positions ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
@@ -210,7 +210,7 @@ class Game: PieceViewProtocol {
                                 conditionsAreMet = false
                             }
                         }
-                    case .IsInitialMove:
+                    case .isInitialMove:
                         if !thisPiece.isFirstMove {
                             conditionsAreMet = false
                         }
@@ -221,11 +221,11 @@ class Game: PieceViewProtocol {
         return (conditionsAreMet, nil)
     }
     
-    func turnConditionsAreMet(conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
+    func turnConditionsAreMet(_ conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
         for condition in conditions ?? [] {
             if let turnCondition = TurnCondition(rawValue: condition) { // implement later
                 switch turnCondition {
-                case .None:
+                case .none:
                     return true
                 }
             }
@@ -233,7 +233,7 @@ class Game: PieceViewProtocol {
         return true
     }
     
-    @objc func cellTapped(sender: UITapGestureRecognizer) {
+    @objc func cellTapped(_ sender: UITapGestureRecognizer) {
         if let view = sender.view {
             let positionTapped = board.position(view.tag)
             let pieceTapped = pieceForPosition(positionTapped, snapshot: nil)
@@ -285,7 +285,7 @@ class Game: PieceViewProtocol {
                         // check for gameOver
                         gameOver()
                         whoseTurn += 1
-                        presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .WhoseTurn)
+                        presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
                         
                     }
                 }
@@ -295,7 +295,7 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func removePieceOccupyingPosition (position: Position) {
+    func removePieceOccupyingPosition (_ position: Position) {
         
         
     }
@@ -306,14 +306,14 @@ class Game: PieceViewProtocol {
         let position: Position?
     }
     
-    func makeMove(move: Move) {
+    func makeMove(_ move: Move) {
         if move.remove {
             for player in players {
-                if let index = player.pieces.indexOf(move.piece) {
+                if let index = player.pieces.index(of: move.piece) {
                     if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == move.piece.id}) {
                         pieceViewToRemove.removeFromSuperview()
                     }
-                    player.pieces.removeAtIndex(index)
+                    player.pieces.remove(at: index)
                 }
             }
         } else if move.position != nil {
@@ -321,18 +321,18 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func makeMoves(moves: [Move]) {
+    func makeMoves(_ moves: [Move]) {
         for move in moves {
             makeMove(move)
         }
     }
     
-    func makeMoveInSnapshot(move: Move, snapshot: GameSnapshot) {
+    func makeMoveInSnapshot(_ move: Move, snapshot: GameSnapshot) {
         if let snapshotPiece = snapshot.allPieces.elementPassing({$0.id == move.piece.id && $0.player != nil && $0.player!.id == move.piece.player!.id}) {
             if move.remove {
                 for player in snapshot.players {
-                    if let index = player.pieces.indexOf(snapshotPiece) {
-                        player.pieces.removeAtIndex(index)
+                    if let index = player.pieces.index(of: snapshotPiece) {
+                        player.pieces.remove(at: index)
                     }
                 }
             } else if move.position != nil {
@@ -342,7 +342,7 @@ class Game: PieceViewProtocol {
 
     }
     
-    func makeMovesInSnapshot(moves: [Move], snapshot: GameSnapshot) {
+    func makeMovesInSnapshot(_ moves: [Move], snapshot: GameSnapshot) {
         for move in moves {
             makeMoveInSnapshot(move, snapshot: snapshot)
         }
@@ -354,7 +354,7 @@ class Game: PieceViewProtocol {
         if let thisMemento = memento {
             thisMemento.piece.isFirstMove = thisMemento.isFirstMove
             thisMemento.piece.position = thisMemento.position
-            if let pieceToRestore = thisMemento.pieceRemoved, player = thisMemento.pieceRemovedPlayer {
+            if let pieceToRestore = thisMemento.pieceRemoved, let player = thisMemento.pieceRemovedPlayer {
                 player.pieces.append(pieceToRestore)
             }
         }
@@ -371,7 +371,7 @@ class Game: PieceViewProtocol {
     
 
     
-    func positionFromTranslation(translation: Position, fromPosition: Position, direction: Direction) -> Position {
+    func positionFromTranslation(_ translation: Position, fromPosition: Position, direction: Direction) -> Position {
         switch direction {
         case .bottom:
             let row = fromPosition.row + translation.row
@@ -386,7 +386,7 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func calculateTranslation(fromPosition:Position, toPosition: Position, direction: Direction) -> Position {
+    func calculateTranslation(_ fromPosition:Position, toPosition: Position, direction: Direction) -> Position {
         
         switch direction {
         case .bottom:
@@ -402,7 +402,7 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func pieceForPosition(position: Position, snapshot: GameSnapshot?) -> Piece? {
+    func pieceForPosition(_ position: Position, snapshot: GameSnapshot?) -> Piece? {
         let pieces = snapshot?.allPieces ?? allPieces
         var pieceFound: Piece?
         for piece in pieces {
@@ -413,7 +413,7 @@ class Game: PieceViewProtocol {
         return pieceFound
     }
     
-    func pieceForPieceView(pieceView: PieceView) -> Piece? {
+    func pieceForPieceView(_ pieceView: PieceView) -> Piece? {
         for piece in allPieces {
             if piece.id == pieceView.tag {return piece}
         }
@@ -443,24 +443,24 @@ class Game: PieceViewProtocol {
 //            }
 //        }
 //    }
-    func animateMove(pieceView: PieceView, position: Position, duration: NSTimeInterval) {
+    func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {
         
         // deactivate position constraints
-        NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
+        NSLayoutConstraint.deactivate(pieceView.positionConstraints)
         
         // activate new position constraints matching cell constraints
         let cellIndex = board.index(position)
         if let cell = boardView.cells.elementPassing({$0.tag == cellIndex}) {
-            let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
-            let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
+            let positionX = NSLayoutConstraint(item: pieceView, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
+            let positionY = NSLayoutConstraint(item: pieceView, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
             pieceView.positionConstraints = [positionX, positionY]
-            NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
+            NSLayoutConstraint.activate(pieceView.positionConstraints)
         }
         
         // animate the change
         boardView.setNeedsUpdateConstraints()
-        UIView.animateWithDuration(duration) {
+        UIView.animate(withDuration: duration, animations: {
             self.boardView.layoutIfNeeded()
-        }
+        }) 
     }
 }

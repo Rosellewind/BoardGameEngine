@@ -20,7 +20,7 @@ class ViewController: UIViewController, GamePresenterProtocol {
         super.viewDidLoad()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         setupGame()
     }
 
@@ -30,15 +30,15 @@ class ViewController: UIViewController, GamePresenterProtocol {
     }
     
     func setupGame() {
-        game = ChessGame(chessVariation: .StandardChess, gameView: gameView)
+        game = ChessGame(chessVariation: .standardChess, gameView: gameView)
         game.presenterDelegate = self
 //        game = Game(gameView: gameView)
     }
     
-    func gameMessage(string: String, status: GameStatus?) {
+    func gameMessage(_ string: String, status: GameStatus?) {
         self.topLabel.text = string
-        switch status ?? .Default {
-        case .GameOver:
+        switch status ?? .default {
+        case .gameOver:
             //show restart button
             setupGame()////temp
             break
@@ -47,8 +47,8 @@ class ViewController: UIViewController, GamePresenterProtocol {
         }
     }
 
-    func showAlert(alert: UIViewController) {
-        self.presentViewController(alert, animated: true, completion: nil)
+    func showAlert(_ alert: UIViewController) {
+        self.present(alert, animated: true, completion: nil)
     }
 
 }
