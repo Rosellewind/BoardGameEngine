@@ -7,8 +7,7 @@
 //
 
 //// cantbeincheckduring, en passant, pawn promotion, check/mate
-//// further the momento pattern
-//  checkmate the opponent; this occurs when the opponent's king is in check, and there is no legal way to remove it from attack. It is illegal for a player to make a move that would put or leave his own king in check.
+
 
 
 import UIKit

@@ -8,7 +8,7 @@
 
 import UIKit
 
-
+/////make reusable snapshot
 
 enum ChessVariation: Int {
     case StandardChess, GalaxyChess
@@ -104,7 +104,7 @@ class ChessGame: Game {
                         // 1. neither the king nor the rook may have been previously moved
                         // 2. there must not be pieces between the king and rook
                         // 3. the king may not be in check, nor may the king pass through squares athat are under attack by eney pieces, nor move to a square where it is in check
-                        
+                        //////stopped here, pass though check
                         
                         
                         // rules needing to be checked here:
@@ -163,12 +163,18 @@ class ChessGame: Game {
                         ////temp
                         if isCheck(player, snapshot: nil) {/////////////////////////////
                             conditionsAreMet = (false, nil)
-                        }
-                        
-                        for translation in condition.positions ?? [] {
-                            reusableGameSnapshot = GameSnapshot(game: self)
-                            if let pieceInthisGameSnapshot = reusableGameSnapshot!.allPieces.elementPassing({$0.id == thisPiece.id}), thisPlayer = pieceInthisGameSnapshot.player {
-                                pieceInthisGameSnapshot.position = positionFromTranslation(translation, fromPosition: pieceInthisGameSnapshot.position, direction: thisPlayer.forwardDirection)
+                        } else {
+                            for translation in condition.positions ?? [] {
+                                
+                                // move in snapshot
+                                reusableGameSnapshot = GameSnapshot(game: self)
+                                if let thisPlayer = thisPiece.player {
+                                    let position = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: thisPlayer.forwardDirection)
+                                    makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
+                                }
+                                
+                                // test the snapshot
+                                /////*******stopped here*********
                                 
                             }
                         }
@@ -178,12 +184,6 @@ class ChessGame: Game {
             }
         }
         return conditionsAreMet
-    }
-    
-    func rookChosenForCastling(rook: Piece, position: Position) {
-        rook.isFirstMove = false
-        rook.position = position
-//        animatePiece(rook, position: position)
     }
 
     func moveARook(rooks: [Piece], position: Position) {
@@ -209,7 +209,7 @@ class ChessGame: Game {
                 case .right:
                     leftRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
                 }
-                self.rookChosenForCastling(leftRook, position: position)
+                self.makeMove(Move(piece: leftRook, remove: false, position: position))
                 alert.dismissViewControllerAnimated(true, completion: nil)
             })
             alert.addAction(leftAction)
@@ -225,7 +225,7 @@ class ChessGame: Game {
                 case .right:
                     rightRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
                 }
-                self.rookChosenForCastling(rightRook, position: position)
+                self.makeMove(Move(piece: rightRook, remove: false, position: position))
                 alert.dismissViewControllerAnimated(true, completion: nil)
             })
             alert.addAction(rightAction)
@@ -235,7 +235,7 @@ class ChessGame: Game {
             }
             
         } else if rooks.count == 1 {
-            self.rookChosenForCastling(rooks[0], position: position)
+            self.makeMove(Move(piece: rooks[0], remove: false, position: position))
         }
     }
     
