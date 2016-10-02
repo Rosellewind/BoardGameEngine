@@ -88,6 +88,10 @@ class Board {
         }
     }
     
+    func isCell(index: Int) -> Bool {
+        return index > 0 && index < numCells && skipCells?.elementPassing({$0 == index}) == nil
+    }
+    
     func copy() -> Board {
         return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
     }

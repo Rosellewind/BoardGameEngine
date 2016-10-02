@@ -8,7 +8,6 @@
 
 import UIKit
 
-/////make reusable snapshot
 
 enum ChessVariation: Int {
     case standardChess, galaxyChess
@@ -158,26 +157,22 @@ class ChessGame: Game {
                             conditionsAreMet = (true, completions)
                         }
                         
-                    case .cantBeInCheckDuring:////test
-                        ////temp
-                        if isCheck(player, snapshot: nil) {/////////////////////////////
-                            conditionsAreMet = (false, nil)
-                        } else {
-                            for translation in condition.positions ?? [] {
-                                
-                                // move in snapshot
-                                reusableGameSnapshot = GameSnapshot(game: self)
-                                if let thisPlayer = thisPiece.player {
-                                    let position = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: thisPlayer.forwardDirection)
-                                    makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
+                    case .cantBeInCheckDuring:
+                        for translation in condition.positions ?? [] {
+                            
+                            // move in snapshot
+                            reusableGameSnapshot = GameSnapshot(game: self)
+                            if let thisPlayer = thisPiece.player {
+                                let position = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: thisPlayer.forwardDirection)
+                                makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
+                                if isCheck(player, snapshot: reusableGameSnapshot) {
+                                    print("IsInCheckDuring is true")
+                                    conditionsAreMet = (false, nil)
+                                    break
                                 }
-                                
-                                // test the snapshot
-                                /////*******stopped here*********
-                                
                             }
                         }
-                        break////****implement
+                        break
                     }
                 }
             }
@@ -432,8 +427,8 @@ class ChessPieceCreator: PiecesCreator {
                     // Castling:
                     // 1. neither king nor rook has moved
                     // 2. there are no pieces between king and rook
-                    // 3. "One may not castle out of, through, or into check."
-                    // into check is already being checked///////////every piece have can't go into check? do I need turn conditions?
+                    // 3. "One may not castle out of, through, or into check." (rook can be under attack, just not the king)
+
                     let signage = translation.column > 0 ? 1 : -1
                     isLegal = true
                     // checked here: king.isInitialMove, RookCanCastle[translation], no pieces inbetween king and landing spot, CantBeInCheckDuring[0,0][0, abs-1]

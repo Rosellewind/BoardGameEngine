@@ -6,7 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// cantbeincheckduring, en passant, pawn promotion, check/mate
+////  en passant, pawn promotion, check/mate
 
 
 
@@ -347,18 +347,7 @@ class Game: PieceViewProtocol {
             makeMoveInSnapshot(move, snapshot: snapshot)
         }
     }
-    
-    var memento: (piece: Piece, isFirstMove: Bool, position: Position, pieceRemoved: Piece?, pieceRemovedPlayer: Player?)?
-    
-    func restoreMemento() {
-        if let thisMemento = memento {
-            thisMemento.piece.isFirstMove = thisMemento.isFirstMove
-            thisMemento.piece.position = thisMemento.position
-            if let pieceToRestore = thisMemento.pieceRemoved, let player = thisMemento.pieceRemovedPlayer {
-                player.pieces.append(pieceToRestore)
-            }
-        }
-    }
+
     
     func gameOver() -> Bool {
         for player in players {
@@ -371,7 +360,7 @@ class Game: PieceViewProtocol {
     
 
     
-    func positionFromTranslation(_ translation: Position, fromPosition: Position, direction: Direction) -> Position {
+    func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
         switch direction {
         case .bottom:
             let row = fromPosition.row + translation.row
@@ -386,19 +375,19 @@ class Game: PieceViewProtocol {
         }
     }
     
-    func calculateTranslation(_ fromPosition:Position, toPosition: Position, direction: Direction) -> Position {
+    func calculateTranslation(_ fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
         
         switch direction {
         case .bottom:
             let row = toPosition.row - fromPosition.row
             let column = toPosition.column - fromPosition.column
-            return Position(row: row, column: column)
+            return Translation(row: row, column: column)
         case .top:
             let row = fromPosition.row - toPosition.row
             let column = toPosition.column - fromPosition.column
-            return Position(row: row, column: column)
+            return Translation(row: row, column: column)
         default:
-            return Position(row: 0, column: 0) //// implement others later
+            return Translation(row: 0, column: 0) //// implement others later
         }
     }
     
@@ -419,30 +408,7 @@ class Game: PieceViewProtocol {
         }
         return nil
     }
-    
-//    func animatePiece(piece: Piece, position: Position) {
-//        if let pieceView = pieceViews.elementPassing({$0.tag == piece.tag}) {
-//            // deactivate position constraints
-//            NSLayoutConstraint.deactivateConstraints(pieceView.positionConstraints)
-//            
-//            // activate new position constraints
-//            let cellIndex = board.index(position)
-//            let matchingCells = boardView.cells.filter({$0.tag == cellIndex})
-//            if matchingCells.count > 0 {
-//                let cell = matchingCells[0]
-//                let positionX = NSLayoutConstraint(item: pieceView, attribute: .CenterX, relatedBy: .Equal, toItem: cell, attribute: .CenterX, multiplier: 1, constant: 0)
-//                let positionY = NSLayoutConstraint(item: pieceView, attribute: .CenterY, relatedBy: .Equal, toItem: cell, attribute: .CenterY, multiplier: 1, constant: 0)
-//                pieceView.positionConstraints = [positionX, positionY]
-//                NSLayoutConstraint.activateConstraints(pieceView.positionConstraints)
-//            }
-//            
-//            // animate the change
-//            boardView.setNeedsUpdateConstraints()
-//            UIView.animateWithDuration(0.5) {
-//                self.boardView.layoutIfNeeded()
-//            }
-//        }
-//    }
+
     func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {
         
         // deactivate position constraints
