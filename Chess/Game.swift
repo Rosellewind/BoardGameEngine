@@ -254,7 +254,7 @@ class Game: PieceViewProtocol {
             // final part of turn, choosing where to go
             else {
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: positionTapped, direction: players[whoseTurn].forwardDirection)
-                let moveFunction = selectedPiece!.isLegalMove(translation: translation)
+                let moveFunction = selectedPiece!.isLegalMove(translation)
                 let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: nil)
                 
                 // check if move is legal and turn conditions are met

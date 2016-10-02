@@ -140,8 +140,7 @@ class ChessGame: Game {
                                             translation = calculateTranslation(rook.position, toPosition: landingPositionForRook, direction: player.forwardDirection)
                                             
                                         }
-                                        
-                                        let moveFunction = rook.isLegalMove(translation: translation)
+                                        let moveFunction = rook.isLegalMove(translation)
                                         if pieceConditionsAreMet(rook, conditions: moveFunction.conditions, snapshot: snapshot).isMet {
                                             castlingRooks.append(rook)
                                         }
@@ -252,7 +251,7 @@ class ChessGame: Game {
                         // for every opponents piece in new positions, can king be taken?
                         for nextPlayersPiece in thisPlayers[thisNextTurn].pieces where conditionsAreMet == true {
                             let translation = calculateTranslation(nextPlayersPiece.position, toPosition: king.position, direction: thisPlayers[thisNextTurn].forwardDirection)
-                            let moveFunction = nextPlayersPiece.isLegalMove(translation: translation)
+                            let moveFunction = nextPlayersPiece.isLegalMove(translation)
                             if moveFunction.isLegal && pieceConditionsAreMet(nextPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet{
                                 conditionsAreMet = false
                             }
@@ -286,7 +285,7 @@ class ChessGame: Game {
                 } else {
                     for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
                         let translation = calculateTranslation(otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = otherPlayerPiece.isLegalMove(translation: translation)
+                        let moveFunction = otherPlayerPiece.isLegalMove(translation)
                         isCheck = moveFunction.isLegal && pieceConditionsAreMet(otherPlayerPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet
                     }
                 }
@@ -324,7 +323,7 @@ class ChessGame: Game {
                         for otherPlayer in otherPlayers where positionIsSafe == true {
                             for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
                                 let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
-                                let moveFunction = otherPlayersPiece.isLegalMove(translation: translation)
+                                let moveFunction = otherPlayersPiece.isLegalMove(translation)
                                 positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
                             }
                         }
@@ -401,7 +400,7 @@ class ChessPieceCreator: PiecesCreator {
             pieces.append(contentsOf: pawns)
             
         case .galaxyChess:
-            let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
+            let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isLegalMove: { IsLegalMove in
                 return (true, nil)
             })
             pieces.append(piece)
@@ -419,7 +418,7 @@ class ChessPieceCreator: PiecesCreator {
     fileprivate func chessPiece(_ name: ChessPiece) -> Piece {
         switch name {
         case .King:
-            return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Translation) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
                 var isLegal = false
                 var conditions: [(condition: Int, positions: [Position]?)]?
                 
@@ -443,7 +442,7 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             })
         case .Queen:
-            return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
+            return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
                 var conditions: [(condition: Int, positions: [Position]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, positions: [translation])]
@@ -477,7 +476,7 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             })
         case .Rook:
-            return Piece(name: name.rawValue, position: Position(row: 0, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 0), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
                 var conditions: [(condition: Int, positions: [Position]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, positions: [translation])]
@@ -504,7 +503,7 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             })
         case .Bishop:
-            return Piece(name: name.rawValue, position: Position(row: 0, column: 2), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 2), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
                 var isLegal = false
                 var cantBeOccupied = [Position]()
                 
@@ -528,7 +527,7 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             })
         case .Knight:
-            return Piece(name: name.rawValue, position: Position(row: 0, column: 1), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 1), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
                 var isLegal = false
                 var conditions: [(condition: Int, positions: [Position]?)]?
                 
@@ -543,7 +542,7 @@ class ChessPieceCreator: PiecesCreator {
             })
             
         case .Pawn:
-            let piece = Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Position) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
+            let piece = Piece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
                 var isLegal = false
                 var conditions: [(condition: Int, positions: [Position]?)]?
                 

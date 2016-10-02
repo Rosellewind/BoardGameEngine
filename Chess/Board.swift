@@ -42,6 +42,20 @@ func ==(lhs: Position, rhs: Position) -> Bool {
     return lhs.row == rhs.row && lhs.column == rhs.column
 }
 
+//class Translation: NSObject {
+//    var rows: Int
+//    var columns: Int
+//
+//    init(rows: Int, columns: Int) {
+//        self.rows = rows
+//        self.columns = columns
+//    }
+//}
+//func ==(lhs: Translation, rhs: Translation) -> Bool {
+//    return lhs.rows == rhs.rows && lhs.columns == rhs.columns
+//}
+typealias Translation = Position
+
 
 
 /// Grid of rows and columns. numCells is calculated. skipped cells are empty at indicated index
