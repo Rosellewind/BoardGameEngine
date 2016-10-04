@@ -6,7 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-////  en passant, pawn promotion, check/mate
+//// pawn promotion, check/mate
 //// move from being in check?
 
 
@@ -63,7 +63,7 @@ class Game: PieceViewProtocol {
     var board: Board
     var boardView: BoardView
     var players: [Player]
-    var pieceViews: [PieceView]
+    var pieceViews: [PieceView] = [PieceView]()
     var selectedPiece: Piece?
     var turnConditions: [TurnCondition.RawValue]?
     var round = 0
@@ -102,11 +102,11 @@ class Game: PieceViewProtocol {
     var reusableGameSnapshot: GameSnapshot?
     
 
-    init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
+    init(gameView: UIView, board: Board, boardView: BoardView, players: [Player]) {
         self.board = board
         self.boardView = boardView
         self.players = players
-        self.pieceViews = pieceViews
+        self.pieceViews = makePieceViews(players: players)
         
         // boardView layout
         gameView.addSubview(boardView)
@@ -114,22 +114,8 @@ class Game: PieceViewProtocol {
         NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
         
         // pieceView layout and observing
-        pieceViews.forEach { (pieceView: PieceView) in
-            if let piece = pieceForPieceView(pieceView) {
-                // add delegate
-                pieceView.delegate = self
-                // add observing
-                pieceView.observing = [(piece, "selected"), (piece, "position")]
-                
-                // pieceView layout
-                let indexOfPieceOnBoard = board.index(piece.position)
-                if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
-                    boardView.addSubview(pieceView)
-                    pieceView.constrainToCell(cell)
-                }
-            }
-        }
-        
+        setupLayoutAndObservingForPieceViews(pieceViews: pieceViews)
+
         // add taps to cells on boardView
         boardView.cells.forEach({ (view: UIView) in
             view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(Game.cellTapped(_:))))
@@ -157,16 +143,50 @@ class Game: PieceViewProtocol {
         let defaultPlayers = [Player(name: "alien", id: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
         
         // create pieceView's
-        var defaultPieceViews = [PieceView]()
-        for player in defaultPlayers {
+        self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers)
+    }
+    
+    
+    func makePieceViews(players: [Player]) -> [PieceView] {
+        var pieceViews = [PieceView]()
+        for player in players {
             for piece in player.pieces {
-                if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                    let pieceView = PieceView(image: image, pieceTag: piece.id)
-                    defaultPieceViews.append(pieceView)
+                if let pieceView = makePieceView(piece: piece) {
+                    pieceViews.append(pieceView)
                 }
             }
         }
-        self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
+        return pieceViews
+    }
+    
+    func makePieceView(piece: Piece) -> PieceView? {
+        if let image = UIImage(named: piece.name + (piece.player?.name ?? "")) {
+            return PieceView(image: image, pieceTag: piece.id)
+        }
+        return nil
+    }
+    
+    func setupLayoutAndObservingForPieceViews(pieceViews: [PieceView]) {
+        // pieceView layout and observing
+        for pieceView in pieceViews {
+            setupLayoutAndObservingForPieceView(pieceView: pieceView)
+        }
+    }
+    
+    func setupLayoutAndObservingForPieceView(pieceView: PieceView) {
+        if let piece = pieceForPieceView(pieceView) {
+            // add delegate
+            pieceView.delegate = self
+            // add observing
+            pieceView.observing = [(piece, "selected"), (piece, "position")]
+            
+            // pieceView layout
+            let indexOfPieceOnBoard = board.index(piece.position)
+            if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
+                boardView.addSubview(pieceView)
+                pieceView.constrainToCell(cell)
+            }
+        }
     }
     
     // MARK: Game Logic (that can't be in an extension)
@@ -327,14 +347,7 @@ extension Game {
     
     func makeMove(_ move: Move) {
         if move.remove {
-            for player in players {
-                if let index = player.pieces.index(of: move.piece) {
-                    if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == move.piece.id}) {
-                        pieceViewToRemove.removeFromSuperview()
-                    }
-                    player.pieces.remove(at: index)
-                }
-            }
+            removePieceAndViewFromGame(piece: move.piece)
         } else if move.position != nil {
             move.piece.position = move.position!
         }
@@ -366,11 +379,24 @@ extension Game {
             makeMoveInSnapshot(move, snapshot: snapshot)
         }
     }
-
-
-    func removePieceOccupyingPosition (_ position: Position) {
-        if let piece = pieceForPosition(position, snapshot: nil) {
-            makeMove(Move(piece: piece, remove: true, position: nil))
+    
+    func removePieceAndViewFromGame(piece: Piece) {
+        for player in players {
+            if let index = player.pieces.index(of: piece) {
+                if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == piece.id}) {
+                    pieceViewToRemove.removeFromSuperview()
+                }
+                player.pieces.remove(at: index)
+            }
+        }
+    }
+    
+    func addPieceAndViewToGame(piece: Piece) {
+        if let player = piece.player {
+            player.pieces.append(piece)
+            if let pieceView = makePieceView(piece: piece) {
+                setupLayoutAndObservingForPieceView(pieceView: pieceView)
+            }
         }
     }
     

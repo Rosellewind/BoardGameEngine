@@ -10,6 +10,11 @@ import UIKit
 import MapKit
 import CoreLocation
 
+//extension Optional<Array<T>> {
+//    func addFrom<T>(array: [T]) {
+//        
+//    }
+//}
 
 extension Array {
     /// Return the first element to satify the predicate includeElement. Returns nil if not found or there is an error.

@@ -48,6 +48,7 @@ class ViewController: UIViewController, GamePresenterProtocol {
     }
 
     func showAlert(_ alert: UIViewController) {
+        alert.popoverPresentationController?.sourceView = self.view
         self.present(alert, animated: true, completion: nil)
     }
 

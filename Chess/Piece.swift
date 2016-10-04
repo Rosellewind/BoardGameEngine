@@ -29,7 +29,7 @@ class Piece: NSObject, NSCopying {
             self.isFirstMove = false
         }
     }
-    let startingPosition: Position
+    var startingPosition: Position
     var isLegalMove: IsLegalMove
     var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool

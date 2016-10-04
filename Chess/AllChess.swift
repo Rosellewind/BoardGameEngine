@@ -14,7 +14,7 @@ enum ChessVariation: Int {
 }
 
 private enum ChessLegalIfCondition: Int {
-    case cantBeInCheckDuring = 1000, rookCanCastle, markAdvancedTwo, mustBeOccupiedByOpponentOrEnPassant
+    case cantBeInCheckDuring = 1000, rookCanCastle, markAdvancedTwo, mustBeOccupiedByOpponentOrEnPassant, checkForPromotion
 }
 
 private enum ChessTurnCondition: Int {
@@ -60,19 +60,7 @@ class ChessGame: Game {
         // create the players with pieces
         let chessPlayers = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
         
-        // create pieceView's
-        var chessPieceViews = [PieceView]()
-        
-        for player in chessPlayers {
-            for piece in player.pieces {
-                if let image = UIImage(named: piece.name + (player.name ?? "")) {
-                    let pieceView = PieceView(image: image, pieceTag: piece.id)
-                    chessPieceViews.append(pieceView)
-                }
-            }
-        }
-        
-        super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers, pieceViews: chessPieceViews)
+        super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
 
         // chessVariation rules
         switch chessVariation {
@@ -184,22 +172,22 @@ class ChessGame: Game {
                                 let landingPosition = positions[0]
                                 let occupiedCondition = super.pieceConditionsAreMet(piece, conditions: [(condition: LegalIfCondition.mustBeOccupiedByOpponent.rawValue, positions: [landingPosition])], snapshot: nil)
                                 
-                                var isEnPassant = false
+                                var enPassantPawn: ChessPiece? = nil
                                 let enPassantPosition = positionFromTranslation(positions[1], fromPosition: thisPiece.position, direction: player.forwardDirection)
                                 if let possiblePawn = pieceForPosition(enPassantPosition, snapshot: nil) as? ChessPiece {
                                     if let roundWhenPawnAdvancedTwo = possiblePawn.roundWhenPawnAdvancedTwo {
                                         if let playerIndex = playerIndex(player: player) {
                                             let isStillFirstRoundSinceAdvancedTwo = (playerIndex >= firstInRound && round == roundWhenPawnAdvancedTwo + 1) || (playerIndex < firstInRound && round == roundWhenPawnAdvancedTwo)
                                             if isStillFirstRoundSinceAdvancedTwo {
-                                                isEnPassant = true
+                                                enPassantPawn = possiblePawn
                                             }
                                         }
                                     }
                                 }
                                 
-                                if isEnPassant {
+                                if enPassantPawn != nil {
                                     var completions = conditionsAreMet.completions ?? Array<()->Void>()
-                                    let enPassantCompletion: () -> Void = {self.removePieceOccupyingPosition(enPassantPosition)}
+                                    let enPassantCompletion: () -> Void = {self.removePieceAndViewFromGame(piece: enPassantPawn!)}
                                     completions.append(enPassantCompletion)
                                     if occupiedCondition.isMet {
                                         if occupiedCondition.completions != nil {
@@ -213,6 +201,50 @@ class ChessGame: Game {
                                 }
                             }
                         }
+                    case .checkForPromotion:
+                        var completions = conditionsAreMet.completions ?? Array<()->Void>()
+                        let checkPromotionCompletion: () -> Void = {
+                            if let direction = piece.player?.forwardDirection {
+                                var hasReachedEighthRank = false
+                                switch direction {
+                                case .bottom:
+                                    hasReachedEighthRank = piece.position.row == self.board.numRows - 1
+                                case .left:
+                                    hasReachedEighthRank = piece.position.column == 0
+                                case .right:
+                                    hasReachedEighthRank = piece.position.column == self.board.numColumns - 1
+                                case .top:
+                                    hasReachedEighthRank = piece.position.row == 0
+                                }
+                                if hasReachedEighthRank {
+                                    // have the presenting VC ask what promotion they want
+                                    let alert = UIAlertController(title: "Promotion", message: "Which chess piece do you want to promote your pawn with?", preferredStyle: .actionSheet)
+                                    let queen = UIAlertAction(title: "Queen", style: .default, handler: {(UIAction) in
+                                        self.promote(piece: piece, toType: .Queen)
+                                        alert.dismiss(animated: true, completion: nil)
+                                    })
+                                    alert.addAction(queen)
+                                    let knight = UIAlertAction(title: "Knight", style: .default, handler: {(UIAction) in
+                                        self.promote(piece: piece, toType: .Knight)
+                                        alert.dismiss(animated: true, completion: nil)
+                                    })
+                                    alert.addAction(knight)
+                                    let rook = UIAlertAction(title: "Rook", style: .default, handler: {(UIAction) in
+                                        self.promote(piece: piece, toType: .Rook)
+                                        alert.dismiss(animated: true, completion: nil)
+                                    })
+                                    alert.addAction(rook)
+                                    let bishop = UIAlertAction(title: "Bishop", style: .default, handler: {(UIAction) in
+                                        self.promote(piece: piece, toType: .Bishop)
+                                        alert.dismiss(animated: true, completion: nil)
+                                    })
+                                    alert.addAction(bishop)                                    
+                                    self.presenterDelegate?.showAlert(alert)
+                                }
+                            }
+                        }
+                        completions.append(checkPromotionCompletion)
+                        conditionsAreMet = (true, completions)
                     }
                 }
             }
@@ -263,11 +295,7 @@ class ChessGame: Game {
                 alert.dismiss(animated: true, completion: nil)
             })
             alert.addAction(rightAction)
-
-            if presenterDelegate != nil {
-                presenterDelegate!.showAlert(alert)
-            }
-            
+            presenterDelegate?.showAlert(alert)
         } else if rooks.count == 1 {
             self.makeMove(Move(piece: rooks[0], remove: false, position: position))
         }
@@ -373,6 +401,26 @@ class ChessGame: Game {
         }
         return isCheckMate
     }
+    
+    fileprivate func promote(piece: Piece, toType: ChessPieceType) {
+        // create replacement
+        let newPiece = ChessPieceCreator.shared.chessPiece(toType)
+        newPiece.position = piece.position
+        newPiece.id = piece.id
+        newPiece.isFirstMove = piece.isFirstMove
+        newPiece.startingPosition = piece.startingPosition
+        newPiece.player = piece.player
+        newPiece.selected = piece.selected
+        
+        // remove the old and add the new
+        UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
+            self.removePieceAndViewFromGame(piece: piece)
+            self.addPieceAndViewToGame(piece: newPiece)
+            }, completion: nil)
+//        UIView.animate(withDuration: 0.2, animations: removePieceAndViewFromGame(piece: piece)
+//            addPieceAndViewToGame(piece: newPiece))
+        
+    }
 }
 
 
@@ -381,14 +429,14 @@ class ChessPlayer: Player {
         return PlayerOrientation(rawValue: self.id) ?? PlayerOrientation.bottom
     }
     init(index: Int) {
-        let pieces = ChessPieceCreator.sharedInstance.makePieces(ChessVariation.standardChess.rawValue, playerId: index)
+        let pieces = ChessPieceCreator.shared.makePieces(ChessVariation.standardChess.rawValue, playerId: index)
         super.init(name: nil, id: index, forwardDirection: nil, pieces: pieces)
         self.name = self.orientation.color()
     }
 }
 
 class ChessPieceCreator: PiecesCreator {
-    static let sharedInstance = ChessPieceCreator()
+    static let shared = ChessPieceCreator()
     func makePieces(_ variation: ChessVariation.RawValue, playerId: Int) -> [Piece] {
         let position = PlayerOrientation(rawValue: playerId) ?? PlayerOrientation.bottom
         var pieces = [Piece]()
@@ -441,7 +489,7 @@ class ChessPieceCreator: PiecesCreator {
             pieces.append(piece)
         }
         
-        // set the tag and isFirstMove
+        // set the id and isFirstMove
         let offset = position.rawValue * pieces.count
         for i in 0..<pieces.count {
             pieces[i].id = i + offset
@@ -579,19 +627,21 @@ class ChessPieceCreator: PiecesCreator {
         case .Pawn:
             let piece = ChessPiece(name: name.rawValue, position: Position(row: 1, column: 0), isLegalMove: { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?) in
                 var isLegal = false
-                var conditions: [(condition: Int, positions: [Position]?)]?
+                var conditions: [(condition: Int, positions: [Position]?)] = [(condition: ChessLegalIfCondition.checkForPromotion.rawValue, positions: nil)]
                 
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if translation.row == 2 && translation.column == 0 {  // initial move, forward two
                     isLegal = true
-                    conditions = [(LegalIfCondition.cantBeOccupied.rawValue, [Position(row: 1, column: 0), Position(row: 2, column: 0)]), (LegalIfCondition.isInitialMove.rawValue, nil), (ChessLegalIfCondition.markAdvancedTwo.rawValue, nil)]
+                    conditions.append((condition: LegalIfCondition.isInitialMove.rawValue, positions: nil))
+                    conditions.append((condition: LegalIfCondition.cantBeOccupied.rawValue, positions: [Position(row: 1, column: 0), Position(row: 2, column: 0)]))
+                    conditions.append((condition: ChessLegalIfCondition.markAdvancedTwo.rawValue, positions: nil))
                 } else if translation.row == 1 && translation.column == 0 {     // move forward one on vacant
                     isLegal = true
-                    conditions = [(LegalIfCondition.cantBeOccupied.rawValue, [translation])]
+                    conditions.append((LegalIfCondition.cantBeOccupied.rawValue, [translation]))
                 } else if translation.row == 1 && abs(translation.column) == 1 {    // move diagonal one on occupied
                     isLegal = true
-                    conditions = [(ChessLegalIfCondition.mustBeOccupiedByOpponentOrEnPassant.rawValue, [translation, Translation(row: 0, column:translation.column)])]
+                    conditions.append((ChessLegalIfCondition.mustBeOccupiedByOpponentOrEnPassant.rawValue, [translation, Translation(row: 0, column:translation.column)]))
                 }
                 return (isLegal, conditions)
             })
