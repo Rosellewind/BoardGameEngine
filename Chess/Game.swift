@@ -7,7 +7,7 @@
 //
 
 ////  en passant, pawn promotion, check/mate
-
+//// move from being in check?
 
 
 import UIKit
@@ -66,10 +66,13 @@ class Game: PieceViewProtocol {
     var pieceViews: [PieceView]
     var selectedPiece: Piece?
     var turnConditions: [TurnCondition.RawValue]?
+    var round = 0
+    var firstInRound = 0
     var whoseTurn: Int = 0 {
         didSet {
             if whoseTurn >= players.count {
                 whoseTurn = 0
+                round += 1
             }
         }
     }
@@ -97,6 +100,7 @@ class Game: PieceViewProtocol {
         }
     }
     var reusableGameSnapshot: GameSnapshot?
+    
 
     init(gameView: UIView, board: Board, boardView: BoardView, players: [Player], pieceViews: [PieceView]) {
         self.board = board
@@ -165,6 +169,8 @@ class Game: PieceViewProtocol {
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers, pieceViews: defaultPieceViews)
     }
     
+    // MARK: Game Logic (that can't be in an extension)
+    
     func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
@@ -232,7 +238,21 @@ class Game: PieceViewProtocol {
         }
         return true
     }
-    
+
+    func gameOver() -> Bool {
+        for player in players {
+            if player.pieces.count <= 0 {
+                return true
+            }
+        }
+        return false
+    }
+}
+
+
+// MARK: Game Logic
+
+extension Game {
     @objc func cellTapped(_ sender: UITapGestureRecognizer) {
         if let view = sender.view {
             let positionTapped = board.position(view.tag)
@@ -250,8 +270,8 @@ class Game: PieceViewProtocol {
                     }
                 }
             }
-            
-            // final part of turn, choosing where to go
+                
+                // final part of turn, choosing where to go
             else {
                 let translation = calculateTranslation(selectedPiece!.position, toPosition: positionTapped, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation)
@@ -271,7 +291,7 @@ class Game: PieceViewProtocol {
                         if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
                             makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
                         }
-
+                        
                         // move the piece
                         makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
                         
@@ -294,12 +314,11 @@ class Game: PieceViewProtocol {
             }
         }
     }
-    
-    func removePieceOccupyingPosition (_ position: Position) {
-        
-        
-    }
-    
+}
+
+// MARK: Moving Pieces
+
+extension Game {
     struct Move {
         let piece: Piece
         let remove: Bool
@@ -339,7 +358,7 @@ class Game: PieceViewProtocol {
                 snapshotPiece.position = move.position!
             }
         }
-
+        
     }
     
     func makeMovesInSnapshot(_ moves: [Move], snapshot: GameSnapshot) {
@@ -348,18 +367,39 @@ class Game: PieceViewProtocol {
         }
     }
 
-    
-    func gameOver() -> Bool {
-        for player in players {
-            if player.pieces.count <= 0 {
-                return true
-            }
+
+    func removePieceOccupyingPosition (_ position: Position) {
+        if let piece = pieceForPosition(position, snapshot: nil) {
+            makeMove(Move(piece: piece, remove: true, position: nil))
         }
-        return false
     }
     
+    func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {
+        
+        // deactivate position constraints
+        NSLayoutConstraint.deactivate(pieceView.positionConstraints)
+        
+        // activate new position constraints matching cell constraints
+        let cellIndex = board.index(position)
+        if let cell = boardView.cells.elementPassing({$0.tag == cellIndex}) {
+            let positionX = NSLayoutConstraint(item: pieceView, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
+            let positionY = NSLayoutConstraint(item: pieceView, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
+            pieceView.positionConstraints = [positionX, positionY]
+            NSLayoutConstraint.activate(pieceView.positionConstraints)
+        }
+        
+        // animate the change
+        boardView.setNeedsUpdateConstraints()
+        UIView.animate(withDuration: duration, animations: {
+            self.boardView.layoutIfNeeded()
+        })
+    }
+}
 
-    
+
+// MARK: Conversions
+
+extension Game {
     func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
         switch direction {
         case .bottom:
@@ -408,25 +448,11 @@ class Game: PieceViewProtocol {
         }
         return nil
     }
-
-    func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {
-        
-        // deactivate position constraints
-        NSLayoutConstraint.deactivate(pieceView.positionConstraints)
-        
-        // activate new position constraints matching cell constraints
-        let cellIndex = board.index(position)
-        if let cell = boardView.cells.elementPassing({$0.tag == cellIndex}) {
-            let positionX = NSLayoutConstraint(item: pieceView, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
-            let positionY = NSLayoutConstraint(item: pieceView, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
-            pieceView.positionConstraints = [positionX, positionY]
-            NSLayoutConstraint.activate(pieceView.positionConstraints)
-        }
-        
-        // animate the change
-        boardView.setNeedsUpdateConstraints()
-        UIView.animate(withDuration: duration, animations: {
-            self.boardView.layoutIfNeeded()
-        }) 
+    
+    func playerIndex(player: Player) -> Int? {
+        return players.index(where: {$0.id == player.id})
     }
+    
+
 }
+
