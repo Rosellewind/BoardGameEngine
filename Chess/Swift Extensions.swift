@@ -15,6 +15,15 @@ import CoreLocation
 //        
 //    }
 //}
+extension Int {
+    func isBetweenInForwardLoop(firstInclusive first: Int, lastNotInclusive last: Int) -> Bool {
+        if first <= last {
+            return (self >= first && self < last)
+        } else {
+            return (self >= first || self < last)
+        }
+    }
+}
 
 extension Array {
     /// Return the first element to satify the predicate includeElement. Returns nil if not found or there is an error.

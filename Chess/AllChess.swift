@@ -62,28 +62,25 @@ class ChessGame: Game {
         
         super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
 
-        // chessVariation rules
-        switch chessVariation {
-        case .standardChess:
-            // add turn conditions
-            turnConditions = [ChessTurnCondition.cantExposeKing.rawValue]
-        default:
-            break
-        }
+//        // chessVariation rules
+//        switch chessVariation {
+//        case .standardChess:
+//            // add turn conditions
+//            turnConditions = [ChessTurnCondition.cantExposeKing.rawValue]
+//        default:
+//            break
+//        }
     }
     
     override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
-        var conditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
-        
-//        // add completion to remove piece that occupies destination
-//        var completions = conditionsAreMet.completions ?? Array<()->Void>()
-//        let chessCompletionRemoveOccupying: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
-//        completions.append(completion)
+        let superConditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
+        var isMet = superConditionsAreMet.isMet
+        var completions = superConditionsAreMet.completions ?? Array<()->Void>()
 
         if let player = thisPiece.player {
-            for condition in conditions ?? [] where conditionsAreMet.isMet == true {
+            for condition in conditions ?? [] where isMet == true {
                 if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
                     switch chessLegalIfCondition {
                     case .rookCanCastle:
@@ -136,13 +133,14 @@ class ChessGame: Game {
                             }
                         }
                         if castlingRooks.count == 0 {
-                            conditionsAreMet = (false, nil)
+                            isMet = false
                         } else {
                             // move the rook
-                            var completions = conditionsAreMet.completions ?? Array<()->Void>()
+                            
+                            
                             let completion: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
                             completions.append(completion)
-                            conditionsAreMet = (true, completions)
+                            isMet = true
                         }
                         
                     case .cantBeInCheckDuring:
@@ -155,16 +153,14 @@ class ChessGame: Game {
                                 makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
                                 if isCheck(player, snapshot: reusableGameSnapshot) {
                                     print("IsInCheckDuring is true")
-                                    conditionsAreMet = (false, nil)
-                                    break
+                                    isMet = false
                                 }
                             }
                         }
                     case .markAdvancedTwo:
-                        var completions = conditionsAreMet.completions ?? Array<()->Void>()
                         let completion: () -> Void = {(piece as? ChessPiece)?.roundWhenPawnAdvancedTwo = self.round}
                         completions.append(completion)
-                        conditionsAreMet = (true, completions)
+                        isMet = true
                     
                     case .mustBeOccupiedByOpponentOrEnPassant:
                         if let positions = condition.positions {
@@ -176,33 +172,36 @@ class ChessGame: Game {
                                 let enPassantPosition = positionFromTranslation(positions[1], fromPosition: thisPiece.position, direction: player.forwardDirection)
                                 if let possiblePawn = pieceForPosition(enPassantPosition, snapshot: nil) as? ChessPiece {
                                     if let roundWhenPawnAdvancedTwo = possiblePawn.roundWhenPawnAdvancedTwo {
-                                        if let playerIndex = playerIndex(player: player) {
-                                            let isStillFirstRoundSinceAdvancedTwo = (playerIndex >= firstInRound && round == roundWhenPawnAdvancedTwo + 1) || (playerIndex < firstInRound && round == roundWhenPawnAdvancedTwo)
-                                            if isStillFirstRoundSinceAdvancedTwo {
-                                                enPassantPawn = possiblePawn
+                                        if let pawnIndex = playerIndex(player: player) {
+                                            if let enPassantPlayer = possiblePawn.player {
+                                                if let enPassantIndex = playerIndex(player: enPassantPlayer) {
+                                                    if pawnIndex != enPassantIndex {
+                                                        let isBetween = pawnIndex.isBetweenInForwardLoop(firstInclusive: firstInRound, lastNotInclusive: enPassantIndex)
+                                                        let isStillFirstRoundSinceAdvancedTwo = (isBetween && round == roundWhenPawnAdvancedTwo + 1) || (!isBetween && round == roundWhenPawnAdvancedTwo)
+                                                        if isStillFirstRoundSinceAdvancedTwo {
+                                                            enPassantPawn = possiblePawn
+                                                        }
+                                                    }
+                                                }
                                             }
+    
                                         }
                                     }
                                 }
+                                if occupiedCondition.completions != nil{
+                                    completions += occupiedCondition.completions!
+                                }
                                 
                                 if enPassantPawn != nil {
-                                    var completions = conditionsAreMet.completions ?? Array<()->Void>()
                                     let enPassantCompletion: () -> Void = {self.removePieceAndViewFromGame(piece: enPassantPawn!)}
                                     completions.append(enPassantCompletion)
-                                    if occupiedCondition.isMet {
-                                        if occupiedCondition.completions != nil {
-                                            completions += occupiedCondition.completions!
-                                        }
-                                    }
-                                    conditionsAreMet = (true, completions)
+                                    isMet = true
                                 } else {
-
-                                    conditionsAreMet = occupiedCondition
+                                    isMet = occupiedCondition.isMet
                                 }
                             }
                         }
                     case .checkForPromotion:
-                        var completions = conditionsAreMet.completions ?? Array<()->Void>()
                         let checkPromotionCompletion: () -> Void = {
                             if let direction = piece.player?.forwardDirection {
                                 var hasReachedEighthRank = false
@@ -244,12 +243,17 @@ class ChessGame: Game {
                             }
                         }
                         completions.append(checkPromotionCompletion)
-                        conditionsAreMet = (true, completions)
+                        isMet = true
                     }
                 }
             }
         }
-        return conditionsAreMet
+        
+        if isMet == false || completions.count == 0 {
+            return (isMet, nil)
+        } else {
+            return (isMet, completions)
+        }
     }
     
     func moveARook(_ rooks: [Piece], position: Position) {
@@ -301,30 +305,30 @@ class ChessGame: Game {
         }
     }
     
-    override func turnConditionsAreMet(_ conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
-        var conditionsAreMet = super.turnConditionsAreMet(conditions, snapshot: snapshot)
-        let thisPlayers = snapshot?.players ?? players
-        let thisWhoseTurn = snapshot?.whoseTurn ?? whoseTurn
-        let thisNextTurn = snapshot?.nextTurn ?? nextTurn
-        for condition in conditions ?? [] where conditionsAreMet == true {
-            if let chessTurnCondition =  ChessTurnCondition(rawValue: condition) {
-                switch chessTurnCondition {
-                case .cantExposeKing:
-                    if let king = thisPlayers[thisWhoseTurn].pieces.elementPassing({$0.name == "King"}) {
-                        // for every opponents piece in new positions, can king be taken?
-                        for nextPlayersPiece in thisPlayers[thisNextTurn].pieces where conditionsAreMet == true {
-                            let translation = calculateTranslation(nextPlayersPiece.position, toPosition: king.position, direction: thisPlayers[thisNextTurn].forwardDirection)
-                            let moveFunction = nextPlayersPiece.isLegalMove(translation)
-                            if moveFunction.isLegal && pieceConditionsAreMet(nextPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet{
-                                conditionsAreMet = false
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return conditionsAreMet
-    }
+//    override func turnConditionsAreMet(_ conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
+//        var conditionsAreMet = super.turnConditionsAreMet(conditions, snapshot: snapshot)
+//        let thisPlayers = snapshot?.players ?? players
+//        let thisWhoseTurn = snapshot?.whoseTurn ?? whoseTurn
+//        let thisNextTurn = snapshot?.nextTurn ?? nextTurn
+//        for condition in conditions ?? [] where conditionsAreMet == true {
+//            if let chessTurnCondition =  ChessTurnCondition(rawValue: condition) {
+//                switch chessTurnCondition {
+//                case .cantExposeKing:
+//                    if let king = thisPlayers[thisWhoseTurn].pieces.elementPassing({$0.name == "King"}) {
+//                        // for every opponents piece in new positions, can king be taken?
+//                        for nextPlayersPiece in thisPlayers[thisNextTurn].pieces where conditionsAreMet == true {
+//                            let translation = calculateTranslation(nextPlayersPiece.position, toPosition: king.position, direction: thisPlayers[thisNextTurn].forwardDirection)
+//                            let moveFunction = nextPlayersPiece.isLegalMove(translation)
+//                            if moveFunction.isLegal && pieceConditionsAreMet(nextPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet{
+//                                conditionsAreMet = false
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return conditionsAreMet
+//    }
     
     override func gameOver() -> Bool {
         for player in players {
@@ -503,14 +507,14 @@ class ChessPieceCreator: PiecesCreator {
         case .King:
             return ChessPiece(name: name.rawValue, position: Position(row: 0, column: 4), isLegalMove: {(translation: Translation) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, positions: [Position]?)]?) in
                 var isLegal = false
-                var conditions: [(condition: Int, positions: [Position]?)]?
+                var conditions: [(condition: Int, positions: [Position]?)] = [(condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation])]
                 
                 // exactly one square horizontally, vertically, or diagonally, 1 castling per game
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){
                     isLegal = true
-                    conditions = [(LegalIfCondition.cantBeOccupiedBySelf.rawValue, [translation])]
+                    conditions.append((LegalIfCondition.cantBeOccupiedBySelf.rawValue, [translation]))
                 } else if translation.row == 0 && abs(translation.column) ==  2 {
                     // Castling:
                     // 1. neither king nor rook has moved
@@ -520,7 +524,10 @@ class ChessPieceCreator: PiecesCreator {
                     let signage = translation.column > 0 ? 1 : -1
                     isLegal = true
                     // checked here: king.isInitialMove, RookCanCastle[translation], no pieces inbetween king and landing spot, CantBeInCheckDuring[0,0][0, abs-1]
-                    conditions = [(LegalIfCondition.isInitialMove.rawValue, nil), (ChessLegalIfCondition.rookCanCastle.rawValue, [Position(row: 0, column: signage)]), (LegalIfCondition.cantBeOccupied.rawValue,[translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (ChessLegalIfCondition.cantBeInCheckDuring.rawValue, [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
+//                    let condition: [(condition: Int, positions: [Position]?)] = [(LegalIfCondition.isInitialMove.rawValue, nil), (ChessLegalIfCondition.rookCanCastle.rawValue, [Position(row: 0, column: signage)]), (LegalIfCondition.cantBeOccupied.rawValue,[translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (ChessLegalIfCondition.cantBeInCheckDuring.rawValue, [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
+                    
+                    let moreConditions: [(condition: Int, positions: [Position]?)] = [(condition: LegalIfCondition.isInitialMove.rawValue, positions: nil), (condition: ChessLegalIfCondition.rookCanCastle.rawValue, positions: [Position(row: 0, column: signage)]), (condition: LegalIfCondition.cantBeOccupied.rawValue, positions: [translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
+                    conditions += moreConditions
                 }
                 return (isLegal, conditions)
             })
@@ -556,6 +563,7 @@ class ChessPieceCreator: PiecesCreator {
                 if cantBeOccupied.count > 0 {
                     conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
                 }
+                conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation]))
                 return (isLegal, conditions)
             })
         case .Rook:
@@ -583,6 +591,7 @@ class ChessPieceCreator: PiecesCreator {
                 if cantBeOccupied.count > 0 {
                     conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
                 }
+                conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation]))
                 return (isLegal, conditions)
             })
         case .Bishop:
@@ -590,7 +599,7 @@ class ChessPieceCreator: PiecesCreator {
                 var isLegal = false
                 var cantBeOccupied = [Position]()
                 
-                // can't land on self
+                // can't land on self or leave self in check
                 var conditions: [(condition: Int, positions: [Position]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, positions: [translation])]
                 
                 // any number of vacant squares in any diagonal direction
@@ -607,6 +616,7 @@ class ChessPieceCreator: PiecesCreator {
                 if cantBeOccupied.count > 0 {
                     conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
                 }
+                conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation]))
                 return (isLegal, conditions)
             })
         case .Knight:
@@ -619,7 +629,7 @@ class ChessPieceCreator: PiecesCreator {
                     isLegal = false
                 } else if abs(translation.row) == 2 && abs(translation.column) == 1 || abs(translation.row) == 1 && abs(translation.column) == 2{
                     isLegal = true
-                    conditions = [(LegalIfCondition.cantBeOccupiedBySelf.rawValue, [translation])]
+                    conditions = [(LegalIfCondition.cantBeOccupiedBySelf.rawValue, [translation]), (condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation])]
                 }
                 return (isLegal, conditions)
             })
@@ -643,6 +653,7 @@ class ChessPieceCreator: PiecesCreator {
                     isLegal = true
                     conditions.append((ChessLegalIfCondition.mustBeOccupiedByOpponentOrEnPassant.rawValue, [translation, Translation(row: 0, column:translation.column)]))
                 }
+                conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, positions: [translation]))
                 return (isLegal, conditions)
             })
             return piece
