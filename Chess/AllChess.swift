@@ -152,7 +152,6 @@ class ChessGame: Game {
                                 let position = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: thisPlayer.forwardDirection)
                                 makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
                                 if isCheck(player, snapshot: reusableGameSnapshot) {
-                                    print("IsInCheckDuring is true")
                                     isMet = false
                                 }
                             }
@@ -306,11 +305,10 @@ class ChessGame: Game {
     }
     
     override func gameOver() -> Bool {
-        for player in players {
-            if isCheckMate(player, snapshot: nil) {
-                presenterDelegate?.gameMessage((player.name ?? "") + " Is In Checkmate!!!", status: .gameOver)
-                return true
-            }
+        let player = players[whoseTurn]
+        if isCheckMate(player, snapshot: nil) {
+            presenterDelegate?.gameMessage((player.name ?? "") + " Is In Checkmate!!!", status: .gameOver)
+            return true
         }
         return false
     }
@@ -333,7 +331,6 @@ class ChessGame: Game {
                 }
             }
         }
-        print("\(thisPlayer.name) is in Check: \(isCheck)")
         return isCheck
     }
     // midTurn, between moves,
@@ -344,7 +341,6 @@ class ChessGame: Game {
 //        if snapshot.isCheck
 //        check all translations pieces can move
         var isCheckMate = false
-        let player = players[whoseTurn]
         if isCheck(player, snapshot: snapshot) {
             isCheckMate = true
             for piece in player.pieces where isCheckMate == true {
@@ -354,7 +350,7 @@ class ChessGame: Game {
                     if piece.isPossibleTranslation(translation) {   // eliminate some iterations
                         self.reusableGameSnapshot = GameSnapshot(game: self)//not using snapshot para
                         let moveFunction = piece.isLegalMove(translation)
-                        let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: self.reusableGameSnapshot)
+                        let pieceConditions = pieceConditionsAreMet(piece, conditions: moveFunction.conditions, snapshot: self.reusableGameSnapshot)
                         
                         if moveFunction.isLegal && pieceConditions.isMet {
                             
@@ -373,7 +369,7 @@ class ChessGame: Game {
                                     completion()
                                 }
                             }
-                            
+                        
                             if isCheck(player, snapshot: self.reusableGameSnapshot) == false {
                                 isCheckMate = false
                             }

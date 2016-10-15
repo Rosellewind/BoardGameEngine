@@ -252,6 +252,7 @@ class Game: PieceViewProtocol {
     }
 
     func gameOver() -> Bool {
+        
         for player in players {
             if player.pieces.count <= 0 {
                 return true

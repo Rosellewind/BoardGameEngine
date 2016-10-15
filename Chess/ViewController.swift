@@ -30,9 +30,11 @@ class ViewController: UIViewController, GamePresenterProtocol {
     }
     
     func setupGame() {
+        for subview in gameView.subviews {
+            subview.removeFromSuperview()
+        }
         game = ChessGame(chessVariation: .standardChess, gameView: gameView)
         game.presenterDelegate = self
-//        game = Game(gameView: gameView)
     }
     
     func gameMessage(_ string: String, status: GameStatus?) {
@@ -40,7 +42,7 @@ class ViewController: UIViewController, GamePresenterProtocol {
         switch status ?? .default {
         case .gameOver:
             //show restart button
-            let alert = UIAlertController(title: "We have a winner!", message: nil, preferredStyle: .alert)
+            let alert = UIAlertController(title: "We have a winner!", message: string, preferredStyle: .alert)
             let okay = UIAlertAction(title: "OK", style: .default, handler: { (UIAlertAction) in
                 self.setupGame()
             })
