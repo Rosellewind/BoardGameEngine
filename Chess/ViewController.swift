@@ -40,7 +40,12 @@ class ViewController: UIViewController, GamePresenterProtocol {
         switch status ?? .default {
         case .gameOver:
             //show restart button
-            setupGame()////temp
+            let alert = UIAlertController(title: "We have a winner!", message: nil, preferredStyle: .alert)
+            let okay = UIAlertAction(title: "OK", style: .default, handler: { (UIAlertAction) in
+                self.setupGame()
+            })
+            alert.addAction(okay)
+            self.present(alert, animated: true, completion: nil)
             break
         default:
             break

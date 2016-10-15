@@ -364,46 +364,75 @@ class ChessGame: Game {
     // midTurn, between moves,
     func isCheckMate(_ player: Player, snapshot: GameSnapshot?) -> Bool {////is being called twice, once for each player
         
+        // after a move, check next player for checkmate if in check
+        // if in check, can use any piece to get out of check?
+//        if snapshot.isCheck
+//        check all positions pieces can move
         var isCheckMate = true
-        if !isCheck(player, snapshot: snapshot) {
-            isCheckMate = false
-        } else {
-            let otherPlayers = players.filter({$0 !== player})
-            if let king = player.pieces.elementPassing({$0.name == "King"}) {
-                var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
-                                        Position(row: king.position.row - 1, column: king.position.column),
-                                        Position(row: king.position.row - 1, column: king.position.column + 1),
-                                        Position(row: king.position.row, column: king.position.column - 1),
-                                        Position(row: king.position.row, column: king.position.column),
-                                        Position(row: king.position.row, column: king.position.column + 1),
-                                        Position(row: king.position.row + 1, column: king.position.column - 1),
-                                        Position(row: king.position.row + 1, column: king.position.column),
-                                        Position(row: king.position.row + 1, column: king.position.column + 1)]
-                // trim positions that are off the board
-                positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
-                
-                // trim positions that are already occupied
-                positionsToCheck = positionsToCheck.filter({pieceForPosition($0, snapshot: nil) == nil})
-                if positionsToCheck.count > 0 {
-                    for position in positionsToCheck where isCheckMate == true {
-                        var positionIsSafe = true
-                        for otherPlayer in otherPlayers where positionIsSafe == true {
-                            for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
-                                let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
-                                let moveFunction = otherPlayersPiece.isLegalMove(translation)
-                                positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
-                            }
-                        }
-                        if positionIsSafe {
-                            isCheckMate = false
-                        }
-                    }
-                } else {
-                    isCheckMate = false
-                }
-            }
-        }
+        let player = players[whoseTurn]
+//        if isCheck(player, snapshot: nil) {
+//            for piece in player.pieces, when isCheckMate == true {
+//                for move in piece.moves {
+//                    reusableGameSnapshot = GameSnapshot(game: self)
+//                    makeMove(Move())
+//                    if isCheck(player, snapshot: reusableGameSnapshot) == false {
+//                        isCheckMate = false
+//                    }
+//                }
+//            }
+//        }
         return isCheckMate
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+//        var isCheckMate = true
+//        if !isCheck(player, snapshot: snapshot) {
+//            isCheckMate = false
+//        } else {
+//            let otherPlayers = players.filter({$0 !== player})
+//            if let king = player.pieces.elementPassing({$0.name == "King"}) {
+//                var positionsToCheck = [Position(row: king.position.row - 1, column: king.position.column - 1),
+//                                        Position(row: king.position.row - 1, column: king.position.column),
+//                                        Position(row: king.position.row - 1, column: king.position.column + 1),
+//                                        Position(row: king.position.row, column: king.position.column - 1),
+//                                        Position(row: king.position.row, column: king.position.column),
+//                                        Position(row: king.position.row, column: king.position.column + 1),
+//                                        Position(row: king.position.row + 1, column: king.position.column - 1),
+//                                        Position(row: king.position.row + 1, column: king.position.column),
+//                                        Position(row: king.position.row + 1, column: king.position.column + 1)]
+//                // trim positions that are off the board
+//                positionsToCheck = positionsToCheck.filter({$0.row >= 0 && $0.row < board.numRows})
+//                
+//                // trim positions that are already occupied
+//                positionsToCheck = positionsToCheck.filter({pieceForPosition($0, snapshot: nil) == nil})
+//                if positionsToCheck.count > 0 {
+//                    for position in positionsToCheck where isCheckMate == true {
+//                        var positionIsSafe = true
+//                        for otherPlayer in otherPlayers where positionIsSafe == true {
+//                            for otherPlayersPiece in otherPlayer.pieces where positionIsSafe == true {
+//                                let translation = calculateTranslation(otherPlayersPiece.position, toPosition: position, direction: otherPlayer.forwardDirection)
+//                                let moveFunction = otherPlayersPiece.isLegalMove(translation)
+//                                positionIsSafe = !(moveFunction.isLegal && pieceConditionsAreMet(otherPlayersPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet)
+//                            }
+//                        }
+//                        if positionIsSafe {
+//                            isCheckMate = false
+//                        }
+//                    }
+//                } else {
+//                    isCheckMate = false
+//                }
+//            }
+//        }
+//        return isCheckMate
     }
     
     fileprivate func promote(piece: Piece, toType: ChessPieceType) {

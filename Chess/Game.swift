@@ -326,8 +326,8 @@ extension Game {
                         }
                         
                         // check for gameOver
-                        gameOver()
                         whoseTurn += 1
+                        gameOver()
                         presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
                         
 //                    }
