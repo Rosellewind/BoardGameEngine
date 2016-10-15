@@ -64,16 +64,23 @@ class Board {
     var numRows: Int
     var numColumns: Int
     var numCells: Int {get {return numRows * numColumns}}
-    let skipCells: [Int]?
+    let skipCells: Set<Int>?
+    var indexes = Set<Int>()
     
     convenience init() {
         self.init(numRows: 5, numColumns: 5)
     }
     
-    init(numRows: Int, numColumns: Int, skipCells: [Int]? = nil) {
+    init(numRows: Int, numColumns: Int, skipCells: Set<Int>? = nil) {
         self.numRows = numRows
         self.numColumns = numColumns
         self.skipCells = skipCells
+        var temp = [Int]()
+        temp += 0..<numCells
+        indexes = Set(temp)
+        if let skip = skipCells {
+            indexes = indexes.subtracting(skip)
+        }
     }
     
     func index(_ position: Position) -> Int {
@@ -89,7 +96,7 @@ class Board {
     }
     
     func isCell(index: Int) -> Bool {
-        return index > 0 && index < numCells && skipCells?.elementPassing({$0 == index}) == nil
+        return indexes.contains(index)
     }
     
     func copy() -> Board {

@@ -142,7 +142,8 @@ class Game: PieceViewProtocol {
         let defaultBoardView = BoardView(board: defaultBoard, checkered: false, images: images, backgroundColors: nil)
         
         // create the players with pieces
-        let defaultPlayers = [Player(name: "alien", id: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isLegalMove: {_ in return (true, nil)})])]
+        let isPossibleTranslation: (Translation) -> Bool = {_ in return true}
+        let defaultPlayers = [Player(name: "alien", id: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: {_ in return (true, nil)})])]
         
         // create pieceView's
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers)
@@ -193,7 +194,7 @@ class Game: PieceViewProtocol {
     
     // MARK: Game Logic (that can't be in an extension)
     
-    func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, positions: [Position]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: Completions?) {
+    func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: Completions?) {
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
         
@@ -204,7 +205,7 @@ class Game: PieceViewProtocol {
                 if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
                     switch legalIfCondition {
                     case .cantBeOccupied:
-                        for translation in condition.positions ?? [] {
+                        for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
                             if pieceOccupying != nil {
@@ -214,7 +215,7 @@ class Game: PieceViewProtocol {
                         ////pos to trans
                         
                     case .mustBeOccupied:
-                        for translation in condition.positions ?? [] {
+                        for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
                             if pieceOccupying == nil {
@@ -222,7 +223,7 @@ class Game: PieceViewProtocol {
                             }
                         }
                     case .mustBeOccupiedByOpponent:
-                        for translation in condition.positions ?? [] {
+                        for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
                             if pieceOccupying == nil {
@@ -232,7 +233,7 @@ class Game: PieceViewProtocol {
                             }
                         }
                     case .cantBeOccupiedBySelf:
-                        for translation in condition.positions ?? [] {
+                        for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
                             let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
                             if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
@@ -249,18 +250,6 @@ class Game: PieceViewProtocol {
         }
         return (isMet, nil)
     }
-    
-//    func turnConditionsAreMet(_ conditions: [TurnCondition.RawValue]?, snapshot: GameSnapshot?) -> Bool {
-//        for condition in conditions ?? [] {
-//            if let turnCondition = TurnCondition(rawValue: condition) { // implement later
-//                switch turnCondition {
-//                case .none:
-//                    return true
-//                }
-//            }
-//        }
-//        return true
-//    }
 
     func gameOver() -> Bool {
         for player in players {
@@ -300,15 +289,8 @@ extension Game {
                 let moveFunction = selectedPiece!.isLegalMove(translation)
                 let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: nil)
                 
-                // check if move is legal and turn conditions are met
+                // check if move is legal
                 if moveFunction.isLegal && pieceConditions.isMet {
-                    
-                    // create snapshot, check if turn conditions will be met
-                    ///////////what if more than one move? implement
-//                    reusableGameSnapshot = GameSnapshot(game: self)
-//                    makeMoveInSnapshot(Move(piece: selectedPiece!, remove: false, position: positionTapped) , snapshot: reusableGameSnapshot!)
-//                    
-//                    if turnConditionsAreMet(turnConditions, snapshot: reusableGameSnapshot) {
                     
                         // remove occupying piece if needed
                         if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {

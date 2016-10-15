@@ -18,7 +18,7 @@ enum LegalIfCondition: Int {
     case mustBeOccupied, cantBeOccupied, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
 }
 
-typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, conditions: [(condition: Int, positions: [Position]?)]?)
+typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?)
 
 class Piece: NSObject, NSCopying {
     var name: String
@@ -30,16 +30,18 @@ class Piece: NSObject, NSCopying {
         }
     }
     var startingPosition: Position
+    var isPossibleTranslation: (_ : Translation) -> Bool
     var isLegalMove: IsLegalMove
     var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool
     dynamic var selected = false
     weak var player: Player?
     
-    init(name: String, position: Position, isLegalMove: @escaping IsLegalMove) {
+    init(name: String, position: Position, isPossibleTranslation: @escaping (_ : Translation) -> Bool, isLegalMove: @escaping IsLegalMove) {
         self.name = name
         self.position = position
         self.startingPosition = position
+        self.isPossibleTranslation = isPossibleTranslation
         self.isLegalMove = isLegalMove
         self.isFirstMove = true
     }
@@ -49,6 +51,7 @@ class Piece: NSObject, NSCopying {
         self.id = toCopy.id
         self.position = toCopy.position
         self.startingPosition = toCopy.position
+        self.isPossibleTranslation = toCopy.isPossibleTranslation
         self.isLegalMove = toCopy.isLegalMove
         self.isFirstMove = toCopy.isFirstMove
         self.selected = toCopy.selected
