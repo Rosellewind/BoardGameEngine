@@ -17,10 +17,6 @@ private enum ChessLegalIfCondition: Int {
     case cantBeInCheckDuring = 1000, rookCanCastle, markAdvancedTwo, mustBeOccupiedByOpponentOrEnPassant, checkForPromotion
 }
 
-private enum ChessTurnCondition: Int {
-    case cantExposeKing = 1000
-}
-
 private enum PlayerOrientation: Int {
     case bottom, top, left, right
     func color() -> String {
@@ -61,15 +57,6 @@ class ChessGame: Game {
         let chessPlayers = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
         
         super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
-
-//        // chessVariation rules
-//        switch chessVariation {
-//        case .standardChess:
-//            // add turn conditions
-//            turnConditions = [ChessTurnCondition.cantExposeKing.rawValue]
-//        default:
-//            break
-//        }
     }
     
     override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first

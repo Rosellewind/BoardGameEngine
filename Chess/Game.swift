@@ -6,25 +6,20 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// check/mate
-//// move from being in check?
+//// memory management, game not released when reassigned, trying weak view/delegates
 
 
 import UIKit
 
 
 
-protocol GamePresenterProtocol {
+protocol GamePresenterProtocol: class {
     func gameMessage(_ string: String, status: GameStatus?)
     func showAlert(_ alert: UIViewController)
 }
 
 enum GameStatus {
     case gameOver, whoseTurn, illegalMove, `default`
-}
-
-enum TurnCondition: Int {   // subclasses may add their own
-    case none
 }
 
 typealias Completions = [(() -> Void)]
@@ -67,7 +62,6 @@ class Game: PieceViewProtocol {
     var players: [Player]
     var pieceViews: [PieceView] = [PieceView]()
     var selectedPiece: Piece?
-//    var turnConditions: [TurnCondition.RawValue]?
     var round = 0
     var firstInRound = 0
     var whoseTurn: Int = 0 {
@@ -87,7 +81,7 @@ class Game: PieceViewProtocol {
             return next
         }
     }
-    var presenterDelegate: GamePresenterProtocol? {
+    weak var presenterDelegate: GamePresenterProtocol? {
         didSet {
             presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + " Starts!", status: .whoseTurn)
         }
@@ -148,6 +142,11 @@ class Game: PieceViewProtocol {
         // create pieceView's
         self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers)
     }
+    
+    deinit {
+       print("deinit Game")
+    }
+
     
     
     func makePieceViews(players: [Player]) -> [PieceView] {
@@ -413,7 +412,7 @@ extension Game {
         UIView.animate(withDuration: duration, animations: {
             self.boardView.layoutIfNeeded()
         })
-    }
+}
 }
 
 

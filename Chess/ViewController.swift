@@ -41,10 +41,13 @@ class ViewController: UIViewController, GamePresenterProtocol {
         self.topLabel.text = string
         switch status ?? .default {
         case .gameOver:
+        
             //show restart button
             let alert = UIAlertController(title: "We have a winner!", message: string, preferredStyle: .alert)
             let okay = UIAlertAction(title: "OK", style: .default, handler: { (UIAlertAction) in
-                self.setupGame()
+                DispatchQueue.main.async {  // needed to prevent: _BSMachError: (os/kern) invalid capability (20), _BSMachError: (os/kern) invalid name (15)
+                    self.setupGame()
+                }
             })
             alert.addAction(okay)
             self.present(alert, animated: true, completion: nil)

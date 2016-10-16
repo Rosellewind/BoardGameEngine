@@ -31,6 +31,10 @@ class Player {
         pieces.forEach({$0.player = self})
     }
     
+    deinit {
+        print("deinit Player")
+    }
+    
     func copy() -> Player {
         return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({($0.copy() as! Piece)}))
     }

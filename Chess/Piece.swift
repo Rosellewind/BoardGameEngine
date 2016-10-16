@@ -58,6 +58,10 @@ class Piece: NSObject, NSCopying {
         self.player = toCopy.player
     }
     
+    deinit {
+        print("deinit Piece")
+    }
+    
     func copy(with zone: NSZone?) -> Any {
         return type(of: self).init(toCopy: self)
     }
@@ -65,14 +69,14 @@ class Piece: NSObject, NSCopying {
 
 
 private var myContext = 0
-protocol PieceViewProtocol {
+protocol PieceViewProtocol: class {
     func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval)
 }
 
 class PieceView: UIView {
     var image: UIImage
     var positionConstraints = [NSLayoutConstraint]()
-    var delegate: PieceViewProtocol?
+    weak var delegate: PieceViewProtocol?
     var observing: [(objectToObserve: NSObject, keyPath: String)]? {
         willSet {
             for observe in observing ?? [] {
@@ -103,6 +107,8 @@ class PieceView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+
+    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if context == &myContext {
             if keyPath == "selected" {
@@ -124,6 +130,10 @@ class PieceView: UIView {
     }
     
     deinit {
+        print("deinit PieceView")
+        for observe in observing ?? [] {
+            observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
+        }
         observing = nil
     }
     

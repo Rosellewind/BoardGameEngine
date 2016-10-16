@@ -83,6 +83,10 @@ class Board {
         }
     }
     
+    deinit {
+        print("deinit Board")
+    }
+    
     func index(_ position: Position) -> Int {
         return position.column + position.row * numColumns
     }
@@ -125,8 +129,12 @@ class BoardView: UIView {
         self.backgroundColors = backgroundColors
         super.init(frame: CGRect.zero)
         makeCells(board)
-        
-              }
+    }
+    
+    deinit {
+        print("deinit BoardView")
+    }
+    
     func makeCells(_ board: Board) {
         var imageIndex = 0 {
             didSet {if imageIndex >= images?.count {imageIndex = 0}}
