@@ -56,6 +56,10 @@ class ViewController: UIViewController, GamePresenterProtocol {
             break
         }
     }
+    
+    func secondaryGameMessage(string: String) {
+        self.bottomLabel.text = string
+    }
 
     func showAlert(_ alert: UIViewController) {
         alert.popoverPresentationController?.sourceView = self.view

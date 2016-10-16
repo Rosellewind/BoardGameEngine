@@ -6,7 +6,10 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-//// memory management, game not released when reassigned, trying weak view/delegates
+// TODO: organize chess files
+//      visual overview omnigraffle
+//      message when in check
+//      change subclass of chessPiece
 
 
 import UIKit
@@ -15,6 +18,7 @@ import UIKit
 
 protocol GamePresenterProtocol: class {
     func gameMessage(_ string: String, status: GameStatus?)
+    func secondaryGameMessage(string: String)
     func showAlert(_ alert: UIViewController)
 }
 

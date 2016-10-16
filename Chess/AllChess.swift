@@ -293,6 +293,12 @@ class ChessGame: Game {
     
     override func gameOver() -> Bool {
         let player = players[whoseTurn]
+        if isCheck(player, snapshot: nil) {
+            let message = player.name != nil ? (player.name! + " is in check") : "in check"
+            presenterDelegate?.secondaryGameMessage(string: message)
+        } else {
+            presenterDelegate?.secondaryGameMessage(string: "")
+        }
         if isCheckMate(player, snapshot: nil) {
             presenterDelegate?.gameMessage((player.name ?? "") + " Is In Checkmate!!!", status: .gameOver)
             return true
