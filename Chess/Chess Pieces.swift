@@ -146,6 +146,8 @@ class ChessPieceCreator: PiecesCreator {
             
             pieces.append(contentsOf: royalty)
             pieces.append(contentsOf: pawns)
+        default:
+            print("implement")
         }
         
         // set the id and isFirstMove

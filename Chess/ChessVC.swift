@@ -13,6 +13,7 @@ class ChessVC: UIViewController, GamePresenterProtocol {
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!
     
+    var chessVariation: ChessVariation?
     var game: Game!
 
     
@@ -33,7 +34,7 @@ class ChessVC: UIViewController, GamePresenterProtocol {
         for subview in gameView.subviews {
             subview.removeFromSuperview()
         }
-        game = ChessGame(chessVariation: .standardChess, gameView: gameView)
+        game = ChessGame(chessVariation: chessVariation ?? .standardChess, gameView: gameView)
         game.presenterDelegate = self
     }
     

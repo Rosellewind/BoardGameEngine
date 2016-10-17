@@ -10,7 +10,22 @@ import UIKit
 
 
 enum ChessVariation: Int {
-    case standardChess, fourPlayer, galaxyChess
+    case standardChess, holeChess, fourPlayer, fourPlayerX, galaxyChess
+    static let allValues = [standardChess, holeChess, fourPlayer, fourPlayerX, galaxyChess]
+    func name() -> String {
+        switch self {
+        case .standardChess:
+            return "Chess"
+        case .holeChess:
+            return "Chess with a Hole"
+        case .fourPlayer:
+            return "Four Player Chess"
+        case .fourPlayerX:
+            return "Four Player Chess with an X"
+        case .galaxyChess:
+            return "Galaxy Chess"
+        }
+    }
 }
 
 class ChessGame: Game {
