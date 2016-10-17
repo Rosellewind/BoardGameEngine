@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  ChessVC.swift
 //  Chess
 //
 //  Created by Roselle Milvich on 5/15/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, GamePresenterProtocol {
+class ChessVC: UIViewController, GamePresenterProtocol {
     @IBOutlet weak var topLabel: UILabel!
     @IBOutlet weak var gameView: UIView!
     @IBOutlet weak var bottomLabel: UILabel!

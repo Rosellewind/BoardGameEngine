@@ -9,7 +9,8 @@
 // TODO: organize chess files
 //      visual overview omnigraffle
 //      message when in check
-//      change subclass of chessPiece
+//      change segue, delete VC
+//      make board variations with block/x in middle
 
 
 import UIKit
@@ -166,7 +167,13 @@ class Game: PieceViewProtocol {
     }
     
     func makePieceView(piece: Piece) -> PieceView? {
-        if let image = UIImage(named: piece.name + (piece.player?.name ?? "")) {
+        var name = piece.name + (piece.player?.name ?? "")
+        if piece.player?.name == "Red" {
+            name = piece.name + "Black"
+        } else if piece.player?.name == "Blue" {
+            name = piece.name + "White"//temp
+        }
+        if let image = UIImage(named: name) {
             return PieceView(image: image, pieceTag: piece.id)
         }
         return nil
@@ -254,14 +261,12 @@ class Game: PieceViewProtocol {
         return (isMet, nil)
     }
 
-    func gameOver() -> Bool {
-        
+    func checkForGameOver() {
         for player in players {
-            if player.pieces.count <= 0 {
-                return true
+            if player.pieces.count == 0 {
+                presenterDelegate?.gameMessage("Game Over", status: .gameOver)
             }
         }
-        return false
     }
 }
 
@@ -295,28 +300,26 @@ extension Game {
                 
                 // check if move is legal
                 if moveFunction.isLegal && pieceConditions.isMet {
+                
+                    // remove occupying piece if needed
+                    if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
+                        makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
+                    }
                     
-                        // remove occupying piece if needed
-                        if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
-                            makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
+                    // move the piece
+                    makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
+                    
+                    // completions
+                    if let completions = pieceConditions.completions {
+                        for completion in completions {
+                            completion()
                         }
-                        
-                        // move the piece
-                        makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
-                        
-                        // completions
-                        if let completions = pieceConditions.completions {
-                            for completion in completions {
-                                completion()
-                            }
-                        }
-                        
-                        // check for gameOver
-                        whoseTurn += 1
-                        gameOver()
-                        presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
-                        
-//                    }
+                    }
+                    
+                    // check for gameOver
+                    checkForGameOver()
+                    whoseTurn += 1
+                    presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
                 }
                 selectedPiece!.selected = false
                 selectedPiece = nil
@@ -426,15 +429,26 @@ extension Game {
     func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
         switch direction {
         case .bottom:
+//            let row = fromPosition.row + translation.row
+//            let column = fromPosition.column + translation.column
             let row = fromPosition.row + translation.row
-            let column = fromPosition.column + translation.column
+            let column = fromPosition.column - translation.column
+
             return Position(row: row, column: column)
-        case .top:
+        case .top://// why one -? two +?
+//            let row = fromPosition.row - translation.row
+//            let column = fromPosition.column + translation.column
             let row = fromPosition.row - translation.row
             let column = fromPosition.column + translation.column
             return Position(row: row, column: column)
-        default:
-            return Position(row: 0, column: 0) //// implement others later
+        case .left:////test this
+            let row = fromPosition.row - translation.column
+            let column = fromPosition.column - translation.row
+            return Position(row: row, column: column)
+        case .right:////test this
+            let row = fromPosition.row + translation.column
+            let column = fromPosition.column + translation.row
+            return Position(row: row, column: column)
         }
     }
     
@@ -442,15 +456,25 @@ extension Game {
         
         switch direction {
         case .bottom:
+//            let row = toPosition.row - fromPosition.row
+//            let column = toPosition.column - fromPosition.column
             let row = toPosition.row - fromPosition.row
-            let column = toPosition.column - fromPosition.column
+            let column = fromPosition.column - toPosition.column
             return Translation(row: row, column: column)
         case .top:
+//            let row = fromPosition.row - toPosition.row
+//            let column = toPosition.column - fromPosition.column
             let row = fromPosition.row - toPosition.row
             let column = toPosition.column - fromPosition.column
             return Translation(row: row, column: column)
-        default:
-            return Translation(row: 0, column: 0) //// implement others later
+        case .left:
+            let row = fromPosition.column - toPosition.column
+            let column = fromPosition.row - toPosition.row
+            return Translation(row: row, column: column)
+        case .right:
+            let row = toPosition.column - fromPosition.column
+            let column = toPosition.row - fromPosition.row
+            return Translation(row: row, column: column)
         }
     }
     

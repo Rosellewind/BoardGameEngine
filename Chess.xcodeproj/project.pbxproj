@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */; };
-		4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* ViewController.swift */; };
+		4A0F33CC1CE9358B00C25E7D /* ChessVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* ChessVC.swift */; };
 		4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33CD1CE9358B00C25E7D /* Main.storyboard */; };
 		4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33D01CE9358B00C25E7D /* Assets.xcassets */; };
 		4A0F33D41CE9358B00C25E7D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */; };
@@ -29,12 +29,14 @@
 		4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34321CED798C00C25E7D /* QueenBlack.png */; };
 		4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34331CED798C00C25E7D /* RookBlack.png */; };
 		4A3BD31F1D0FB4A4008A14AF /* AllChess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */; };
+		4AC0A3801DB4339200129CDB /* FourPlayerChessVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */; };
+		4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		4A0F33C61CE9358B00C25E7D /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4A0F33CB1CE9358B00C25E7D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		4A0F33CB1CE9358B00C25E7D /* ChessVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessVC.swift; sourceTree = "<group>"; };
 		4A0F33CE1CE9358B00C25E7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A0F33D01CE9358B00C25E7D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A0F33D31CE9358B00C25E7D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -56,6 +58,8 @@
 		4A0F34321CED798C00C25E7D /* QueenBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QueenBlack.png; sourceTree = "<group>"; };
 		4A0F34331CED798C00C25E7D /* RookBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RookBlack.png; sourceTree = "<group>"; };
 		4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllChess.swift; sourceTree = "<group>"; };
+		4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FourPlayerChessVC.swift; sourceTree = "<group>"; };
+		4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessPlayer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,8 +94,10 @@
 			children = (
 				4A0F34251CEA5C1A00C25E7D /* Images */,
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
-				4A0F33CB1CE9358B00C25E7D /* ViewController.swift */,
+				4A0F33CB1CE9358B00C25E7D /* ChessVC.swift */,
+				4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */,
 				4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */,
+				4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */,
 				4A0F34281CEA67D800C25E7D /* Game.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
@@ -209,7 +215,9 @@
 				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
 				4A0F34291CEA67D800C25E7D /* Game.swift in Sources */,
 				4A3BD31F1D0FB4A4008A14AF /* AllChess.swift in Sources */,
-				4A0F33CC1CE9358B00C25E7D /* ViewController.swift in Sources */,
+				4A0F33CC1CE9358B00C25E7D /* ChessVC.swift in Sources */,
+				4AC0A3801DB4339200129CDB /* FourPlayerChessVC.swift in Sources */,
+				4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */,
 				4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,

@@ -10,8 +10,8 @@ import Foundation
 
 
 enum Direction: Int {
-    case top, bottom, left, right
-    static let allValues = [top, bottom, left, right]
+    case top, bottom, right, left
+    static let allValues = [top, bottom, right, left]
     init(loopingRawValue: Int) {
         self = Direction(rawValue: (loopingRawValue % Direction.allValues.count))!
     }

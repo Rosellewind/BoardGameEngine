@@ -10,7 +10,7 @@ import UIKit
 
 
 enum ChessVariation: Int {
-    case standardChess, galaxyChess
+    case standardChess, fourPlayer, galaxyChess
 }
 
 private enum ChessLegalIfCondition: Int {
@@ -40,23 +40,40 @@ private enum ChessPieceType: String {
     case King, Queen, Rook, Bishop, Knight, Pawn
 }
 
-class ChessPiece: Piece {////PawnPiece?
+class PawnPiece: Piece {
     var roundWhenPawnAdvancedTwo: Int?
 }
 
 class ChessGame: Game {
     init(chessVariation: ChessVariation, gameView: UIView) {
-        
-        // create the board
-        let chessBoard = Board(numRows: 8, numColumns: 8)
-        
-        // create the boardView
-        let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
-        
-        // create the players with pieces
-        let chessPlayers = [ChessPlayer(index: 0), ChessPlayer(index: 1)]
-        
-        super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
+        switch chessVariation {
+        case .fourPlayer:
+
+            // create the board
+            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
+            
+            
+            // create the boardView
+            let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue), ChessPlayer(index: 2, variation: chessVariation.rawValue), ChessPlayer(index: 3, variation: chessVariation.rawValue)]
+            
+            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
+            
+        default:
+            
+            // create the board
+            let chessBoard = Board(numRows: 8, numColumns: 8)
+            
+            // create the boardView
+            let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue)]
+            
+            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)        }
+
     }
     
     override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first
@@ -144,7 +161,7 @@ class ChessGame: Game {
                             }
                         }
                     case .markAdvancedTwo:
-                        let completion: () -> Void = {(piece as? ChessPiece)?.roundWhenPawnAdvancedTwo = self.round}
+                        let completion: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = self.round}
                         completions.append(completion)
                         isMet = true
                     
@@ -154,9 +171,9 @@ class ChessGame: Game {
                                 let landingTranslation = translations[0]
                                 let occupiedCondition = super.pieceConditionsAreMet(piece, conditions: [(condition: LegalIfCondition.mustBeOccupiedByOpponent.rawValue, translations: [landingTranslation])], snapshot: nil)
                                 
-                                var enPassantPawn: ChessPiece? = nil
+                                var enPassantPawn: PawnPiece? = nil
                                 let enPassantPosition = positionFromTranslation(translations[1], fromPosition: thisPiece.position, direction: player.forwardDirection)
-                                if let possiblePawn = pieceForPosition(enPassantPosition, snapshot: nil) as? ChessPiece {
+                                if let possiblePawn = pieceForPosition(enPassantPosition, snapshot: nil) as? PawnPiece {
                                     if let roundWhenPawnAdvancedTwo = possiblePawn.roundWhenPawnAdvancedTwo {
                                         if let pawnIndex = playerIndex(player: player) {
                                             if let enPassantPlayer = possiblePawn.player {
@@ -291,7 +308,7 @@ class ChessGame: Game {
         }
     }
     
-    override func gameOver() -> Bool {
+    override func checkForGameOver(){
         let player = players[whoseTurn]
         if isCheck(player, snapshot: nil) {
             let message = player.name != nil ? (player.name! + " is in check") : "in check"
@@ -299,12 +316,28 @@ class ChessGame: Game {
         } else {
             presenterDelegate?.secondaryGameMessage(string: "")
         }
-        if isCheckMate(player, snapshot: nil) {
-            presenterDelegate?.gameMessage((player.name ?? "") + " Is In Checkmate!!!", status: .gameOver)
-            return true
+        var playersInCheckMate = [Player]()
+        for player in players {
+            if player.id != players[whoseTurn].id {
+                if isCheckMate(player, snapshot: nil) {
+                    playersInCheckMate.append(player)
+                }
+            }
         }
-        return false
-    }
+        if playersInCheckMate.count > 0 {
+            var message = (player.name ?? "")
+            if playersInCheckMate.count == 1 {
+                message.append(" Is In Checkmate!!!")
+            } else {
+                for player in playersInCheckMate {
+                    message.append(" And ")
+                    message.append(player.name ?? "")
+                    message.append(" Are In Checkmate!!!")
+                }
+            }
+            presenterDelegate?.gameMessage(message, status: .gameOver)
+        }
+     }
     
     func isCheck(_ player: Player, snapshot: GameSnapshot?) -> Bool {
         // all other players pieces can not take king
@@ -400,8 +433,8 @@ class ChessPlayer: Player {
     fileprivate var orientation: PlayerOrientation {
         return PlayerOrientation(rawValue: self.id) ?? PlayerOrientation.bottom
     }
-    init(index: Int) {
-        let pieces = ChessPieceCreator.shared.makePieces(ChessVariation.standardChess.rawValue, playerId: index)
+    init(index: Int, variation: Int) {
+        let pieces = ChessPieceCreator.shared.makePieces(variation, playerId: index)
         super.init(name: nil, id: index, forwardDirection: nil, pieces: pieces)
         self.name = self.orientation.color()
     }
@@ -461,6 +494,77 @@ class ChessPieceCreator: PiecesCreator {
             }
             let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
             pieces.append(piece)
+            
+        case .fourPlayer:
+            let king = self.chessPiece(.King)
+            let queen = self.chessPiece(.Queen)
+            let rook = self.chessPiece(.Rook)
+            let bishop = self.chessPiece(.Bishop)
+            let knight = self.chessPiece(.Knight)
+            let pawn = self.chessPiece(.Pawn)
+            let rook2 = rook.copy() as! Piece
+            let bishop2 = bishop.copy() as! Piece
+            let knight2 = knight.copy() as! Piece
+            let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
+            var pawns = [Piece]()
+            
+            // set starting positions
+            if position == .top || position == .bottom {
+                king.position = Position(row: 0, column: 6)
+                queen.position = Position(row: 0, column: 5)
+                rook.position = Position(row: 0, column: 2)
+                rook2.position = Position(row: 0, column: 9)
+                bishop.position = Position(row: 0, column: 4)
+                bishop2.position = Position(row: 0, column: 7)
+                knight.position = Position(row: 0, column: 3)
+                knight2.position = Position(row: 0, column: 8)
+                
+                pawn.position = Position(row: 1, column: 2)
+                pawns.append(pawn)
+                for i in 1..<8 {
+                    let pawnI = pawn.copy() as! Piece
+                    pawnI.position = Position(row: pawn.position.row, column: i + 2)
+                    pawns.append(pawnI)
+                }
+                
+                if position == .bottom {
+                    for piece in royalty {
+                        piece.position = Position(row: 11, column: piece.position.column)
+                    }
+                    for piece in pawns {
+                        piece.position = Position(row: 10, column: piece.position.column)
+                    }
+                }
+            } else {
+                king.position = Position(row: 5, column: 0)
+                queen.position = Position(row: 6, column: 0)
+                rook.position = Position(row: 2, column: 0)
+                rook2.position = Position(row: 9, column: 0)
+                bishop.position = Position(row: 4, column: 0)
+                bishop2.position = Position(row: 7, column: 0)
+                knight.position = Position(row: 3, column: 0)
+                knight2.position = Position(row: 8, column: 0)
+                
+                pawn.position = Position(row: 2, column: 1)
+                pawns.append(pawn)
+                for i in 1..<8 {
+                    let pawnI = pawn.copy() as! Piece
+                    pawnI.position = Position(row: i + 2, column: pawn.position.column)
+                    pawns.append(pawnI)
+                }
+                
+                if position == .right {
+                    for piece in royalty {
+                        piece.position = Position(row: piece.position.row, column: 11)
+                    }
+                    for piece in pawns {
+                        piece.position = Position(row: piece.position.row, column: 10)
+                    }
+                }
+            }
+            
+            pieces.append(contentsOf: royalty)
+            pieces.append(contentsOf: pawns)
         }
         
         // set the id and isFirstMove
@@ -472,7 +576,7 @@ class ChessPieceCreator: PiecesCreator {
         return pieces
     }
     
-    fileprivate func chessPiece(_ name: ChessPieceType) -> ChessPiece {
+    fileprivate func chessPiece(_ name: ChessPieceType) -> Piece {
         switch name {
         case .King:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
@@ -507,7 +611,7 @@ class ChessPieceCreator: PiecesCreator {
                 }
                 return (isLegal, conditions)
             }
-            return ChessPiece(name: name.rawValue, position: Position(row: 0, column: 4), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 4), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
         case .Queen:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
                 if translation.row == 0 && translation.column == 0 {
@@ -557,7 +661,7 @@ class ChessPieceCreator: PiecesCreator {
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
             }
-            return ChessPiece(name: name.rawValue, position: Position(row: 0, column:  3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
         case .Rook:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
                 if translation.row == 0 && translation.column == 0 {
@@ -598,7 +702,7 @@ class ChessPieceCreator: PiecesCreator {
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
             }
-            return ChessPiece(name: name.rawValue, position: Position(row: 0, column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
         case .Bishop:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
                 if translation.row == 0 && translation.column == 0 {
@@ -634,7 +738,7 @@ class ChessPieceCreator: PiecesCreator {
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
             }
-            return ChessPiece(name: name.rawValue, position: Position(row: 0, column: 2), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 2), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
         case .Knight:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
                 return abs(translation.row) == 2 && abs(translation.column) == 1 || abs(translation.row) == 1 && abs(translation.column) == 2
@@ -653,7 +757,7 @@ class ChessPieceCreator: PiecesCreator {
                 }
                 return (isLegal, conditions)
             }
-            return ChessPiece(name: name.rawValue, position: Position(row: 0, column: 1), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            return Piece(name: name.rawValue, position: Position(row: 0, column: 1), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
         case .Pawn:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
                 let forwardTwo = translation.row == 2 && translation.column == 0
@@ -688,7 +792,7 @@ class ChessPieceCreator: PiecesCreator {
                 return (isLegal, conditions)
             }
             
-            let piece = ChessPiece(name: name.rawValue, position: Position(row: 1, column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
+            let piece = PawnPiece(name: name.rawValue, position: Position(row: 1, column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
             return piece
         }}
     }
