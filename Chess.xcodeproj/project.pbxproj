@@ -28,9 +28,10 @@
 		4A0F34371CED798C00C25E7D /* PawnBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34311CED798C00C25E7D /* PawnBlack.png */; };
 		4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34321CED798C00C25E7D /* QueenBlack.png */; };
 		4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34331CED798C00C25E7D /* RookBlack.png */; };
-		4A3BD31F1D0FB4A4008A14AF /* AllChess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */; };
+		4A3BD31F1D0FB4A4008A14AF /* ChessGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */; };
 		4AC0A3801DB4339200129CDB /* FourPlayerChessVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */; };
 		4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */; };
+		4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3831DB5201000129CDB /* Chess Pieces.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,9 +58,10 @@
 		4A0F34311CED798C00C25E7D /* PawnBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PawnBlack.png; sourceTree = "<group>"; };
 		4A0F34321CED798C00C25E7D /* QueenBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QueenBlack.png; sourceTree = "<group>"; };
 		4A0F34331CED798C00C25E7D /* RookBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RookBlack.png; sourceTree = "<group>"; };
-		4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllChess.swift; sourceTree = "<group>"; };
+		4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessGame.swift; sourceTree = "<group>"; };
 		4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FourPlayerChessVC.swift; sourceTree = "<group>"; };
 		4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessPlayer.swift; sourceTree = "<group>"; };
+		4AC0A3831DB5201000129CDB /* Chess Pieces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Pieces.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +98,7 @@
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ChessVC.swift */,
 				4AC0A37F1DB4339200129CDB /* FourPlayerChessVC.swift */,
-				4A3BD31E1D0FB4A4008A14AF /* AllChess.swift */,
-				4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */,
+				4AC0A3851DB520C900129CDB /* Chess */,
 				4A0F34281CEA67D800C25E7D /* Game.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
@@ -127,6 +128,16 @@
 				4A0F34201CEA5C1300C25E7D /* 4.jpg */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		4AC0A3851DB520C900129CDB /* Chess */ = {
+			isa = PBXGroup;
+			children = (
+				4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */,
+				4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */,
+				4AC0A3831DB5201000129CDB /* Chess Pieces.swift */,
+			);
+			name = Chess;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,12 +225,13 @@
 			files = (
 				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
 				4A0F34291CEA67D800C25E7D /* Game.swift in Sources */,
-				4A3BD31F1D0FB4A4008A14AF /* AllChess.swift in Sources */,
+				4A3BD31F1D0FB4A4008A14AF /* ChessGame.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* ChessVC.swift in Sources */,
 				4AC0A3801DB4339200129CDB /* FourPlayerChessVC.swift in Sources */,
 				4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */,
 				4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
+				4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
 				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,
 				4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */,

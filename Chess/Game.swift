@@ -6,7 +6,7 @@
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
 
-// TODO: organize chess files
+// TODO:
 //      visual overview omnigraffle
 //      message when in check
 //      change segue, delete VC
