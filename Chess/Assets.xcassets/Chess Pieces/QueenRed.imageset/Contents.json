@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "filename" : "QueenRed.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "QueenRed.Ipad.pdf"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

@@ -1,8 +1,12 @@
 {
   "images" : [
     {
-      "idiom" : "universal",
+      "idiom" : "iphone",
       "filename" : "KnightBlack.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "KnightBlack.Ipad.pdf"
     }
   ],
   "info" : {

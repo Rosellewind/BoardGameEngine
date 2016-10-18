@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "filename" : "BishopBlue.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "BishopBlue.Ipad.pdf"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

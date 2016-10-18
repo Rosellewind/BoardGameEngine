@@ -45,7 +45,19 @@ class ChessGame: Game {
             
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
             
-        default:
+        case .fourPlayerX:
+            // create the board
+            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143, 39, 52, 91, 104, 44, 55, 88, 99])
+            //65, 78, 66, 77, 
+            
+            // create the boardView
+            let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue), ChessPlayer(index: 2, variation: chessVariation.rawValue), ChessPlayer(index: 3, variation: chessVariation.rawValue)]
+            
+            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
+        case .standardChess, .galaxyChess:
             
             // create the board
             let chessBoard = Board(numRows: 8, numColumns: 8)
@@ -56,8 +68,19 @@ class ChessGame: Game {
             // create the players with pieces
             let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue)]
             
-            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)        }
-
+            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
+        case .holeChess:
+            // create the board
+            let chessBoard = Board(numRows: 8, numColumns: 8, skipCells: [27, 28, 35, 36])
+            
+            // create the boardView
+            let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue)]
+            
+            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
+        }
     }
     
     override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first

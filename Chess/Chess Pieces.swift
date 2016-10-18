@@ -27,7 +27,7 @@ class ChessPieceCreator: PiecesCreator {
         let position = ChessPlayerOrientation(rawValue: playerId) ?? ChessPlayerOrientation.bottom
         var pieces = [Piece]()
         switch ChessVariation(rawValue: variation) ?? ChessVariation.standardChess {
-        case .standardChess:
+        case .standardChess, .holeChess:
             let king = self.chessPiece(.King)
             let queen = self.chessPiece(.Queen)
             let rook = self.chessPiece(.Rook)
@@ -76,7 +76,7 @@ class ChessPieceCreator: PiecesCreator {
             let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
             pieces.append(piece)
             
-        case .fourPlayer:
+        case .fourPlayer, .fourPlayerX:
             let king = self.chessPiece(.King)
             let queen = self.chessPiece(.Queen)
             let rook = self.chessPiece(.Rook)
@@ -146,8 +146,8 @@ class ChessPieceCreator: PiecesCreator {
             
             pieces.append(contentsOf: royalty)
             pieces.append(contentsOf: pawns)
-        default:
-            print("implement")
+//        default:
+//            print("implement")
         }
         
         // set the id and isFirstMove

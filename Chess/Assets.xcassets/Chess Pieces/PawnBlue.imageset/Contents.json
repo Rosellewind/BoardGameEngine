@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "filename" : "PawnBlue.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "PawnBlue.Ipad.pdf"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

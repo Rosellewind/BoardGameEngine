@@ -1,8 +1,12 @@
 {
   "images" : [
     {
-      "idiom" : "universal",
+      "idiom" : "iphone",
       "filename" : "RookBlack.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "RookBlack.Ipad.pdf"
     }
   ],
   "info" : {

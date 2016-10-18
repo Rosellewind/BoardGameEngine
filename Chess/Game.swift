@@ -9,8 +9,6 @@
 // TODO:
 //      visual overview omnigraffle
 //      message when in check
-//      change segue, delete VC
-//      make board variations with block/x in middle
 
 
 import UIKit
@@ -167,12 +165,7 @@ class Game: PieceViewProtocol {
     }
     
     func makePieceView(piece: Piece) -> PieceView? {
-        var name = piece.name + (piece.player?.name ?? "")
-        if piece.player?.name == "Red" {
-            name = piece.name + "Black"
-        } else if piece.player?.name == "Blue" {
-            name = piece.name + "White"//temp
-        }
+        let name = piece.name + (piece.player?.name ?? "")
         if let image = UIImage(named: name) {
             return PieceView(image: image, pieceTag: piece.id)
         }
@@ -214,15 +207,18 @@ class Game: PieceViewProtocol {
             for condition in conditions ?? [] where isMet == true {
                 if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
                     switch legalIfCondition {
-                    case .cantBeOccupied:
+                    case .cantBeOccupied:////mustBeVacantCell
                         for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
-                            if pieceOccupying != nil {
+                            if !board.isCell(index: board.index(positionToCheck)) {
                                 isMet = false
+                            } else {
+                                let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
+                                if pieceOccupying != nil {
+                                    isMet = false
+                                }
                             }
                         }
-                        ////pos to trans
                         
                     case .mustBeOccupied:
                         for translation in condition.translations ?? [] {

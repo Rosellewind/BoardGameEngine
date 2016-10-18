@@ -1,8 +1,12 @@
 {
   "images" : [
     {
-      "idiom" : "universal",
+      "idiom" : "iphone",
       "filename" : "PawnWhite.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "PawnWhite.Ipad.pdf"
     }
   ],
   "info" : {
