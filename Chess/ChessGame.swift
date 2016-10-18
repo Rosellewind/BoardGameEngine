@@ -83,33 +83,27 @@ class ChessGame: Game {
         }
     }
     
-    override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {////go through conditions sequentially, change from checking all Game conditions first
+    override func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: [(() -> Void)]?) {
         let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
         let thisPiece = pieceInSnapshot ?? piece
-        let superConditionsAreMet = super.pieceConditionsAreMet(thisPiece, conditions: conditions, snapshot: snapshot)
-        var isMet = superConditionsAreMet.isMet
-        var completions = superConditionsAreMet.completions ?? Array<()->Void>()
+        var isMet = true
+        var completions: [()->Void]? = Array<()->Void>()
 
         if let player = thisPiece.player {
             for condition in conditions ?? [] where isMet == true {
-                if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
+                if LegalIfCondition(rawValue: condition.condition) != nil {
+                    let superConditionsAreMet = super.pieceConditionsAreMet(piece, conditions: [condition], snapshot: snapshot)
+                    isMet = superConditionsAreMet.isMet
+                    completions = superConditionsAreMet.completions ?? Array<()->Void>()
+                }
+                else if let chessLegalIfCondition = ChessLegalIfCondition(rawValue:condition.condition) {
                     switch chessLegalIfCondition {
                     case .rookCanCastle:
                         // king moves 2 horizontally, rook goes where king just crossed
                         // 1. neither the king nor the rook may have been previously moved
                         // 2. there must not be pieces between the king and rook
                         // 3. the king may not be in check, nor may the king pass through squares athat are under attack by eney pieces, nor move to a square where it is in check
-                        //////stopped here, pass though check
-                        
-                        
-                        // rules needing to be checked here:
-                        //      rook can't be previously moved
-                        //      can't be occupied to rook landing spot(isLegalMove/pieceConditionsAreMet)
-                        // also verify:
-                        //      CantBeInCheckDuring[0,0][0, abs-1]
-                        //  still need:
-                        //      king can't have moved before
-                        
+            
                         let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
                         var castlingRooks = [Piece]()
                         var landingPositionForRook = Position(row: 0, column: 0)
@@ -145,12 +139,13 @@ class ChessGame: Game {
                         }
                         if castlingRooks.count == 0 {
                             isMet = false
+                            completions = []
                         } else {
                             // move the rook
                             
                             
                             let completion: () -> Void = { self.moveARook(castlingRooks, position: landingPositionForRook)}
-                            completions.append(completion)
+                            completions!.append(completion)
                             isMet = true
                         }
                         
@@ -164,12 +159,16 @@ class ChessGame: Game {
                                 makeMoveInSnapshot(Move(piece: thisPiece, remove: false, position: position), snapshot: reusableGameSnapshot!)
                                 if isCheck(player, snapshot: reusableGameSnapshot) {
                                     isMet = false
+                                    completions = []
+                                    if self.presenterDelegate != nil {
+                                        completions = [{self.presenterDelegate!.secondaryGameMessage(string: "You can't leave yourself in check")}]
+                                    }
                                 }
                             }
                         }
                     case .markAdvancedTwo:
                         let completion: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = self.round}
-                        completions.append(completion)
+                        completions!.append(completion)
                         isMet = true
                     
                     case .mustBeOccupiedByOpponentOrEnPassant:
@@ -199,15 +198,16 @@ class ChessGame: Game {
                                     }
                                 }
                                 if occupiedCondition.completions != nil{
-                                    completions += occupiedCondition.completions!
+                                    completions! += occupiedCondition.completions!
                                 }
                                 
                                 if enPassantPawn != nil {
                                     let enPassantCompletion: () -> Void = {self.removePieceAndViewFromGame(piece: enPassantPawn!)}
-                                    completions.append(enPassantCompletion)
+                                    completions!.append(enPassantCompletion)
                                     isMet = true
                                 } else {
                                     isMet = occupiedCondition.isMet
+                                    completions = occupiedCondition.completions
                                 }
                             }
                         }
@@ -252,15 +252,14 @@ class ChessGame: Game {
                                 }
                             }
                         }
-                        completions.append(checkPromotionCompletion)
+                        completions!.append(checkPromotionCompletion)
                         isMet = true
                     }
                 }
             }
         }
         
-        if isMet == false || completions.count == 0 {
-            return (isMet, nil)
+        if completions!.count == 0 {            return (isMet, nil)
         } else {
             return (isMet, completions)
         }

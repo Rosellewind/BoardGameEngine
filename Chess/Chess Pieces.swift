@@ -189,7 +189,7 @@ class ChessPieceCreator: PiecesCreator {
                     let signage = translation.column > 0 ? 1 : -1
                     isLegal = true
                     
-                    let moreConditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.isInitialMove.rawValue, translations: nil), (condition: ChessLegalIfCondition.rookCanCastle.rawValue, translations: [Position(row: 0, column: signage)]), (condition: LegalIfCondition.cantBeOccupied.rawValue, translations: [translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
+                    let moreConditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.isInitialMove.rawValue, translations: nil), (condition: ChessLegalIfCondition.rookCanCastle.rawValue, translations: [Position(row: 0, column: signage)]), (condition: LegalIfCondition.mustBeVacantCell.rawValue, translations: [translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
                     conditions += moreConditions
                 }
                 return (isLegal, conditions)
@@ -209,7 +209,7 @@ class ChessPieceCreator: PiecesCreator {
             
             let isLegalMove = { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, translations: [Translation]?)]?) in
                 var isLegal = false
-                var cantBeOccupied = [Position]()
+                var mustBeVacantCell = [Position]()
                 var conditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, translations: [translation])]
                 
                 // any number of vacant squares in a horizontal, vertical, or diagonal direction.
@@ -221,25 +221,25 @@ class ChessPieceCreator: PiecesCreator {
                 } else if horizontal {  // horizontal
                     let signage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.column) {
-                        cantBeOccupied.append(Position(row: 0, column: i * signage))
+                        mustBeVacantCell.append(Position(row: 0, column: i * signage))
                     }
                     isLegal = true
                 } else if vertical { // vertical
                     let signage = translation.row > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
-                        cantBeOccupied.append(Position(row: i * signage, column: 0))
+                        mustBeVacantCell.append(Position(row: i * signage, column: 0))
                     }
                     isLegal = true
                 } else if diagonal {    // diagonal
                     let rowSignage = translation.row > 0 ? 1 : -1
                     let columnSignage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
-                        cantBeOccupied.append(Position(row: i * rowSignage, column: i * columnSignage))
+                        mustBeVacantCell.append(Position(row: i * rowSignage, column: i * columnSignage))
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 0 {
-                    conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
+                if mustBeVacantCell.count > 0 {
+                    conditions.append((LegalIfCondition.mustBeVacantCell.rawValue, mustBeVacantCell))
                 }
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
@@ -258,7 +258,7 @@ class ChessPieceCreator: PiecesCreator {
             
             let isLegalMove = {(translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?) in
                 var isLegal = false
-                var cantBeOccupied = [Position]()
+                var mustBeVacantCell = [Position]()
                 var conditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, translations: [translation])]
                 
                 // any number of vacant squares in a horizontal or vertical direction, also moved in castling
@@ -269,18 +269,18 @@ class ChessPieceCreator: PiecesCreator {
                 } else if horizontal {  // horizontal
                     let signage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.column) {
-                        cantBeOccupied.append(Position(row: 0, column: i * signage))
+                        mustBeVacantCell.append(Position(row: 0, column: i * signage))
                     }
                     isLegal = true
                 } else if vertical { // vertical
                     let signage = translation.row > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
-                        cantBeOccupied.append(Position(row: i * signage, column: 0))
+                        mustBeVacantCell.append(Position(row: i * signage, column: 0))
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 0 {
-                    conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
+                if mustBeVacantCell.count > 0 {
+                    conditions.append((LegalIfCondition.mustBeVacantCell.rawValue, mustBeVacantCell))
                 }
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
@@ -299,7 +299,7 @@ class ChessPieceCreator: PiecesCreator {
             
             let isLegalMove = { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?) in
                 var isLegal = false
-                var cantBeOccupied = [Position]()
+                var mustBeVacantCell = [Position]()
                 
                 // can't land on self or leave self in check
                 var conditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.cantBeOccupiedBySelf.rawValue, translations: [translation])]
@@ -311,12 +311,12 @@ class ChessPieceCreator: PiecesCreator {
                     let rowSignage = translation.row > 0 ? 1 : -1
                     let columnSignage = translation.column > 0 ? 1 : -1
                     for i in 1..<abs(translation.row) {
-                        cantBeOccupied.append(Position(row: i * rowSignage, column: i * columnSignage))
+                        mustBeVacantCell.append(Position(row: i * rowSignage, column: i * columnSignage))
                     }
                     isLegal = true
                 }
-                if cantBeOccupied.count > 0 {
-                    conditions.append((LegalIfCondition.cantBeOccupied.rawValue, cantBeOccupied))
+                if mustBeVacantCell.count > 0 {
+                    conditions.append((LegalIfCondition.mustBeVacantCell.rawValue, mustBeVacantCell))
                 }
                 conditions.append((condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation]))
                 return (isLegal, conditions)
@@ -362,11 +362,11 @@ class ChessPieceCreator: PiecesCreator {
                 } else if forwardTwo {  // initial move, forward two
                     isLegal = true
                     conditions.append((condition: LegalIfCondition.isInitialMove.rawValue, translations: nil))
-                    conditions.append((condition: LegalIfCondition.cantBeOccupied.rawValue, translations: [Position(row: 1, column: 0), Position(row: 2, column: 0)]))
+                    conditions.append((condition: LegalIfCondition.mustBeVacantCell.rawValue, translations: [Position(row: 1, column: 0), Position(row: 2, column: 0)]))
                     conditions.append((condition: ChessLegalIfCondition.markAdvancedTwo.rawValue, translations: nil))
                 } else if forwardOne {     // move forward one on vacant
                     isLegal = true
-                    conditions.append((LegalIfCondition.cantBeOccupied.rawValue, [translation]))
+                    conditions.append((LegalIfCondition.mustBeVacantCell.rawValue, [translation]))
                 } else if diagonalOne {    // move diagonal one on occupied
                     isLegal = true
                     conditions.append((ChessLegalIfCondition.mustBeOccupiedByOpponentOrEnPassant.rawValue, [translation, Translation(row: 0, column:translation.column)]))

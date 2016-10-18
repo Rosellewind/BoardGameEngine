@@ -15,7 +15,7 @@ protocol PiecesCreator {
 }
 
 enum LegalIfCondition: Int {
-    case mustBeOccupied, cantBeOccupied, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
+    case mustBeOccupied, mustBeVacantCell, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
 }
 
 typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?)
