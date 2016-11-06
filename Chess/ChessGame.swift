@@ -197,9 +197,7 @@ class ChessGame: Game {
                                         }
                                     }
                                 }
-                                if occupiedCondition.completions != nil{
-                                    completions! += occupiedCondition.completions!
-                                }
+
                                 
                                 if enPassantPawn != nil {
                                     let enPassantCompletion: () -> Void = {self.removePieceAndViewFromGame(piece: enPassantPawn!)}
@@ -207,8 +205,9 @@ class ChessGame: Game {
                                     isMet = true
                                 } else {
                                     isMet = occupiedCondition.isMet
-                                    completions = occupiedCondition.completions
-                                }
+                                    if occupiedCondition.completions != nil{
+                                        completions! += occupiedCondition.completions!
+                                    }                                }
                             }
                         }
                     case .checkForPromotion:

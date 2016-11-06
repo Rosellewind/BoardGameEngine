@@ -146,8 +146,6 @@ class Game: PieceViewProtocol {
     deinit {
        print("deinit Game")
     }
-
-    
     
     func makePieceViews(players: [Player]) -> [PieceView] {
         var pieceViews = [PieceView]()
@@ -162,10 +160,26 @@ class Game: PieceViewProtocol {
     }
     
     func makePieceView(piece: Piece) -> PieceView? {
-        let name = piece.name + (piece.player?.name ?? "")
-        if let image = UIImage(named: name) {
-            return PieceView(image: image, pieceTag: piece.id)
+        if let player = piece.player {
+            let name = piece.name + (player.name ?? "")
+            var radians: Double
+            switch player.forwardDirection {
+            case .top:
+                radians = 0
+            case .bottom:
+                radians = M_PI
+            case .left:
+                radians = M_PI_2 * -1
+            case .right:
+                radians = M_PI_2
+            }
+            if let image = UIImage(named: name) {
+                let imageView = PieceView(image: image, pieceTag: piece.id)
+                imageView.transform = CGAffineTransform(rotationAngle: CGFloat(radians))
+                return imageView
+            }
         }
+
         return nil
     }
     
