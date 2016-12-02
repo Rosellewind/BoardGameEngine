@@ -20,7 +20,6 @@
 		4A0F34241CEA5C1300C25E7D /* 4.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34201CEA5C1300C25E7D /* 4.jpg */; };
 		4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34261CEA5F6E00C25E7D /* Piece.swift */; };
 		4A0F34291CEA67D800C25E7D /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F34281CEA67D800C25E7D /* Game.swift */; };
-		4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342A1CEA6BBF00C25E7D /* x.swift */; };
 		4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F342C1CEA74FF00C25E7D /* Player.swift */; };
 		4A0F34341CED798C00C25E7D /* BishopBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F342E1CED798C00C25E7D /* BishopBlack.png */; };
 		4A0F34351CED798C00C25E7D /* KingBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F342F1CED798C00C25E7D /* KingBlack.png */; };
@@ -50,7 +49,6 @@
 		4A0F34201CEA5C1300C25E7D /* 4.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 4.jpg; sourceTree = "<group>"; };
 		4A0F34261CEA5F6E00C25E7D /* Piece.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
 		4A0F34281CEA67D800C25E7D /* Game.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
-		4A0F342A1CEA6BBF00C25E7D /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
 		4A0F342C1CEA74FF00C25E7D /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		4A0F342E1CED798C00C25E7D /* BishopBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BishopBlack.png; sourceTree = "<group>"; };
 		4A0F342F1CED798C00C25E7D /* KingBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = KingBlack.png; sourceTree = "<group>"; };
@@ -98,12 +96,11 @@
 				4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */,
 				4AC0A3881DB5227100129CDB /* MenuTVC.swift */,
 				4A0F33CB1CE9358B00C25E7D /* ChessVC.swift */,
-				4AC0A3851DB520C900129CDB /* Chess */,
 				4A0F34281CEA67D800C25E7D /* Game.swift */,
 				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
-				4A0F342A1CEA6BBF00C25E7D /* x.swift */,
+				4AC0A3851DB520C900129CDB /* Chess */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
@@ -229,7 +226,6 @@
 				4A0F33CC1CE9358B00C25E7D /* ChessVC.swift in Sources */,
 				4AC0A3891DB5227100129CDB /* MenuTVC.swift in Sources */,
 				4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */,
-				4A0F342B1CEA6BBF00C25E7D /* x.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
 				4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,

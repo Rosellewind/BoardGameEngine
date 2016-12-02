@@ -10,11 +10,7 @@ import UIKit
 import MapKit
 import CoreLocation
 
-//extension Optional<Array<T>> {
-//    func addFrom<T>(array: [T]) {
-//        
-//    }
-//}
+
 extension Int {
     func isBetweenInForwardLoop(firstInclusive first: Int, lastNotInclusive last: Int) -> Bool {
         if first <= last {

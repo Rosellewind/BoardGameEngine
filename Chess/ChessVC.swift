@@ -15,19 +15,9 @@ class ChessVC: UIViewController, GamePresenterProtocol {
     
     var chessVariation: ChessVariation?
     var game: Game!
-
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
     
     override func viewDidAppear(_ animated: Bool) {
         setupGame()
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     func setupGame() {
