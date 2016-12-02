@@ -330,7 +330,7 @@ class ChessGame: Game {
             }
         }
         if playersInCheckMate.count > 0 {
-            var message = (player.name ?? "")
+            var message = (playersInCheckMate[0].name ?? "")
             if playersInCheckMate.count == 1 {
                 message.append(" Is In Checkmate!!!")
             } else {

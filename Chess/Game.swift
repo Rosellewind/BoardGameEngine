@@ -325,8 +325,8 @@ extension Game {
                     }
                     
                     // check for gameOver
-                    whoseTurn += 1
                     checkForGameOver()
+                    whoseTurn += 1
                     presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
                 } else {
                     if let completions = pieceConditions.completions {
