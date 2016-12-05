@@ -34,7 +34,7 @@ class ChessGame: Game {
         case .fourPlayer:
 
             // create the board
-            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
+            let chessBoard = Board(numRows: 12, numColumns: 12, emptyCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
             
             
             // create the boardView
@@ -47,7 +47,7 @@ class ChessGame: Game {
             
         case .fourPlayerX:
             // create the board
-            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143, 39, 52, 91, 104, 44, 55, 88, 99])
+            let chessBoard = Board(numRows: 12, numColumns: 12, emptyCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143, 39, 52, 91, 104, 44, 55, 88, 99])
             //65, 78, 66, 77, 
             
             // create the boardView
@@ -71,7 +71,7 @@ class ChessGame: Game {
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
         case .holeChess:
             // create the board
-            let chessBoard = Board(numRows: 8, numColumns: 8, skipCells: [27, 28, 35, 36])
+            let chessBoard = Board(numRows: 8, numColumns: 8, emptyCells: [27, 28, 35, 36])
             
             // create the boardView
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
@@ -375,8 +375,8 @@ class ChessGame: Game {
         if isCheck(player, snapshot: snapshot) {
             isCheckMate = true
             for piece in player.pieces where isCheckMate == true {
-                for index in board.indexes {
-                    let position = board.position(index)
+                for index in board.indexesNotEmpty {
+                    let position = board.position(index: index)
                     let translation = calculateTranslation(piece.position, toPosition: position, direction: player.forwardDirection)
                     if piece.isPossibleTranslation(translation) {   // eliminate some iterations
                         self.reusableGameSnapshot = GameSnapshot(game: self)//not using snapshot para

@@ -124,7 +124,7 @@ class Game: PieceViewProtocol {
     convenience init(gameView: UIView) {
         
         // create the board
-        let defaultBoard = Board(numRows: 8, numColumns: 5, skipCells: [0, 4, 20])
+        let defaultBoard = Board(numRows: 8, numColumns: 5, emptyCells: [0, 4, 20])
         
         // create the boardView
         var images = [UIImage]()
@@ -198,7 +198,7 @@ class Game: PieceViewProtocol {
             pieceView.observing = [(piece, "selected"), (piece, "position")]
             
             // pieceView layout
-            let indexOfPieceOnBoard = board.index(piece.position)
+            let indexOfPieceOnBoard = board.index(position: piece.position)
             if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
                 boardView.addSubview(pieceView)
                 pieceView.constrainToCell(cell)
@@ -222,7 +222,7 @@ class Game: PieceViewProtocol {
                     case .mustBeVacantCell:
                         for translation in condition.translations ?? [] {
                             let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            if !board.isCell(index: board.index(positionToCheck)) {
+                            if !board.isACellAndIsNotEmpty(index: board.index(position: positionToCheck)) {
                                 isMet = false
                             } else {
                                 let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
@@ -284,7 +284,7 @@ class Game: PieceViewProtocol {
 extension Game {
     @objc func cellTapped(_ sender: UITapGestureRecognizer) {
         if let view = sender.view {
-            let positionTapped = board.position(view.tag)
+            let positionTapped = board.position(index: view.tag)
             let pieceTapped = pieceForPosition(positionTapped, snapshot: nil)
             
             // beginning of turn, selecting the piece
@@ -420,7 +420,7 @@ extension Game {
         NSLayoutConstraint.deactivate(pieceView.positionConstraints)
         
         // activate new position constraints matching cell constraints
-        let cellIndex = board.index(position)
+        let cellIndex = board.index(position: position)
         if let cell = boardView.cells.elementPassing({$0.tag == cellIndex}) {
             let positionX = NSLayoutConstraint(item: pieceView, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
             let positionY = NSLayoutConstraint(item: pieceView, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)

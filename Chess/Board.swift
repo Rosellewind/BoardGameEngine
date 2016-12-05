@@ -7,27 +7,9 @@
 //
 
 import UIKit
-fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-  switch (lhs, rhs) {
-  case let (l?, r?):
-    return l < r
-  case (nil, _?):
-    return true
-  default:
-    return false
-  }
-}
-
-fileprivate func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-  switch (lhs, rhs) {
-  case let (l?, r?):
-    return l >= r
-  default:
-    return !(lhs < rhs)
-  }
-}
 
 
+/// Position Class: rows and columns, equatable
 
 class Position: NSObject {
     var row: Int
@@ -38,6 +20,7 @@ class Position: NSObject {
         self.column = column
     }
 }
+
 func ==(lhs: Position, rhs: Position) -> Bool {
     return lhs.row == rhs.row && lhs.column == rhs.column
 }
@@ -46,40 +29,34 @@ typealias Translation = Position
 
 
 
-/// Grid of rows and columns. numCells is calculated. skipped cells are empty at indicated index
+/// Board Class: Grid of rows and columns that may include empty cells.
 
 class Board {
     var numRows: Int
     var numColumns: Int
     var numCells: Int {get {return numRows * numColumns}}
-    let skipCells: Set<Int>?
-    var indexes = Set<Int>()
+    var emptyCells: Set<Int>?
+    var indexesNotEmpty: Set<Int> {
+        get {
+            return Set(0..<numCells).subtracting(emptyCells ?? [])
+        }
+    }
     
     convenience init() {
         self.init(numRows: 5, numColumns: 5)
     }
     
-    init(numRows: Int, numColumns: Int, skipCells: Set<Int>? = nil) {
+    init(numRows: Int, numColumns: Int, emptyCells: Set<Int>? = nil) {
         self.numRows = numRows
         self.numColumns = numColumns
-        self.skipCells = skipCells
-        var temp = [Int]()
-        temp += 0..<numCells
-        indexes = Set(temp)
-        if let skip = skipCells {
-            indexes = indexes.subtracting(skip)
-        }
+        self.emptyCells = emptyCells
     }
     
-    deinit {
-        print("deinit Board")
-    }
-    
-    func index(_ position: Position) -> Int {
+    func index(position: Position) -> Int {
         return position.column + position.row * numColumns
     }
     
-    func position(_ index: Int) -> Position {
+    func position(index: Int) -> Position {
         if numColumns > 0  {
             return Position(row: index / numColumns, column: index % numColumns)
         } else {
@@ -87,17 +64,17 @@ class Board {
         }
     }
     
-    func isCell(index: Int) -> Bool {
-        return indexes.contains(index)
+    func isACellAndIsNotEmpty(index: Int) -> Bool {
+        return indexesNotEmpty.contains(index)
     }
     
     func copy() -> Board {
-        return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
+        return Board(numRows: numRows, numColumns: numColumns, emptyCells: emptyCells)
     }
 }
 
 
-/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
+/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. empty cells are clear placeholder views
 
 class BoardView: UIView {
     var cells = [UIView]()
@@ -116,14 +93,10 @@ class BoardView: UIView {
         self.images = images
         self.backgroundColors = backgroundColors
         super.init(frame: CGRect.zero)
-        makeCells(board)
+        makeCells(board: board)
     }
     
-    deinit {
-        print("deinit BoardView")
-    }
-    
-    func makeCells(_ board: Board) {
+    func makeCells(board: Board) {
         var imageIndex = 0 {
             didSet {if imageIndex >= images?.count {imageIndex = 0}}
         }
@@ -140,9 +113,9 @@ class BoardView: UIView {
             // set the image or color
             let evenNumberColumns = board.numColumns % 2 == 0
             if checkered && evenNumberColumns{
-                let inFirstColumn = board.position(i).column == 0
+                let inFirstColumn = board.position(index: i).column == 0
                 if inFirstColumn {
-                    let onOddRow = board.position(i).row % 2 != 0
+                    let onOddRow = board.position(index: i).row % 2 != 0
                     if onOddRow {
                         imageIndex = 1
                         colorIndex = 1
@@ -154,7 +127,7 @@ class BoardView: UIView {
                 }
             }
             
-            if let skips = board.skipCells , skips.contains(i) {
+            if let empty = board.emptyCells, empty.contains(i) {
                 cell.backgroundColor = UIColor.clear
             } else {
                 if imageIndex < images?.count {
@@ -175,35 +148,7 @@ class BoardView: UIView {
             self.addSubview(cell)
             cell.translatesAutoresizingMaskIntoConstraints = false
         }
-        addConstraintsToCells(board)
-    }
-    
-    func addConstraintsToCells(_ board: Board) {
-        
-        //autolayout cells
-        var constraints = [NSLayoutConstraint]()
-        
-        // add horizontal constraints
-        for i in stride(from: 0, to: board.numCells, by: board.numColumns) {
-            let range = i..<i + board.numColumns
-            let slice: Array<UIView> = Array(cells[range])
-            let horizontal = NSLayoutConstraint.bindHorizontally(slice)
-            constraints.append(contentsOf: horizontal)
-            let widths = NSLayoutConstraint.equalWidths(slice)
-            constraints.append(contentsOf: widths)
-        }
-        
-        // add vertical constraints
-        for i in 0..<board.numColumns {
-            var verticalCells = [UIView]()
-            for j in stride(from: i, to: board.numCells, by: board.numColumns)  {
-                verticalCells.append(cells[j])
-            }
-            let vertical = NSLayoutConstraint.bindVertically(verticalCells)
-            constraints.append(contentsOf: vertical)
-            let heights = NSLayoutConstraint.equalHeights(verticalCells)
-            constraints.append(contentsOf: heights)
-        }
+        let constraints = NSLayoutConstraint.constraintsForGrid(views: cells, width: board.numColumns)
         NSLayoutConstraint.activate(constraints)
     }
     
@@ -214,6 +159,27 @@ class BoardView: UIView {
 
 
 
+// compare nil values
+
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+    switch (lhs, rhs) {
+    case let (l?, r?):
+        return l < r
+    case (nil, _?):
+        return true
+    default:
+        return false
+    }
+}
+
+fileprivate func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+    switch (lhs, rhs) {
+    case let (l?, r?):
+        return l >= r
+    default:
+        return !(lhs < rhs)
+    }
+}
 
 
 

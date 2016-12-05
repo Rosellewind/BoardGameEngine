@@ -37,8 +37,41 @@ extension Array {
         return nil
     }
 }
-    
+
 extension NSLayoutConstraint {
+    class func constraintsForGrid(views: [UIView], width: Int)  -> [NSLayoutConstraint] {
+        //autolayout cells
+        var constraints = [NSLayoutConstraint]()
+        
+        let count = views.count - views.count % width
+        
+        // add horizontal constraints
+        for i in stride(from: 0, to: count, by: width) {
+            let range = i..<i + width
+            let slice: Array<UIView> = Array(views[range])
+            let horizontal = NSLayoutConstraint.bindHorizontally(slice)
+            constraints.append(contentsOf: horizontal)
+            let widths = NSLayoutConstraint.equalWidths(slice)
+            constraints.append(contentsOf: widths)
+        }
+        
+        // add vertical constraints
+        for i in 0..<width {
+            var verticalCells = [UIView]()
+            for j in stride(from: i, to: count, by: width)  {
+                verticalCells.append(views[j])
+            }
+            let vertical = NSLayoutConstraint.bindVertically(verticalCells)
+            constraints.append(contentsOf: vertical)
+            let heights = NSLayoutConstraint.equalHeights(verticalCells)
+            constraints.append(contentsOf: heights)
+        }
+        return constraints
+    }
+    
+    
+    
+    
     class func centerHorizontally(_ view: UIView) -> NSLayoutConstraint {
         return NSLayoutConstraint(item: view, attribute: .centerX, relatedBy: .equal, toItem: view.superview, attribute: .centerX, multiplier: 1, constant: 0)
     }
