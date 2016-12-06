@@ -65,6 +65,11 @@ class Piece: NSObject, NSCopying {
     func copy(with zone: NSZone?) -> Any {
         return type(of: self).init(toCopy: self)
     }
+    
+//    func canMove(translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?) {
+//        
+//    }
+//    
 }
 
 
