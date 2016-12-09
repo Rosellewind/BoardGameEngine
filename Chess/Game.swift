@@ -11,6 +11,13 @@
 
 import UIKit
 
+struct Move {
+    let piece: Piece
+    let remove: Bool
+    let position: Position?
+}
+
+
 
 protocol GamePresenterProtocol: class {
     func gameMessage(_ string: String, status: GameStatus?)
@@ -25,6 +32,7 @@ enum GameStatus {
 typealias Completions = [(() -> Void)]
 
 class GameSnapshot {
+    static var shared: GameSnapshot? = nil
     var board: Board
     var players: [Player]
     var selectedPiece: Piece?
@@ -39,9 +47,49 @@ class GameSnapshot {
             return pieces
         }
     }
+    
     convenience init(game: Game) {
         self.init(board: game.board, players: game.players, selectedPiece: game.selectedPiece, whoseTurn: game.whoseTurn, nextTurn: game.nextTurn)
     }
+    
+    convenience init(gameSnapshot: GameSnapshot) {
+        self.init(board: gameSnapshot.board, players: gameSnapshot.players, selectedPiece: gameSnapshot.selectedPiece, whoseTurn: gameSnapshot.whoseTurn, nextTurn: gameSnapshot.nextTurn)
+    }
+    
+    func pieceForPosition(_ position: Position, snapshot: GameSnapshot?) -> Piece? {
+        let pieces = snapshot?.allPieces ?? allPieces
+        var pieceFound: Piece?
+        for piece in pieces {
+            if piece.position == position {
+                pieceFound = piece
+            }
+        }
+        return pieceFound
+    }
+    
+    func makeMove(_ move: Move) {
+        if let snapshotPiece = self.allPieces.elementPassing({$0.id == move.piece.id && $0.player != nil && $0.player!.id == move.piece.player!.id}) {
+            if move.remove {
+                for player in self.players {
+                    if let index = player.pieces.index(of: snapshotPiece) {
+                        player.pieces.remove(at: index)
+                    }
+                }
+            } else if move.position != nil {
+                if let snapshotPieceToReplace = pieceForPosition(move.position!, snapshot: self) {
+                    if snapshotPieceToReplace.removePieceOccupyingNewPosition == true {
+                        for player in self.players {
+                            if let index = player.pieces.index(of: snapshotPieceToReplace) {
+                                player.pieces.remove(at: index)
+                            }
+                        }
+                    }
+                }
+                snapshotPiece.position = move.position!
+            }
+        }
+    }
+    
     init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int) {
         self.board = board.copy()
         self.players = players.map({$0.copy()})
@@ -207,68 +255,23 @@ class Game: PieceViewProtocol {
     }
     
     // MARK: Game Logic (that can't be in an extension)
-    
-    func pieceConditionsAreMet(_ piece: Piece, conditions: [(condition: Int, translations: [Translation]?)]?, snapshot: GameSnapshot?) -> (isMet: Bool, completions: Completions?) {
-        let pieceInSnapshot = snapshot?.allPieces.elementPassing({$0.id == piece.id})
-        let thisPiece = pieceInSnapshot ?? piece
-        
+    func checkIfConditionsAreMet(piece: Piece, snapshot: GameSnapshot, legalIfs: [LegalIf]?) -> IsMetAndCompletions {
+        if legalIfs == nil {
+            return IsMetAndCompletions(isMet: true, completions: nil)
+        }
         var isMet = true
-//        var completions: [()->Void]? = Array<()->Void>()
-
-        if let player = thisPiece.player {
-            for condition in conditions ?? [] where isMet == true {
-                if let legalIfCondition = LegalIfCondition(rawValue:condition.condition) {
-                    switch legalIfCondition {
-                    case .mustBeVacantCell:
-                        for translation in condition.translations ?? [] {
-                            let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            if !board.isACellAndIsNotEmpty(index: board.index(position: positionToCheck)) {
-                                isMet = false
-                            } else {
-                                let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
-                                if pieceOccupying != nil {
-                                    isMet = false
-                                }
-                            }
-                        }
-                        
-                    case .mustBeOccupied:
-                        for translation in condition.translations ?? [] {
-                            let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
-                            if pieceOccupying == nil {
-                                isMet = false
-                            }
-                        }
-                    case .mustBeOccupiedByOpponent:
-                        for translation in condition.translations ?? [] {
-                            let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
-                            if pieceOccupying == nil {
-                                isMet = false
-                            } else if player.pieces.contains(pieceOccupying!) {
-                                isMet = false
-                            }
-                        }
-                    case .cantBeOccupiedBySelf:
-                        for translation in condition.translations ?? [] {
-                            let positionToCheck = positionFromTranslation(translation, fromPosition: thisPiece.position, direction: player.forwardDirection)
-                            let pieceOccupying = pieceForPosition(positionToCheck, snapshot: snapshot)
-                            if pieceOccupying != nil && player.pieces.contains(pieceOccupying!) {
-                                isMet = false
-                            }
-                        }
-                    case .isInitialMove:
-                        if !thisPiece.isFirstMove {
-                            isMet = false
-                        }
-                    }
-                }
+        var completions: [(() -> Void)]? =  [(() -> Void)]()
+        for legalIf in legalIfs! where isMet == true {
+            let isMetAndCompletions = legalIf.condition.checkIfConditionIsMet(piece: piece, translations: legalIf.translations!, snapshot: snapshot)
+            
+            isMet = isMetAndCompletions.isMet
+            if let complete = isMetAndCompletions.completions {
+                completions! += complete
             }
         }
-        return (isMet, nil)
+        return IsMetAndCompletions(isMet: isMet, completions: completions!.count > 0 ? completions : nil)
     }
-
+    
     func checkForGameOver() {
         for player in players {
             if player.pieces.count == 0 {
@@ -302,42 +305,43 @@ extension Game {
                 
             // final part of turn, choosing where to go
             else {
-                let translation = calculateTranslation(selectedPiece!.position, toPosition: positionTapped, direction: players[whoseTurn].forwardDirection)
+                let translation = Position.calculateTranslation(fromPosition: selectedPiece!.position, toPosition: positionTapped, direction: players[whoseTurn].forwardDirection)
                 let moveFunction = selectedPiece!.isLegalMove(translation)
-                let pieceConditions = pieceConditionsAreMet(selectedPiece!, conditions: moveFunction.conditions, snapshot: nil)
-                
-                // check if move is legal
-                if moveFunction.isLegal && pieceConditions.isMet {
-                
-                    // remove occupying piece if needed
-                    if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
-                        makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
-                    }
-                    
-                    // move the piece
-                    makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
-                    
-                    // completions
-                    if let completions = pieceConditions.completions {
-                        for completion in completions {
-                            completion()
+                reusableGameSnapshot = GameSnapshot(game: self)
+                if moveFunction.isLegal {
+                    // check
+                    let isMetAndCompletions = checkIfConditionsAreMet(piece: selectedPiece!, snapshot: reusableGameSnapshot!, legalIfs: moveFunction.legalIf)
+                    if isMetAndCompletions.isMet {
+                        // remove occupying piece if needed     // put in condition: removeOccupying, completions: removeOccupying
+                        if selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
+                            makeMove(Move(piece: pieceTapped!, remove: true, position: nil))
                         }
-                    }
-                    
-                    // check for gameOver
-                    checkForGameOver()
-                    whoseTurn += 1
-                    presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
-                } else {
-                    if let completions = pieceConditions.completions {
-                        for completion in completions {
-                            completion()
+                        
+                        // move the piece
+                        makeMove(Move(piece: selectedPiece!, remove: false, position: positionTapped))
+                        
+                        // completions
+                        if let completions = isMetAndCompletions.completions {
+                            for completion in completions {
+                                completion()
+                            }
+                        }
+                        
+                        // check for gameOver
+                        checkForGameOver()
+                        whoseTurn += 1
+                        presenterDelegate?.gameMessage((players[whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
+                    } else {
+                        if let completions = isMetAndCompletions.completions {
+                            for completion in completions {
+                                completion()
+                            }
                         }
                     }
                 }
-                selectedPiece!.selected = false
-                selectedPiece = nil
             }
+            selectedPiece!.selected = false
+            selectedPiece = nil
         }
     }
 }
@@ -345,12 +349,12 @@ extension Game {
 // MARK: Moving Pieces
 
 extension Game {
-    struct Move {
-        let piece: Piece
-        let remove: Bool
-        let position: Position?
-    }
-    
+//    struct Move {
+//        let piece: Piece
+//        let remove: Bool
+//        let position: Position?
+//    }
+//    
     func makeMove(_ move: Move) {
         if move.remove {
             removePieceAndViewFromGame(piece: move.piece)
@@ -365,34 +369,34 @@ extension Game {
         }
     }
     
-    func makeMoveInSnapshot(_ move: Move, snapshot: GameSnapshot) {
-        if let snapshotPiece = snapshot.allPieces.elementPassing({$0.id == move.piece.id && $0.player != nil && $0.player!.id == move.piece.player!.id}) {
-            if move.remove {
-                for player in snapshot.players {
-                    if let index = player.pieces.index(of: snapshotPiece) {
-                        player.pieces.remove(at: index)
-                    }
-                }
-            } else if move.position != nil {
-                if let snapshotPieceToReplace = pieceForPosition(move.position!, snapshot: snapshot) {
-                    if snapshotPieceToReplace.removePieceOccupyingNewPosition == true {
-                        for player in snapshot.players {
-                            if let index = player.pieces.index(of: snapshotPieceToReplace) {
-                                player.pieces.remove(at: index)
-                            }
-                        }
-                    }
-                }
-                snapshotPiece.position = move.position!
-            }
-        }
-    }
-    
-    func makeMovesInSnapshot(_ moves: [Move], snapshot: GameSnapshot) {
-        for move in moves {
-            makeMoveInSnapshot(move, snapshot: snapshot)
-        }
-    }
+//    func makeMoveInSnapshot(_ move: Move, snapshot: GameSnapshot) {
+//        if let snapshotPiece = snapshot.allPieces.elementPassing({$0.id == move.piece.id && $0.player != nil && $0.player!.id == move.piece.player!.id}) {
+//            if move.remove {
+//                for player in snapshot.players {
+//                    if let index = player.pieces.index(of: snapshotPiece) {
+//                        player.pieces.remove(at: index)
+//                    }
+//                }
+//            } else if move.position != nil {
+//                if let snapshotPieceToReplace = pieceForPosition(move.position!, snapshot: snapshot) {
+//                    if snapshotPieceToReplace.removePieceOccupyingNewPosition == true {
+//                        for player in snapshot.players {
+//                            if let index = player.pieces.index(of: snapshotPieceToReplace) {
+//                                player.pieces.remove(at: index)
+//                            }
+//                        }
+//                    }
+//                }
+//                snapshotPiece.position = move.position!
+//            }
+//        }
+//    }
+//    
+//    func makeMovesInSnapshot(_ moves: [Move], snapshot: GameSnapshot) {
+//        for move in moves {
+//            makeMoveInSnapshot(move, snapshot: snapshot)
+//        }
+//    }
     
     func removePieceAndViewFromGame(piece: Piece) {
         for player in players {
@@ -440,45 +444,45 @@ extension Game {
 // MARK: Conversions
 
 extension Game {
-    func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
-        let row: Int
-        let column: Int
-        switch direction {
-        case .bottom:
-            row = fromPosition.row + translation.row
-            column = fromPosition.column - translation.column
-        case .top:
-            row = fromPosition.row - translation.row
-            column = fromPosition.column + translation.column
-        case .left:
-            row = fromPosition.row - translation.column
-            column = fromPosition.column - translation.row
-        case .right:
-            row = fromPosition.row + translation.column
-            column = fromPosition.column + translation.row
-        }
-        return Position(row: row, column: column)
-    }
-    
-    func calculateTranslation(_ fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
-        let row: Int
-        let column: Int
-        switch direction {
-        case .bottom:
-            row = toPosition.row - fromPosition.row
-            column = fromPosition.column - toPosition.column
-        case .top:
-            row = fromPosition.row - toPosition.row
-            column = toPosition.column - fromPosition.column
-        case .left:
-            row = fromPosition.column - toPosition.column
-            column = fromPosition.row - toPosition.row
-        case .right:
-            row = toPosition.column - fromPosition.column
-            column = toPosition.row - fromPosition.row
-        }
-        return Translation(row: row, column: column)
-    }
+//    func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
+//        let row: Int
+//        let column: Int
+//        switch direction {
+//        case .bottom:
+//            row = fromPosition.row + translation.row
+//            column = fromPosition.column - translation.column
+//        case .top:
+//            row = fromPosition.row - translation.row
+//            column = fromPosition.column + translation.column
+//        case .left:
+//            row = fromPosition.row - translation.column
+//            column = fromPosition.column - translation.row
+//        case .right:
+//            row = fromPosition.row + translation.column
+//            column = fromPosition.column + translation.row
+//        }
+//        return Position(row: row, column: column)
+//    }
+//    
+//    func calculateTranslation(_ fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
+//        let row: Int
+//        let column: Int
+//        switch direction {
+//        case .bottom:
+//            row = toPosition.row - fromPosition.row
+//            column = fromPosition.column - toPosition.column
+//        case .top:
+//            row = fromPosition.row - toPosition.row
+//            column = toPosition.column - fromPosition.column
+//        case .left:
+//            row = fromPosition.column - toPosition.column
+//            column = fromPosition.row - toPosition.row
+//        case .right:
+//            row = toPosition.column - fromPosition.column
+//            column = toPosition.row - fromPosition.row
+//        }
+//        return Translation(row: row, column: column)
+//    }
     
     func pieceForPosition(_ position: Position, snapshot: GameSnapshot?) -> Piece? {
         let pieces = snapshot?.allPieces ?? allPieces

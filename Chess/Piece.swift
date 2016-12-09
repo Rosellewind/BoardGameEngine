@@ -14,11 +14,16 @@ protocol PiecesCreator {
     func makePieces(_ variation: Int, playerId: Int) -> [Piece]
 }
 
-enum LegalIfCondition: Int {
-    case mustBeOccupied, mustBeVacantCell, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
+//enum LegalIfCondition: Int {
+//    case mustBeOccupied, mustBeVacantCell, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
+//}
+
+struct LegalIf {
+    let condition: Condition
+    let translations: [Translation]?
 }
 
-typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?)
+typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?)
 
 class Piece: NSObject, NSCopying {
     var name: String

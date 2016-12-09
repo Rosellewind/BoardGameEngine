@@ -19,6 +19,46 @@ class Position: NSObject {
         self.row = row
         self.column = column
     }
+    
+    class func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
+        let row: Int
+        let column: Int
+        switch direction {
+        case .bottom:
+            row = fromPosition.row + translation.row
+            column = fromPosition.column - translation.column
+        case .top:
+            row = fromPosition.row - translation.row
+            column = fromPosition.column + translation.column
+        case .left:
+            row = fromPosition.row - translation.column
+            column = fromPosition.column - translation.row
+        case .right:
+            row = fromPosition.row + translation.column
+            column = fromPosition.column + translation.row
+        }
+        return Position(row: row, column: column)
+    }
+    
+    class func calculateTranslation(fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
+        let row: Int
+        let column: Int
+        switch direction {
+        case .bottom:
+            row = toPosition.row - fromPosition.row
+            column = fromPosition.column - toPosition.column
+        case .top:
+            row = fromPosition.row - toPosition.row
+            column = toPosition.column - fromPosition.column
+        case .left:
+            row = fromPosition.column - toPosition.column
+            column = fromPosition.row - toPosition.row
+        case .right:
+            row = toPosition.column - fromPosition.column
+            column = toPosition.row - fromPosition.row
+        }
+        return Translation(row: row, column: column)
+    }
 }
 
 func ==(lhs: Position, rhs: Position) -> Bool {

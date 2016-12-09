@@ -9,9 +9,10 @@
 import UIKit
 
 
-enum ChessLegalIfCondition: Int {
-    case cantBeInCheckDuring = 1000, rookCanCastle, markAdvancedTwo, mustBeOccupiedByOpponentOrEnPassant, checkForPromotion
-}
+
+//enum ChessLegalIfCondition: Int {
+//    case cantBeInCheckDuring = 1000, rookCanCastle, markAdvancedTwo, mustBeOccupiedByOpponentOrEnPassant, checkForPromotion
+//}
 
 enum ChessPieceType: String {
     case King, Queen, Rook, Bishop, Knight, Pawn
@@ -70,7 +71,7 @@ class ChessPieceCreator: PiecesCreator {
             
         case .galaxyChess:
             let isPossibleTranslation: (Translation) -> Bool = {_ in return true}
-            let isLegalMove = { (translation: Translation) -> (isLegal: Bool, conditions: [(condition: Int, translations: [Translation]?)]?) in
+            let isLegalMove = { (translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
                 return (true, nil)
             }
             let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
@@ -170,27 +171,34 @@ class ChessPieceCreator: PiecesCreator {
                 }
             }
             
-            let isLegalMove = {(translation: Translation) -> (isLegal: Bool, conditions: [(condition: LegalIfCondition.RawValue, translations: [Translation]?)]?) in
+            let isLegalMove = {(translation: Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
                 var isLegal = false
-                var conditions: [(condition: Int, translations: [Translation]?)] = [(condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [translation])]
+                var conditions: [LegalIf]? = nil
                 
                 // exactly one square horizontally, vertically, or diagonally, 1 castling per game
+                ////only one
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){
                     isLegal = true
-                    conditions.append((LegalIfCondition.cantBeOccupiedBySelf.rawValue, [translation]))
+                    conditions = [LegalIf(condition: CantLandInCheck(), translations: [translation]), LegalIf(condition: CantBeOccupiedBySelf(), translations: [translation])]
+
                 } else if translation.row == 0 && abs(translation.column) ==  2 {
                     // Castling:
+                    // king moves 2 horizontally, rook goes where king just crossed
                     // 1. neither king nor rook has moved
                     // 2. there are no pieces between king and rook
                     // 3. "One may not castle out of, through, or into check." (rook can be under attack, just not the king)
                     
                     let signage = translation.column > 0 ? 1 : -1
                     isLegal = true
-                    
-                    let moreConditions: [(condition: Int, translations: [Translation]?)] = [(condition: LegalIfCondition.isInitialMove.rawValue, translations: nil), (condition: ChessLegalIfCondition.rookCanCastle.rawValue, translations: [Position(row: 0, column: signage)]), (condition: LegalIfCondition.mustBeVacantCell.rawValue, translations: [translation, Position(row: translation.row, column: (abs(translation.column) - 1) * signage)]), (condition: ChessLegalIfCondition.cantBeInCheckDuring.rawValue, translations: [Position(row: 0, column: 0), Position(row:0, column: (abs(translation.column) - 1) * signage), translation])]
-                    conditions += moreConditions
+                    // rookCanCastleCondition: rook hasn't moved yet, no pieces from next to landing to rook
+                    //// completion, "can't castle through being in check
+                    let kingFirstMoveCondition = LegalIf(condition: IsInitialMove(), translations: nil)
+                    let rookCanCastleCondition = LegalIf(condition: RookCanCastle(), translations: [translation])
+                    let mustBeVacantCellsFromKingToKingLandingCondition = LegalIf(condition: MustBeVacantCell(), translations: [translation, Translation(row: translation.row, column: (abs(translation.column) - 1) * signage)])
+                    let cantBeInCheckDuringCondition = LegalIf(condition: CantBeInCheckDuring(), translations: [Translation(row: 0, column: 0), Translation(row:0, column: (abs(translation.column) - 1) * signage), translation])
+                    conditions = [kingFirstMoveCondition, rookCanCastleCondition, mustBeVacantCellsFromKingToKingLandingCondition, cantBeInCheckDuringCondition, LegalIf(condition: CantLandInCheck(), translations: [translation])]
                 }
                 return (isLegal, conditions)
             }
