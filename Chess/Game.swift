@@ -38,6 +38,7 @@ class GameSnapshot {
     var selectedPiece: Piece?
     var whoseTurn: Int
     var nextTurn: Int
+    var round: Int
     var allPieces: [Piece] {
         get {
             var pieces = [Piece]()
@@ -49,11 +50,11 @@ class GameSnapshot {
     }
     
     convenience init(game: Game) {
-        self.init(board: game.board, players: game.players, selectedPiece: game.selectedPiece, whoseTurn: game.whoseTurn, nextTurn: game.nextTurn)
+        self.init(board: game.board, players: game.players, selectedPiece: game.selectedPiece, whoseTurn: game.whoseTurn, nextTurn: game.nextTurn, round: game.round)
     }
     
     convenience init(gameSnapshot: GameSnapshot) {
-        self.init(board: gameSnapshot.board, players: gameSnapshot.players, selectedPiece: gameSnapshot.selectedPiece, whoseTurn: gameSnapshot.whoseTurn, nextTurn: gameSnapshot.nextTurn)
+        self.init(board: gameSnapshot.board, players: gameSnapshot.players, selectedPiece: gameSnapshot.selectedPiece, whoseTurn: gameSnapshot.whoseTurn, nextTurn: gameSnapshot.nextTurn, round: gameSnapshot.round)
     }
     
     func pieceForPosition(_ position: Position, snapshot: GameSnapshot?) -> Piece? {
@@ -90,16 +91,17 @@ class GameSnapshot {
         }
     }
     
-    init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int) {
+    init(board: Board, players: [Player], selectedPiece: Piece?, whoseTurn: Int, nextTurn: Int, round: Int) {
         self.board = board.copy()
         self.players = players.map({$0.copy()})
         self.whoseTurn = whoseTurn
         self.nextTurn = nextTurn
+        self.round = round
         self.selectedPiece = self.allPieces.elementPassing({$0.id == selectedPiece?.id})
     }
     
     func copy() -> GameSnapshot {
-        return GameSnapshot(board: board.copy(), players: players.map({$0.copy()}), selectedPiece: allPieces.elementPassing({$0.id == selectedPiece?.id}), whoseTurn: whoseTurn, nextTurn: nextTurn)
+        return GameSnapshot(board: board.copy(), players: players.map({$0.copy()}), selectedPiece: allPieces.elementPassing({$0.id == selectedPiece?.id}), whoseTurn: whoseTurn, nextTurn: nextTurn, round: round)
     }
 }
 
@@ -262,7 +264,7 @@ class Game: PieceViewProtocol {
         var isMet = true
         var completions: [(() -> Void)]? =  [(() -> Void)]()
         for legalIf in legalIfs! where isMet == true {
-            let isMetAndCompletions = legalIf.condition.checkIfConditionIsMet(piece: piece, translations: legalIf.translations!, snapshot: snapshot)
+            let isMetAndCompletions = legalIf.condition.checkIfConditionIsMet(piece: piece, translations: legalIf.translations, snapshot: snapshot)
             
             isMet = isMetAndCompletions.isMet
             if let complete = isMetAndCompletions.completions {
@@ -339,9 +341,9 @@ extension Game {
                         }
                     }
                 }
+                selectedPiece!.selected = false
+                selectedPiece = nil
             }
-            selectedPiece!.selected = false
-            selectedPiece = nil
         }
     }
 }
@@ -502,9 +504,7 @@ extension Game {
         return nil
     }
     
-    func playerIndex(player: Player) -> Int? {
-        return players.index(where: {$0.id == player.id})
-    }
+
     
 
 }

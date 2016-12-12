@@ -17,25 +17,6 @@ protocol Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, snapshot: GameSnapshot) -> IsMetAndCompletions
 }
 
-class ConditionsHelper {
-    class func checkConditions(piece: Piece, snapshot: GameSnapshot, legalIfs: [LegalIf]?) -> IsMetAndCompletions {
-        if legalIfs == nil {
-            return IsMetAndCompletions(isMet: true, completions: nil)
-        }
-        var isMet = true
-        var completions: [(() -> Void)]? =  [(() -> Void)]()
-        for legalIf in legalIfs! where isMet == true {
-            let isMetAndCompletions = legalIf.condition.checkIfConditionIsMet(piece: piece, translations: legalIf.translations!, snapshot: snapshot)
-            
-            isMet = isMetAndCompletions.isMet
-            if let complete = isMetAndCompletions.completions {
-                completions! += complete
-            }
-        }
-        return IsMetAndCompletions(isMet: isMet, completions: completions!.count > 0 ? completions : nil)
-    }
-}
-
 
 
 // MARK: Basic Conditions
@@ -266,11 +247,11 @@ class RookCanCastle: Condition {
                 let kingLandingPosition = Position.positionFromTranslation(kingTranslation, fromPosition: king.position, direction: player.forwardDirection)
                 let kingMovingToTheRight = kingTranslation.column > 0
                 let rookOnRight = rook.position.column - king.position.column > 0
-                let columns: CountableRange<Int>
+                var columns: CountableRange<Int> = 0..<1
                 if kingMovingToTheRight {
                     landingPositionForRook = Position(row: king.position.row, column: king.position.column - 1)
                     if rookOnRight {
-                        let columns = kingLandingPosition.column+1..<rook.position.column
+                        columns = kingLandingPosition.column+1..<rook.position.column
                     } else {
                         columns = rook.position.column+1..<king.position.column
                     }
@@ -310,52 +291,129 @@ class RookCanCastle: Condition {
     }
 
     func moveARook(castlingRooks rooks: [Piece], position: Position) {
-        if rooks.count == 2 {
+//        if rooks.count == 2 {
+//            
+//            // find the direction the player is moving
+//            var playerOrientation = ChessPlayerOrientation.bottom
+//            if let player = rooks[0].player as? ChessPlayer {
+//                playerOrientation = player.orientation
+//            }
+//            
+//            // have the presenting VC ask which rook to use
+//            let alert = UIAlertController(title: "Castling", message: "Which rook do you want to use?", preferredStyle: .alert)
+//            let leftAction = UIAlertAction(title: "Left", style: .default, handler: { (action: UIAlertAction) in
+//                let leftRook: Piece
+//                switch playerOrientation {
+//                case .bottom:
+//                    leftRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
+//                case .top:
+//                    leftRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
+//                case .left:
+//                    leftRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
+//                case .right:
+//                    leftRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
+//                }
+//                self.makeMove(Move(piece: leftRook, remove: false, position: position))
+//                alert.dismiss(animated: true, completion: nil)
+//            })
+//            alert.addAction(leftAction)
+//            let rightAction = UIAlertAction(title: "Right", style: .default, handler: { (action: UIAlertAction) in
+//                let rightRook: Piece
+//                switch playerOrientation {
+//                case .bottom:
+//                    rightRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
+//                case .top:
+//                    rightRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
+//                case .left:
+//                    rightRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
+//                case .right:
+//                    rightRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
+//                }
+//                self.makeMove(Move(piece: rightRook, remove: false, position: position))
+//                alert.dismiss(animated: true, completion: nil)
+//            })
+//            alert.addAction(rightAction)
+//            presenterDelegate?.showAlert(alert)
+//        } else if rooks.count == 1 {
+//            self.makeMove(Move(piece: rooks[0], remove: false, position: position))
+//        }
+    }
+}
+
+class CheckForPromotion: Condition {
+    func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, snapshot: GameSnapshot) -> IsMetAndCompletions {
+        return IsMetAndCompletions(isMet: false, completions: nil)
+    }
+
+    
+}
+
+class MarkAdvancedTwo: Condition {
+    func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, snapshot: GameSnapshot) -> IsMetAndCompletions {
+        let completion: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = snapshot.round}
+        return IsMetAndCompletions(isMet: true, completions: [completion])
+
+    }
+}
+
+class MustBeOccupiedByOpponentOrEnPassant: Condition {
+    func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, snapshot: GameSnapshot) -> IsMetAndCompletions {
+        var isMet = false
+        guard let player = piece.player, let translations = translations else {
+            return IsMetAndCompletions(isMet: false, completions: nil)
+        }
+//        for translation in translations ?? [] {
+//
+//            }
+//        }
+        
+    
+    
+    
+        if translations.count == 2 {
+            let landingTranslation = translations[0]
             
-            // find the direction the player is moving
-            var playerOrientation = ChessPlayerOrientation.bottom
-            if let player = rooks[0].player as? ChessPlayer {
-                playerOrientation = player.orientation
+            
+            
+            
+            var enPassantPawn: PawnPiece? = nil
+            let enPassantPosition = Position.positionFromTranslation(translations[1], fromPosition: piece.position, direction: player.forwardDirection)
+            if let possiblePawn = snapshot.pieceForPosition(enPassantPosition, snapshot: nil) as? PawnPiece {
+                if let roundWhenPawnAdvancedTwo = possiblePawn.roundWhenPawnAdvancedTwo {
+                    if let pawnIndex = playerIndex(player: player) {
+                        if let enPassantPlayer = possiblePawn.player {
+                            if let enPassantIndex = playerIndex(player: enPassantPlayer) {
+                                if pawnIndex != enPassantIndex {
+                                    let isBetween = pawnIndex.isBetweenInForwardLoop(firstInclusive: firstInRound, lastNotInclusive: enPassantIndex)
+                                    let isStillFirstRoundSinceAdvancedTwo = (isBetween && round == roundWhenPawnAdvancedTwo + 1) || (!isBetween && round == roundWhenPawnAdvancedTwo)
+                                    if isStillFirstRoundSinceAdvancedTwo {
+                                        enPassantPawn = possiblePawn
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
             }
             
-            // have the presenting VC ask which rook to use
-            let alert = UIAlertController(title: "Castling", message: "Which rook do you want to use?", preferredStyle: .alert)
-            let leftAction = UIAlertAction(title: "Left", style: .default, handler: { (action: UIAlertAction) in
-                let leftRook: Piece
-                switch playerOrientation {
-                case .bottom:
-                    leftRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
-                case .top:
-                    leftRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
-                case .left:
-                    leftRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
-                case .right:
-                    leftRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
-                }
-                self.makeMove(Move(piece: leftRook, remove: false, position: position))
-                alert.dismiss(animated: true, completion: nil)
-            })
-            alert.addAction(leftAction)
-            let rightAction = UIAlertAction(title: "Right", style: .default, handler: { (action: UIAlertAction) in
-                let rightRook: Piece
-                switch playerOrientation {
-                case .bottom:
-                    rightRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
-                case .top:
-                    rightRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
-                case .left:
-                    rightRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
-                case .right:
-                    rightRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
-                }
-                self.makeMove(Move(piece: rightRook, remove: false, position: position))
-                alert.dismiss(animated: true, completion: nil)
-            })
-            alert.addAction(rightAction)
-            presenterDelegate?.showAlert(alert)
-        } else if rooks.count == 1 {
-            self.makeMove(Move(piece: rooks[0], remove: false, position: position))
+            
+            if enPassantPawn != nil {
+                let enPassantCompletion: () -> Void = {self.removePieceAndViewFromGame(piece: enPassantPawn!)}
+                completions!.append(enPassantCompletion)
+                isMet = true
+            } else {
+                isMet = occupiedCondition.isMet
+                if occupiedCondition.completions != nil{////del
+                    completions! += occupiedCondition.completions!
+                }                                }
         }
+        return IsMetAndCompletions(isMet: false, completions: nil)
+
+    }
+    
+    func playerIndex(player: Player) -> Int? {
+        return players.index(where: {$0.id == player.id})
     }
 }
 

@@ -14,10 +14,6 @@ protocol PiecesCreator {
     func makePieces(_ variation: Int, playerId: Int) -> [Piece]
 }
 
-//enum LegalIfCondition: Int {
-//    case mustBeOccupied, mustBeVacantCell, mustBeOccupiedByOpponent, cantBeOccupiedBySelf, isInitialMove
-//}
-
 struct LegalIf {
     let condition: Condition
     let translations: [Translation]?

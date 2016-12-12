@@ -125,9 +125,9 @@ class ChessGame: Game {
                     continue
                 } else {
                     for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
-                        let translation = calculateTranslation(otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
+                        let translation = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
                         let moveFunction = otherPlayerPiece.isLegalMove(translation)
-                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(otherPlayerPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet
+//                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(otherPlayerPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet
                     }
                 }
             }
@@ -141,45 +141,46 @@ class ChessGame: Game {
         // if in check, can use any piece to get out of check?
 //        if snapshot.isCheck
 //        check all translations pieces can move
-        var isCheckMate = false
-        if isCheck(player, snapshot: snapshot) {
-            isCheckMate = true
-            for piece in player.pieces where isCheckMate == true {
-                for index in board.indexesNotEmpty {
-                    let position = board.position(index: index)
-                    let translation = calculateTranslation(piece.position, toPosition: position, direction: player.forwardDirection)
-                    if piece.isPossibleTranslation(translation) {   // eliminate some iterations
-                        self.reusableGameSnapshot = GameSnapshot(game: self)//not using snapshot para
-                        let moveFunction = piece.isLegalMove(translation)
-                        let pieceConditions = pieceConditionsAreMet(piece, conditions: moveFunction.conditions, snapshot: self.reusableGameSnapshot)
-                        
-                        if moveFunction.isLegal && pieceConditions.isMet {
-                            
-                            // remove occupying piece if needed
-                            let occupyingPiece = pieceForPosition(position, snapshot: self.reusableGameSnapshot)
-                            if piece.removePieceOccupyingNewPosition == true && occupyingPiece != nil {
-                                makeMoveInSnapshot(Move(piece: occupyingPiece!, remove: true, position: nil), snapshot: self.reusableGameSnapshot!)
-                            }
-                            
-                            // move the piece
-                            makeMoveInSnapshot(Move(piece: piece, remove: false, position: position), snapshot: self.reusableGameSnapshot!)
-                            
-                            // completions
-                            if let completions = pieceConditions.completions {
-                                for completion in completions {
-                                    completion()
-                                }
-                            }
-                        
-                            if isCheck(player, snapshot: self.reusableGameSnapshot) == false {
-                                isCheckMate = false
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return isCheckMate
+//        var isCheckMate = false
+//        if isCheck(player, snapshot: snapshot) {
+//            isCheckMate = true
+//            for piece in player.pieces where isCheckMate == true {
+//                for index in board.indexesNotEmpty {
+//                    let position = board.position(index: index)
+//                    let translation = Position.calculateTranslation(fromPosition: piece.position, toPosition: position, direction: player.forwardDirection)
+//                    if piece.isPossibleTranslation(translation) {   // eliminate some iterations
+//                        self.reusableGameSnapshot = GameSnapshot(game: self)//not using snapshot para
+//                        let moveFunction = piece.isLegalMove(translation)
+//                        let pieceConditions = pieceConditionsAreMet(piece, conditions: moveFunction.conditions, snapshot: self.reusableGameSnapshot)
+//                        
+//                        if moveFunction.isLegal && pieceConditions.isMet {
+//                            
+//                            // remove occupying piece if needed
+//                            let occupyingPiece = pieceForPosition(position, snapshot: self.reusableGameSnapshot)
+//                            if piece.removePieceOccupyingNewPosition == true && occupyingPiece != nil {
+//                                self.reusableGameSnapshot?.makeMove(Move(piece: occupyingPiece!, remove: true, position: nil))
+//                            }
+//                            
+//                            // move the piece
+//                            self.reusableGameSnapshot?.makeMove(Move(piece: piece, remove: false, position: position))
+//                            
+//                            // completions
+//                            if let completions = pieceConditions.completions {
+//                                for completion in completions {
+//                                    completion()
+//                                }
+//                            }
+//                        
+//                            if isCheck(player, snapshot: self.reusableGameSnapshot) == false {
+//                                isCheckMate = false
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return isCheckMate
+        return false
     }
     
     fileprivate func promote(piece: Piece, toType: ChessPieceType) {
