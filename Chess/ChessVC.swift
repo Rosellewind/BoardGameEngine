@@ -14,7 +14,7 @@ class ChessVC: UIViewController, GamePresenterProtocol {
     @IBOutlet weak var bottomLabel: UILabel!
     
     var chessVariation: ChessVariation?
-    var game: Game!
+    var game: GameVC!
     
     override func viewDidAppear(_ animated: Bool) {
         setupGame()

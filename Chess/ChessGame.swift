@@ -28,7 +28,7 @@ enum ChessVariation: Int {
     }
 }
 
-class ChessGame: Game {
+class ChessGame: GameVC {
     init(chessVariation: ChessVariation, gameView: UIView) {
         switch chessVariation {
         case .fourPlayer:
@@ -84,17 +84,21 @@ class ChessGame: Game {
     }
     
     override func checkForGameOver(){
-        let player = players[whoseTurn]
-        if isCheck(player, snapshot: nil) {
+        
+        // check if next player is in check, display string
+        let player = game.players[game.nextTurn]
+        if isCheck(player, game: nil) {
             let message = player.name != nil ? (player.name! + " is in check") : "in check"
             presenterDelegate?.secondaryGameMessage(string: message)
         } else {
             presenterDelegate?.secondaryGameMessage(string: "")
         }
+        
+        // check if any player is in checkmate
         var playersInCheckMate = [Player]()
-        for player in players {
-            if player.id != players[whoseTurn].id {
-                if isCheckMate(player, snapshot: nil) {
+        for player in game.players {
+            if player.id != game.players[game.whoseTurn].id {
+                if isCheckMate(player, game: nil) {
                     playersInCheckMate.append(player)
                 }
             }
@@ -114,93 +118,72 @@ class ChessGame: Game {
         }
      }
     
-    func isCheck(_ player: Player, snapshot: GameSnapshot?) -> Bool {
+    func isCheck(_ player: Player, game: Game?) -> Bool {
         // all other players pieces can not take king
         var isCheck = false
-        let thisPlayer = snapshot?.players.elementPassing({$0.id == player.id}) ?? player
-        let thisPlayers = snapshot?.players ?? players
-        if let king = thisPlayer.pieces.elementPassing({$0.name == "King"}) {
-            for otherPlayer in thisPlayers where isCheck == false {
-                if otherPlayer === thisPlayer {
+        let player = game?.players.elementPassing({$0.id == player.id}) ?? player
+        let game = game ?? self.game
+        if let king = player.pieces.elementPassing({$0.name == "King"}) {
+            for otherPlayer in game.players where isCheck == false {
+                if otherPlayer === player {
                     continue
                 } else {
                     for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
                         let translation = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
                         let moveFunction = otherPlayerPiece.isLegalMove(translation)
-//                        isCheck = moveFunction.isLegal && pieceConditionsAreMet(otherPlayerPiece, conditions: moveFunction.conditions, snapshot: snapshot).isMet
+                        if moveFunction.isLegal {
+                            let isMetAndCompletions = game.checkIfConditionsAreMet(piece: otherPlayerPiece, legalIfs: moveFunction.legalIf)
+                            if isMetAndCompletions.isMet {
+                                isCheck = true
+                            }
+                        }
                     }
                 }
             }
         }
         return isCheck
     }
-    // midTurn, between moves,
-    func isCheckMate(_ player: Player, snapshot: GameSnapshot?) -> Bool {
+
+    func isCheckMate(_ player: Player, game: Game?) -> Bool {
         
         // after a move, check next player for checkmate if in check
         // if in check, can use any piece to get out of check?
-//        if snapshot.isCheck
-//        check all translations pieces can move
-//        var isCheckMate = false
-//        if isCheck(player, snapshot: snapshot) {
-//            isCheckMate = true
-//            for piece in player.pieces where isCheckMate == true {
-//                for index in board.indexesNotEmpty {
-//                    let position = board.position(index: index)
-//                    let translation = Position.calculateTranslation(fromPosition: piece.position, toPosition: position, direction: player.forwardDirection)
-//                    if piece.isPossibleTranslation(translation) {   // eliminate some iterations
-//                        self.reusableGameSnapshot = GameSnapshot(game: self)//not using snapshot para
-//                        let moveFunction = piece.isLegalMove(translation)
-//                        let pieceConditions = pieceConditionsAreMet(piece, conditions: moveFunction.conditions, snapshot: self.reusableGameSnapshot)
-//                        
-//                        if moveFunction.isLegal && pieceConditions.isMet {
-//                            
-//                            // remove occupying piece if needed
-//                            let occupyingPiece = pieceForPosition(position, snapshot: self.reusableGameSnapshot)
-//                            if piece.removePieceOccupyingNewPosition == true && occupyingPiece != nil {
-//                                self.reusableGameSnapshot?.makeMove(Move(piece: occupyingPiece!, remove: true, position: nil))
-//                            }
-//                            
-//                            // move the piece
-//                            self.reusableGameSnapshot?.makeMove(Move(piece: piece, remove: false, position: position))
-//                            
-//                            // completions
-//                            if let completions = pieceConditions.completions {
-//                                for completion in completions {
-//                                    completion()
-//                                }
-//                            }
-//                        
-//                            if isCheck(player, snapshot: self.reusableGameSnapshot) == false {
-//                                isCheckMate = false
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return isCheckMate
-        return false
-    }
-    
-    fileprivate func promote(piece: Piece, toType: ChessPieceType) {
-        // create replacement
-        let newPiece = ChessPieceCreator.shared.chessPiece(toType)
-        newPiece.position = piece.position
-        newPiece.id = piece.id
-        newPiece.isFirstMove = piece.isFirstMove
-        newPiece.startingPosition = piece.startingPosition
-        newPiece.player = piece.player
-        newPiece.selected = piece.selected
-        
-        // remove the old and add the new
-        UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
-            self.removePieceAndViewFromGame(piece: piece)
-            self.addPieceAndViewToGame(piece: newPiece)
-            }, completion: nil)
-//        UIView.animate(withDuration: 0.2, animations: removePieceAndViewFromGame(piece: piece)
-//            addPieceAndViewToGame(piece: newPiece))
-        
+        // if game.isCheck check all translations pieces can move
+        var isCheckMate = false
+        if isCheck(player, game: game) {
+            let game = game ?? self.game
+            var canMoveOutOfCheck = false
+            for piece in player.pieces where canMoveOutOfCheck == false {
+                for index in game.board.indexesNotEmpty {
+                    let position = game.board.position(index: index)
+                    let translation = Position.calculateTranslation(fromPosition: piece.position, toPosition: position, direction: player.forwardDirection)
+                    if piece.isPossibleTranslation(translation) {   // eliminate some iterations
+                        let moveFunction = piece.isLegalMove(translation)
+                        if moveFunction.isLegal {
+                            let isMetAndCompletions = game.checkIfConditionsAreMet(piece: piece, legalIfs: moveFunction.legalIf)
+                            if isMetAndCompletions.isMet {
+                                // if piece is moved, come out of check?
+                                let gameCopy = game.copy()
+                                gameCopy.printPieces()
+                                gameCopy.movePieceMatching(piece: piece, position: position, removeOccupying: piece.removePieceOccupyingNewPosition)
+                                for completion in isMetAndCompletions.completions ?? [] {
+                                    completion()
+                                }
+                                gameCopy.printPieces()
+                                if isCheck(player, game: gameCopy) == false {
+                                    print(piece.name, piece.position.row, piece.position.column, position.row, position.column, translation.row, translation.column)
+                                    canMoveOutOfCheck = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if canMoveOutOfCheck == false {
+                isCheckMate = true
+            }
+        }
+        return isCheckMate
     }
 }
 
