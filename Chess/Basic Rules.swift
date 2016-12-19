@@ -19,7 +19,6 @@ protocol Condition {
 }
 
 
-
 // MARK: Basic Conditions
 
 class MustBeVacantCell: Condition {

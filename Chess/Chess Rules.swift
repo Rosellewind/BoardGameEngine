@@ -8,6 +8,9 @@
 
 import UIKit
 
+
+// MARK: Chess Conditions
+
 class CantBeInCheck: Condition {
     static var shared: Condition = CantBeInCheck()
     private init() {}
