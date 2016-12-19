@@ -25,7 +25,7 @@ class GamePlayVC: UIViewController, GamePresenterProtocol {
         for subview in gameView.subviews {
             subview.removeFromSuperview()
         }
-        game = ChessGame(chessVariation: chessVariation ?? .standardChess, gameView: gameView)
+        game = ChessGameVC(chessVariation: chessVariation ?? .standardChess, gameView: gameView)
         game.presenterDelegate = self
     }
     

@@ -30,7 +30,7 @@
 		4A0F34371CED798C00C25E7D /* PawnBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34311CED798C00C25E7D /* PawnBlack.png */; };
 		4A0F34381CED798C00C25E7D /* QueenBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34321CED798C00C25E7D /* QueenBlack.png */; };
 		4A0F34391CED798C00C25E7D /* RookBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F34331CED798C00C25E7D /* RookBlack.png */; };
-		4A3BD31F1D0FB4A4008A14AF /* ChessGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */; };
+		4A3BD31F1D0FB4A4008A14AF /* ChessGameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3BD31E1D0FB4A4008A14AF /* ChessGameVC.swift */; };
 		4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */; };
 		4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3831DB5201000129CDB /* Chess Pieces.swift */; };
 		4AC0A3891DB5227100129CDB /* MenuTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3881DB5227100129CDB /* MenuTVC.swift */; };
@@ -62,7 +62,7 @@
 		4A0F34311CED798C00C25E7D /* PawnBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PawnBlack.png; sourceTree = "<group>"; };
 		4A0F34321CED798C00C25E7D /* QueenBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = QueenBlack.png; sourceTree = "<group>"; };
 		4A0F34331CED798C00C25E7D /* RookBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RookBlack.png; sourceTree = "<group>"; };
-		4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessGame.swift; sourceTree = "<group>"; };
+		4A3BD31E1D0FB4A4008A14AF /* ChessGameVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessGameVC.swift; sourceTree = "<group>"; };
 		4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessPlayer.swift; sourceTree = "<group>"; };
 		4AC0A3831DB5201000129CDB /* Chess Pieces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Pieces.swift"; sourceTree = "<group>"; };
 		4AC0A3881DB5227100129CDB /* MenuTVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuTVC.swift; sourceTree = "<group>"; };
@@ -108,7 +108,6 @@
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
 				23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */,
-				235E06381E04D51800FBDBF4 /* Chess Rules.swift */,
 				4AC0A3851DB520C900129CDB /* Chess */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
@@ -139,9 +138,10 @@
 		4AC0A3851DB520C900129CDB /* Chess */ = {
 			isa = PBXGroup;
 			children = (
-				4A3BD31E1D0FB4A4008A14AF /* ChessGame.swift */,
+				4A3BD31E1D0FB4A4008A14AF /* ChessGameVC.swift */,
 				4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */,
 				4AC0A3831DB5201000129CDB /* Chess Pieces.swift */,
+				235E06381E04D51800FBDBF4 /* Chess Rules.swift */,
 			);
 			name = Chess;
 			sourceTree = "<group>";
@@ -231,7 +231,7 @@
 			files = (
 				4A0F34271CEA5F6E00C25E7D /* Piece.swift in Sources */,
 				4A0F34291CEA67D800C25E7D /* Game.swift in Sources */,
-				4A3BD31F1D0FB4A4008A14AF /* ChessGame.swift in Sources */,
+				4A3BD31F1D0FB4A4008A14AF /* ChessGameVC.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */,
 				23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */,
 				235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */,
@@ -368,6 +368,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Chess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -381,6 +382,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Chess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

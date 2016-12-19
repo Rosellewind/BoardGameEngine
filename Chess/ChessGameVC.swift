@@ -1,6 +1,6 @@
 //
 //  AllChess.swift
-//  ChessGame
+//  ChessGameVC
 //
 //  Created by Roselle Milvich on 6/13/16.
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
@@ -28,7 +28,7 @@ enum ChessVariation: Int {
     }
 }
 
-class ChessGame: GameVC {
+class ChessGameVC: GameVC {
     init(chessVariation: ChessVariation, gameView: UIView) {
         switch chessVariation {
         case .fourPlayer:
