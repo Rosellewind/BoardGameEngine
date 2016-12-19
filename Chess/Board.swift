@@ -59,6 +59,40 @@ class Position: NSObject {
         }
         return Translation(row: row, column: column)
     }
+    
+    class func betweenLinearExclusive(position1: Position, position2: Position) -> [Position] {
+        var positions = [Position]()
+        var lower = 0
+        var higher = 0
+        if position1.row == position2.row {
+            if position1.column + 1 < position2.column {
+                lower = position1.column + 1
+                higher = position2.column - 1
+            } else if position2.column + 1 < position1.column {
+                lower = position2.column + 1
+                higher = position1.column - 1
+            }
+            if lower != higher {
+                for i in lower...higher {
+                    positions.append(Position(row: position1.row, column: i))
+                }
+            }
+        } else if position1.column == position2.column {
+            if position1.row + 1 < position2.row {
+                lower = position1.row + 1
+                higher = position2.row - 1
+            } else if position2.row + 1 < position1.row {
+                lower = position2.row + 1
+                higher = position1.row - 1
+            }
+            if lower != higher {
+                for i in lower...higher {
+                    positions.append(Position(row: i, column: position1.column))
+                }
+            }
+        }
+        return positions
+    }
 }
 
 func ==(lhs: Position, rhs: Position) -> Bool {

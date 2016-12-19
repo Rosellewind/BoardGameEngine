@@ -9,6 +9,8 @@
 import UIKit
 
 class CantBeInCheck: Condition {
+    static var shared: Condition = CantBeInCheck()
+    private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         print("...")
         var isMet = true
@@ -32,27 +34,25 @@ class CantBeInCheck: Condition {
     func isCheck(player: Player, game: Game) -> Bool {
         // all other players pieces can not take king
         var isCheck = false
-        let thisPlayer = game.players.elementPassing({$0.id == player.id}) ?? player
-        let allPlayers = game.players
-        if let king = thisPlayer.pieces.elementPassing({$0.name == "King"}) {
-            for otherPlayer in allPlayers where isCheck == false {
-                if otherPlayer === thisPlayer {
+        guard let player = game.players.elementPassing({$0.id == player.id}) else {
+            return false
+        }
+        
+        if let king = player.pieces.elementPassing({$0.name == "King"}) {
+            for otherPlayer in game.players where isCheck == false {
+                if otherPlayer === player {
                     continue
                 } else {
-                    for otherPlayerPiece in otherPlayer.pieces where isCheck == false {////false checked at top
+                    for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
                         let translationToCaptureKing = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = otherPlayerPiece.isLegalMove(translationToCaptureKing)// -> bool, conditions
+                        let moveFunction = otherPlayerPiece.isLegalMove(translationToCaptureKing)
                         if moveFunction.isLegal {
                             // give chance for condition to make isCheck false
-                            isCheck = true
-                            for conditionTuple in moveFunction.legalIf! where isCheck == true {
-                                let x = conditionTuple.condition.checkIfConditionIsMet(piece: otherPlayerPiece, translations: conditionTuple.translations!, game: game)
-                                if x.isMet == false {
-                                    isCheck = false
-                                }
+                            let isMetAndCompletions = game.checkIfConditionsAreMet(piece: otherPlayerPiece, legalIfs: moveFunction.legalIf)
+                            if isMetAndCompletions.isMet {
+                                isCheck = true
                             }
                         }
-                        
                     }
                 }
             }
@@ -62,6 +62,8 @@ class CantBeInCheck: Condition {
 }
 
 class RookCanCastle: Condition {
+    static var shared: Condition = RookCanCastle()
+    private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         // king moves 2 horizontally, rook goes where king just crossed
         // 1. neither the king nor the rook may have been previously moved
@@ -69,122 +71,52 @@ class RookCanCastle: Condition {
         // 3. the king may not be in check, nor may the king pass through squares athat are under attack by eney pieces, nor move to a square where it is in check
         
         
-        // this func: rook hasn't moved yet, no pieces from next to landing to rook
+        // this func checks: rook hasn't moved yet, no pieces from next to landing to rook
         var isMet: Bool
         var completions: [(() -> Void)]? = nil
-        guard let player = piece.player, let king = player.pieces.elementPassing({$0.name == "King"}), let translations = translations  else {
+        guard let player = piece.player, let king = player.pieces.elementPassing({$0.name == "King"}), let kingTranslation = translations?[0]  else {
             return IsMetAndCompletions(isMet: false, completions: nil)
         }
-        
         let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
-        var castlingRooks = [Piece]()
-        var landingPositionForRook = Position(row: 0, column: 0)
+        let kingLandingPosition = Position.positionFromTranslation(kingTranslation, fromPosition: king.position, direction: player.forwardDirection)
+        let kingDirection = kingTranslation.column > 0 ? 1 : -1 ////bool
+        let rookLandingPosition = Position.positionFromTranslation(Translation(row: kingTranslation.row, column: kingTranslation.column - kingDirection), fromPosition: king.position, direction: player.forwardDirection)
+        var castlingRook: Piece? = nil
         for rook in rooks {
-            
-            // checks half of rule 1, rook can't be previously moved
-            if rook.isFirstMove && translations.count > 0 {
-                
-                // check if no pieces between
-                // translation is +2 or -2
-                let kingTranslation = translations[0]
-                let kingLandingPosition = Position.positionFromTranslation(kingTranslation, fromPosition: king.position, direction: player.forwardDirection)
-                let kingMovingToTheRight = kingTranslation.column > 0
-                let rookIsOnRight = rook.position.column - king.position.column > 0
-                var columnsThatMustBeEmpty: CountableRange<Int> = 0..<1
-                if kingMovingToTheRight {
-                    landingPositionForRook = Position(row: kingLandingPosition.row, column: kingLandingPosition.column - 1)
-                    if rookIsOnRight {
-                        columnsThatMustBeEmpty = kingLandingPosition.column+1..<rook.position.column
-                    } else {
-                        columnsThatMustBeEmpty = rook.position.column+1..<king.position.column
+            let rookTranslation = Position.calculateTranslation(fromPosition: rook.position, toPosition: rookLandingPosition, direction: player.forwardDirection)
+            let rookDirection = rookTranslation.column > 0 ? 1 : -1
+            if kingDirection != rookDirection {
+                // checks half of rule 1, rook can't be previously moved
+                if rook.isFirstMove{
+                    // check half of rule 2, if no pieces between rook and kingLanding
+                    let mustBeEmptyPositions = Position.betweenLinearExclusive(position1: kingLandingPosition, position2: rook.position)
+                    let mustBeEmptyTranslations = mustBeEmptyPositions.map({ (position: Position) -> Translation in
+                        Position.calculateTranslation(fromPosition: rook.position, toPosition: position, direction: player.forwardDirection)
+                    })
+                    let conditionsMet = MustBeVacantCell.shared.checkIfConditionIsMet(piece: rook, translations: mustBeEmptyTranslations, game: game)
+                    if conditionsMet.isMet == true {
+                        castlingRook = rook
+                        break
                     }
-                } else {    // king is moving to the left
-                    landingPositionForRook = Position(row: kingLandingPosition.row, column: kingLandingPosition.column + 1)
-                    if rookIsOnRight {
-                        columnsThatMustBeEmpty = king.position.column+1..<rook.position.column
-                    } else {
-                        columnsThatMustBeEmpty = rook.position.column+1..<kingLandingPosition.column
-                    }
-                }
-                
-                let rookLandingTranslation = Position.calculateTranslation(fromPosition: rook.position, toPosition: landingPositionForRook, direction: player.forwardDirection)
-                
-                var translationsMustBeVacant = [Translation]()
-                for column in columnsThatMustBeEmpty {
-                    let translationThatMustVacant = Position.calculateTranslation(fromPosition: rook.position, toPosition: Translation(row: rook.position.row, column: column), direction: player.forwardDirection)
-                    translationsMustBeVacant.append(translationThatMustVacant)
-                }
-                let x = MustBeVacantCell().checkIfConditionIsMet(piece: rook, translations: translationsMustBeVacant, game: game)
-                if x.isMet == true {
-                    castlingRooks.append(rook)
                 }
             }
+            
         }
-        
-        if castlingRooks.count == 0 {
-            isMet = false
-        } else {
+        if castlingRook != nil {
             // move the rook
             isMet = true
-            completions = [{self.moveARook(castlingRooks: castlingRooks, position: landingPositionForRook, game: game)}]
+            completions = [{game.movePiece(piece: castlingRook!, position: rookLandingPosition, removeOccupying: false)
+                }]
+        } else {
+            isMet = false
         }
         return IsMetAndCompletions(isMet: isMet, completions: completions)
-    }
-    
-    func moveARook(castlingRooks rooks: [Piece], position: Position, game: Game) {
-        if rooks.count == 2 {
-            guard let vc = game.vc else {
-                return
-            }
-            
-            // find the direction the player is moving
-            var playerOrientation = ChessPlayerOrientation.bottom
-            if let player = rooks[0].player as? ChessPlayer {
-                playerOrientation = player.orientation
-            }
-            
-            // have the presenting VC ask which rook to use
-            let alert = UIAlertController(title: "Castling", message: "Which rook do you want to use?", preferredStyle: .alert)
-            let leftAction = UIAlertAction(title: "Left", style: .default, handler: { (action: UIAlertAction) in
-                let leftRook: Piece
-                switch playerOrientation {
-                case .bottom:
-                    leftRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
-                case .top:
-                    leftRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
-                case .left:
-                    leftRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
-                case .right:
-                    leftRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
-                }
-                game.movePiece(piece: leftRook, position: position, removeOccupying: false)
-                alert.dismiss(animated: true, completion: nil)
-            })
-            alert.addAction(leftAction)
-            let rightAction = UIAlertAction(title: "Right", style: .default, handler: { (action: UIAlertAction) in
-                let rightRook: Piece
-                switch playerOrientation {
-                case .bottom:
-                    rightRook = rooks[0].position.column > rooks[1].position.column ? rooks[0] : rooks[1]
-                case .top:
-                    rightRook = rooks[0].position.column < rooks[1].position.column ? rooks[0] : rooks[1]
-                case .left:
-                    rightRook = rooks[0].position.row > rooks[1].position.row ? rooks[0] : rooks[1]
-                case .right:
-                    rightRook = rooks[0].position.row < rooks[1].position.row ? rooks[0] : rooks[1]
-                }
-                game.movePiece(piece: rightRook, position: position, removeOccupying: false)
-                alert.dismiss(animated: true, completion: nil)
-            })
-            alert.addAction(rightAction)
-            vc.presenterDelegate?.showAlert(alert)
-        } else if rooks.count == 1 {
-            game.movePiece(piece: rooks[0], position: position, removeOccupying: false)
-        }
     }
 }
 
 class CheckForPromotion: Condition {
+    static var shared: Condition = CheckForPromotion()
+    private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         guard let vc = game.vc else {
             return IsMetAndCompletions(isMet: true, completions: nil)
@@ -253,6 +185,8 @@ class CheckForPromotion: Condition {
 }
 
 class MarkAdvancedTwo: Condition {
+    static var shared: Condition = MarkAdvancedTwo()
+    private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         let completion: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = game.round}
         return IsMetAndCompletions(isMet: true, completions: [completion])
@@ -261,6 +195,8 @@ class MarkAdvancedTwo: Condition {
 }
 
 class MustBeOccupiedByOpponentOrEnPassant: Condition {
+    static var shared: Condition = MustBeOccupiedByOpponentOrEnPassant()
+    private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = false
         var completions: [(() -> Void)]? = nil
@@ -291,7 +227,7 @@ class MustBeOccupiedByOpponentOrEnPassant: Condition {
                 }
                 isMet = true
             } else {                    // is pawn attack move
-                return MustBeOccupied().checkIfConditionIsMet(piece: piece, translations: [landingTranslation], game: game)                               }
+                return MustBeOccupied.shared.checkIfConditionIsMet(piece: piece, translations: [landingTranslation], game: game)                               }
         }
         return IsMetAndCompletions(isMet: isMet, completions: completions)
     }

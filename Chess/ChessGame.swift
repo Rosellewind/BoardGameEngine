@@ -119,6 +119,7 @@ class ChessGame: GameVC {
      }
     
     func isCheck(_ player: Player, game: Game?) -> Bool {
+
         // all other players pieces can not take king
         var isCheck = false
         let player = game?.players.elementPassing({$0.id == player.id}) ?? player
@@ -129,9 +130,10 @@ class ChessGame: GameVC {
                     continue
                 } else {
                     for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
-                        let translation = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = otherPlayerPiece.isLegalMove(translation)
+                        let translationToCaptureKing = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
+                        let moveFunction = otherPlayerPiece.isLegalMove(translationToCaptureKing)
                         if moveFunction.isLegal {
+                            // give chance for condition to make isCheck false
                             let isMetAndCompletions = game.checkIfConditionsAreMet(piece: otherPlayerPiece, legalIfs: moveFunction.legalIf)
                             if isMetAndCompletions.isMet {
                                 isCheck = true

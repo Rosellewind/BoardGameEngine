@@ -18,6 +18,7 @@ class ChessVC: UIViewController, GamePresenterProtocol {
     
     override func viewDidAppear(_ animated: Bool) {
         setupGame()
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(confirmBack(sender:)))
     }
     
     func setupGame() {
@@ -54,6 +55,20 @@ class ChessVC: UIViewController, GamePresenterProtocol {
 
     func showAlert(_ alert: UIViewController) {
         alert.popoverPresentationController?.sourceView = self.view
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func confirmBack(sender: UIBarButtonItem) {
+        let alert = UIAlertController(title: "Back to the Menu", message: "Do you want to erase your game and go back to the menu?", preferredStyle: .alert)
+        let yes = UIAlertAction(title: "Yes", style: .destructive, handler: { (UIAlertAction) -> Void in
+            if let navController = self.navigationController {
+                navController.popViewController(animated: true)
+            }
+            return
+        })
+        alert.addAction(yes)
+        let no = UIAlertAction(title: "NO", style: .default, handler: nil)
+        alert.addAction(no)
         self.present(alert, animated: true, completion: nil)
     }
 
