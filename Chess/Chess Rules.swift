@@ -17,6 +17,7 @@ class CantBeInCheck: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         print("...")
         var isMet = true
+        var completions: [Completion]? = nil
         guard let player = piece.player, let translations = translations  else {
             return IsMetAndCompletions(isMet: false, completions: nil)
         }
@@ -29,9 +30,10 @@ class CantBeInCheck: Condition {
             
             if isCheck(player: player, game: gameCopy) {
                 isMet = false
+                completions = [Completion(closure: {game.vc?.presenterDelegate?.secondaryGameMessage(string: "Can't leave yourself in check")}, evenIfNotMet: true)]
             }
         }
-        return IsMetAndCompletions(isMet: isMet, completions: nil)
+        return IsMetAndCompletions(isMet: isMet, completions: completions)
     }
     
     func isCheck(player: Player, game: Game) -> Bool {
@@ -76,7 +78,7 @@ class RookCanCastle: Condition {
         
         // this func checks: rook hasn't moved yet, no pieces from next to landing to rook
         var isMet: Bool
-        var completions: [(() -> Void)]? = nil
+        var completions: [Completion]? = nil
         guard let player = piece.player, let king = player.pieces.elementPassing({$0.name == "King"}), let kingTranslation = translations?[0]  else {
             return IsMetAndCompletions(isMet: false, completions: nil)
         }
@@ -108,8 +110,7 @@ class RookCanCastle: Condition {
         if castlingRook != nil {
             // move the rook
             isMet = true
-            completions = [{game.movePiece(piece: castlingRook!, position: rookLandingPosition, removeOccupying: false)
-                }]
+            completions = [Completion(closure: {game.movePiece(piece: castlingRook!, position: rookLandingPosition, removeOccupying: false)}, evenIfNotMet: false)]
         } else {
             isMet = false
         }
@@ -124,7 +125,7 @@ class CheckForPromotion: Condition {
         guard let vc = game.vc else {
             return IsMetAndCompletions(isMet: true, completions: nil)
         }
-        let checkPromotionCompletion: () -> Void = {
+        let checkPromotionClosure: () -> Void = {
             if let direction = piece.player?.forwardDirection {
                 var hasReachedEighthRank = false
                 switch direction {
@@ -164,7 +165,9 @@ class CheckForPromotion: Condition {
                 }
             }
         }
-        return IsMetAndCompletions(isMet: true, completions: [checkPromotionCompletion])
+        
+        return IsMetAndCompletions(isMet: true, completions: [Completion(closure: checkPromotionClosure
+            , evenIfNotMet: false)])
     }
     
     fileprivate func promote(piece: Piece, toType: ChessPieceType, game: Game) {
@@ -191,9 +194,8 @@ class MarkAdvancedTwo: Condition {
     static var shared: Condition = MarkAdvancedTwo()
     private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
-        let completion: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = game.round}
-        return IsMetAndCompletions(isMet: true, completions: [completion])
-        
+        let closure: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = game.round}
+        return IsMetAndCompletions(isMet: true, completions: [Completion(closure: closure, evenIfNotMet: false)])
     }
 }
 
@@ -202,7 +204,7 @@ class MustBeOccupiedByOpponentOrEnPassant: Condition {
     private init() {}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = false
-        var completions: [(() -> Void)]? = nil
+        var completions: [Completion]? = nil
         guard let player = piece.player, let translations = translations else {
             return IsMetAndCompletions(isMet: false, completions: nil)
         }
@@ -224,9 +226,9 @@ class MustBeOccupiedByOpponentOrEnPassant: Condition {
             if enPassantPawn != nil {   // is en passant move
                 
                 if game.vc != nil {
-                    completions = [{game.vc!.removePieceAndViewFromGame(piece: enPassantPawn!)}]
+                    completions = [Completion(closure: {game.vc!.removePieceAndViewFromGame(piece: enPassantPawn!)}, evenIfNotMet: false)]
                 } else {
-                    completions = [{game.removePiece(piece: enPassantPawn!)}]
+                    completions = [Completion(closure: {game.removePiece(piece: enPassantPawn!)}, evenIfNotMet: false)]
                 }
                 isMet = true
             } else {                    // is pawn attack move

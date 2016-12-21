@@ -146,12 +146,11 @@ class Game {
             return IsMetAndCompletions(isMet: true, completions: nil)
         }
         var isMet = true
-        var completions: [(() -> Void)]? =  [(() -> Void)]()
+        var completions: [Completion]? =  [Completion]()
         for legalIf in legalIfs! where isMet == true {
             let isMetAndCompletions = legalIf.condition.checkIfConditionIsMet(piece: piece, translations: legalIf.translations, game: self)
-            
             isMet = isMetAndCompletions.isMet
-            if let complete = isMetAndCompletions.completions {
+            if let complete = isMetAndCompletions.completions { // right now only allows for one completions evenIfNotMet
                 completions! += complete
             }
         }

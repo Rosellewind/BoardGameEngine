@@ -8,9 +8,14 @@
 
 import UIKit
 
+struct Completion {
+    let closure: (() -> Void)
+    let evenIfNotMet: Bool
+}
+
 struct IsMetAndCompletions {
     let isMet: Bool
-    let completions: [(() -> Void)]?
+    let completions: [Completion]?
 }
 
 protocol Condition {

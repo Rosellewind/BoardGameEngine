@@ -181,7 +181,7 @@ extension GameVC {
                         // completions
                         if let completions = isMetAndCompletions.completions {
                             for completion in completions {
-                                completion()
+                                completion.closure()
                             }
                         }
                         
@@ -192,7 +192,9 @@ extension GameVC {
                     } else {
                         if let completions = isMetAndCompletions.completions {
                             for completion in completions {
-                                completion()
+                                if completion.evenIfNotMet {
+                                    completion.closure()
+                                }
                             }
                         }
                     }

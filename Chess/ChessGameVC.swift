@@ -98,7 +98,7 @@ class ChessGameVC: GameVC {
         var playersInCheckMate = [Player]()
         for player in game.players {
             if player.id != game.players[game.whoseTurn].id {
-                if isCheckMate(player, game: nil) {
+                if isCheckMate(player, game: game.copy()) {
                     playersInCheckMate.append(player)
                 }
             }
@@ -166,14 +166,21 @@ class ChessGameVC: GameVC {
                             if isMetAndCompletions.isMet {
                                 // if piece is moved, come out of check?
                                 let gameCopy = game.copy()
-                                gameCopy.printPieces()
                                 gameCopy.movePieceMatching(piece: piece, position: position, removeOccupying: piece.removePieceOccupyingNewPosition)
                                 for completion in isMetAndCompletions.completions ?? [] {
-                                    completion()
+                                    completion.closure()
                                 }
-                                gameCopy.printPieces()
                                 if isCheck(player, game: gameCopy) == false {
-                                    print(piece.name, piece.position.row, piece.position.column, position.row, position.column, translation.row, translation.column)
+                                    canMoveOutOfCheck = true
+                                }
+                            } else if let completionsEvenIfNotMet = isMetAndCompletions.completions?.filter({$0.evenIfNotMet}) {
+                                let gameCopy = game.copy()
+                                for completion in completionsEvenIfNotMet {
+                                    if completion.evenIfNotMet {
+                                        completion.closure()
+                                    }
+                                }
+                                if isCheck(player, game: gameCopy) == false {
                                     canMoveOutOfCheck = true
                                 }
                             }
