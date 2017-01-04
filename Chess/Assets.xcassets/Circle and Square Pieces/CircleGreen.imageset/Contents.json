@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "filename" : "CircleGreen.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "CircleGreen.Ipad.pdf"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

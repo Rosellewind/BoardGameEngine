@@ -118,3 +118,22 @@ class IsInitialMove: Condition {
     }
 }
 
+class RemoveOpponent: Condition {
+    static var shared: Condition = RemoveOpponent()
+    func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
+        guard let player = piece.player else {
+            return IsMetAndCompletions(isMet: false, completions: nil)
+        }
+        var completions =  [Completion]()
+        for translation in translations ?? [] {
+            let positionToRemove = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
+            let piecesToRemove = game.pieces(position: positionToRemove)?.filter({$0.player != nil && $0.player! != player})
+            
+            for pieceToRemove in piecesToRemove ?? [] {
+                completions.append(Completion(closure: {game.removePiece(piece: pieceToRemove)}, evenIfNotMet: false))
+            }
+        }
+        return IsMetAndCompletions(isMet: true, completions: completions.count > 0 ? completions : nil)
+    }
+}
+

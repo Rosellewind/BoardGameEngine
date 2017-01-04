@@ -39,3 +39,9 @@ class Player {
         return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({($0.copy() as! Piece)}))
     }
 }
+func == (lhs: Player, rhs: Player) -> Bool {
+    return lhs.id == rhs.id
+}
+func != (lhs: Player, rhs: Player) -> Bool {
+    return lhs.id != rhs.id
+}

@@ -19,6 +19,14 @@ extension Int {
             return (self >= first || self < last)
         }
     }
+    
+    mutating func stepTowardsZero() {
+        if self > 0 {
+            self -= 1
+        } else if self < 0 {
+            self += 1
+        }
+    }
 }
 
 extension Array {

@@ -10,20 +10,16 @@ import UIKit
 
 
 enum ChessVariation: Int {
-    case standardChess, holeChess, fourPlayer, fourPlayerX, galaxyChess
-    static let allValues = [standardChess, holeChess, fourPlayer, fourPlayerX, galaxyChess]
+    case standardChess, fourPlayer, fourPlayerX
+    static let allValues = [standardChess, fourPlayer, fourPlayerX]
     func name() -> String {
         switch self {
         case .standardChess:
             return "Chess"
-        case .holeChess:
-            return "Chess with a Hole"
         case .fourPlayer:
             return "Four Player Chess"
         case .fourPlayerX:
             return "Four Player Chess with an X"
-        case .galaxyChess:
-            return "Galaxy Chess"
         }
     }
 }
@@ -32,16 +28,14 @@ class ChessGameVC: GameVC {
     init(chessVariation: ChessVariation, gameView: UIView) {
         switch chessVariation {
         case .fourPlayer:
-
             // create the board
             let chessBoard = Board(numRows: 12, numColumns: 12, emptyCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
-            
             
             // create the boardView
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
             
             // create the players with pieces
-            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue), ChessPlayer(index: 2, variation: chessVariation.rawValue), ChessPlayer(index: 3, variation: chessVariation.rawValue)]
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 1, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 2, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 3, variation: chessVariation.rawValue, board: chessBoard)]
             
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
             
@@ -54,11 +48,10 @@ class ChessGameVC: GameVC {
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
             
             // create the players with pieces
-            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue), ChessPlayer(index: 2, variation: chessVariation.rawValue), ChessPlayer(index: 3, variation: chessVariation.rawValue)]
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 1, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 2, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 3, variation: chessVariation.rawValue, board: chessBoard)]
             
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
-        case .standardChess, .galaxyChess:
-            
+        case .standardChess:
             // create the board
             let chessBoard = Board(numRows: 8, numColumns: 8)
             
@@ -66,18 +59,7 @@ class ChessGameVC: GameVC {
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
             
             // create the players with pieces
-            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue)]
-            
-            super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
-        case .holeChess:
-            // create the board
-            let chessBoard = Board(numRows: 8, numColumns: 8, emptyCells: [27, 28, 35, 36])
-            
-            // create the boardView
-            let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
-            
-            // create the players with pieces
-            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue), ChessPlayer(index: 1, variation: chessVariation.rawValue)]
+            let chessPlayers = [ChessPlayer(index: 0, variation: chessVariation.rawValue, board: chessBoard), ChessPlayer(index: 1, variation: chessVariation.rawValue, board: chessBoard)]
             
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
         }

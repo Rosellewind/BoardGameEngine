@@ -14,6 +14,7 @@ class GamePlayVC: UIViewController, GamePresenterProtocol {
     @IBOutlet weak var bottomLabel: UILabel!
     
     var chessVariation: ChessVariation?
+    var gameVariation: GameVariation?
     var game: GameVC!
     
     override func viewDidAppear(_ animated: Bool) {
@@ -25,7 +26,13 @@ class GamePlayVC: UIViewController, GamePresenterProtocol {
         for subview in gameView.subviews {
             subview.removeFromSuperview()
         }
-        game = ChessGameVC(chessVariation: chessVariation ?? .standardChess, gameView: gameView)
+        if gameVariation != nil {
+            game = GameVC(gameVariation: gameVariation!, gameView: gameView)
+        } else if chessVariation != nil {
+            game = ChessGameVC(chessVariation: chessVariation!, gameView: gameView)
+        } else {
+            game = ChessGameVC(chessVariation: .standardChess, gameView: gameView)
+        }
         game.presenterDelegate = self
     }
     

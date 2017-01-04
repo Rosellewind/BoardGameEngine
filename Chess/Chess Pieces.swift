@@ -19,11 +19,11 @@ class PawnPiece: Piece {
 
 class ChessPieceCreator: PiecesCreator {
     static let shared = ChessPieceCreator()
-    func makePieces(_ variation: ChessVariation.RawValue, playerId: Int) -> [Piece] {
+    func makePieces(variation: ChessVariation.RawValue, playerId: Int, board: Board) -> [Piece] {
         let position = ChessPlayerOrientation(rawValue: playerId) ?? ChessPlayerOrientation.bottom
         var pieces = [Piece]()
         switch ChessVariation(rawValue: variation) ?? ChessVariation.standardChess {
-        case .standardChess, .holeChess:
+        case .standardChess:
             let king = self.chessPiece(.King)
             let queen = self.chessPiece(.Queen)
             let rook = self.chessPiece(.Rook)
@@ -63,14 +63,6 @@ class ChessPieceCreator: PiecesCreator {
             
             pieces.append(contentsOf: royalty)
             pieces.append(contentsOf: pawns)
-            
-        case .galaxyChess:
-            let isPossibleTranslation: (Translation) -> Bool = {_ in return true}
-            let isLegalMove = { (translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
-                return (true, nil)
-            }
-            let piece = Piece(name: "ship", position: Position(row: 3, column: 3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)
-            pieces.append(piece)
             
         case .fourPlayer, .fourPlayerX:
             let king = self.chessPiece(.King)

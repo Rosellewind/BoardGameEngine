@@ -8,6 +8,17 @@
 
 import UIKit
 
+enum GameVariation: Int {
+    case galaxy
+    static let allValues = [galaxy]
+    func name() -> String {
+        switch self {
+        case .galaxy:
+            return "Galaxy Game"
+        }
+    }
+}
+
 class GameVC: PieceViewProtocol {
     var game: Game
     var boardView: BoardView
@@ -45,26 +56,23 @@ class GameVC: PieceViewProtocol {
     }
     
     /// creates a default board for testing purposes
-    convenience init(gameView: UIView) {
-        
-        // create the board
-        let defaultBoard = Board(numRows: 8, numColumns: 5, emptyCells: [0, 4, 20])
-        
-        // create the boardView
-        var images = [UIImage]()
-        for i in 1...3 {
-            if let image = UIImage(named: "\(i).jpg") {
-                images.append(image)
-            }
+    convenience init(gameVariation: GameVariation, gameView: UIView) {
+        switch gameVariation {
+        case .galaxy:
+            // create the board
+            let board = Board(numRows: 8, numColumns: 8)
+            
+            // create the boardView
+            let image1 = UIImage(named: "galaxy1")
+            let image2 = UIImage(named: "galaxy2")
+            let images = (image1 != nil && image2 != nil) ? [image1!, image2!] : nil
+            let boardView = BoardView(board: board, checkered: true, images: images, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let players = [Player(name: "Green", id: 0, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Purple", id: 1, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
+            
+            self.init(gameView: gameView, board: board, boardView: boardView, players: players)
         }
-        let defaultBoardView = BoardView(board: defaultBoard, checkered: false, images: images, backgroundColors: nil)
-        
-        // create the players with pieces
-        let isPossibleTranslation: (Translation) -> Bool = {_ in return true}
-        let defaultPlayers = [Player(name: "alien", id: 0, forwardDirection: .top, pieces: [Piece(name: "hi", position: Position(row: 0,column: 0), isPossibleTranslation: isPossibleTranslation, isLegalMove: {_ in return (true, nil)})])]
-        
-        // create pieceView's
-        self.init(gameView: gameView, board: defaultBoard, boardView: defaultBoardView, players: defaultPlayers)
     }
     
     deinit {
