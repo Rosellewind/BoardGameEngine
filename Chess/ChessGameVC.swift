@@ -29,7 +29,7 @@ class ChessGameVC: GameVC {
         switch chessVariation {
         case .fourPlayer:
             // create the board
-            let chessBoard = Board(numRows: 12, numColumns: 12, emptyCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
+            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143])
             
             // create the boardView
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])
@@ -41,7 +41,7 @@ class ChessGameVC: GameVC {
             
         case .fourPlayerX:
             // create the board
-            let chessBoard = Board(numRows: 12, numColumns: 12, emptyCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143, 39, 52, 91, 104, 44, 55, 88, 99])
+            let chessBoard = Board(numRows: 12, numColumns: 12, skipCells: [0, 1 ,10, 11, 12, 13, 22, 23, 120, 121, 130, 131, 132, 133, 142, 143, 39, 52, 91, 104, 44, 55, 88, 99])
             //65, 78, 66, 77, 
             
             // create the boardView
@@ -138,7 +138,7 @@ class ChessGameVC: GameVC {
             let game = game ?? self.game
             var canMoveOutOfCheck = false
             for piece in player.pieces where canMoveOutOfCheck == false {
-                for index in game.board.indexesNotEmpty {
+                for index in game.board.indexesNotSkipped {
                     let position = game.board.position(index: index)
                     let translation = Position.calculateTranslation(fromPosition: piece.position, toPosition: position, direction: player.forwardDirection)
                     if piece.isPossibleTranslation(translation) {   // eliminate some iterations

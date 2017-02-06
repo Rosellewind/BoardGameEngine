@@ -7,17 +7,30 @@
 //
 
 import UIKit
+//// working on nonSkippedEdges gives repeated positions, change Position to struct, check cells to delete when bordered by skipped and empty cells
 
 
 /// Position Class: rows and columns, equatable
 
-class Position: NSObject {
+class Position: NSObject {      // Position is class instead of a struct so that it can be observed
     var row: Int
     var column: Int
     
     init(row: Int, column: Int) {
         self.row = row
         self.column = column
+    }
+    
+    override var hashValue: Int {
+        return row.hashValue ^ column.hashValue
+    }
+    
+    override func isEqual(_ object: Any?) -> Bool {
+        if let object = object as? Position {
+            return object.row == self.row && object.column == self.column
+        } else  {
+            return false
+        }
     }
     
     class func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
@@ -102,17 +115,16 @@ func ==(lhs: Position, rhs: Position) -> Bool {
 typealias Translation = Position
 
 
-
-/// Board Class: Grid of rows and columns that may include empty cells.
+/// Board Class: Grid of rows and columns that may include skipped cells.
 
 class Board {
     var numRows: Int
     var numColumns: Int
     var numCells: Int {get {return numRows * numColumns}}
-    var emptyCells: Set<Int>?
-    var indexesNotEmpty: Set<Int> {
+    var skipCells: Set<Int>?
+    var indexesNotSkipped: Set<Int> {
         get {
-            return Set(0..<numCells).subtracting(emptyCells ?? [])
+            return Set(0..<numCells).subtracting(skipCells ?? [])
         }
     }
     
@@ -120,10 +132,10 @@ class Board {
         self.init(numRows: 5, numColumns: 5)
     }
     
-    init(numRows: Int, numColumns: Int, emptyCells: Set<Int>? = nil) {
+    init(numRows: Int, numColumns: Int, skipCells: Set<Int>? = nil) {
         self.numRows = numRows
         self.numColumns = numColumns
-        self.emptyCells = emptyCells
+        self.skipCells = skipCells
     }
     
     func index(position: Position) -> Int {
@@ -138,17 +150,161 @@ class Board {
         }
     }
     
-    func isACellAndIsNotEmpty(index: Int) -> Bool {
-        return indexesNotEmpty.contains(index)
+    func isACellAndIsNotSkipped(index: Int) -> Bool {
+        return indexesNotSkipped.contains(index)
     }
     
     func copy() -> Board {
-        return Board(numRows: numRows, numColumns: numColumns, emptyCells: emptyCells)
+        return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
+    }
+    
+    func columnFromFromNonSkippedEdge(row: Int, offset: Int, fromTheLeft: Bool) -> Int? {
+        guard offset == 0 || (fromTheLeft == (offset >= 0)) else { return nil }
+        var column: Int? = nil
+        var index = fromTheLeft ? 0 : self.numColumns - 1
+        let limitingCase = fromTheLeft ? index < self.numColumns - 1 : index >= 0
+        let crimenter = fromTheLeft ? 1 : -1
+        while column == nil && limitingCase {
+            if isACellAndIsNotSkipped(index: self.index(position: Position(row: row, column: index))) {
+                column = index
+            }
+            index += crimenter
+        }
+        if column != nil {
+            let offsetColumn = column! + offset
+            column = isACellAndIsNotSkipped(index: self.index(position: Position(row: row, column: offsetColumn))) ? offsetColumn : nil
+        }
+        return column
+    }
+    
+    func rowFromNonSkippedEdge(column: Int, offset: Int, fromTheTop: Bool) -> Int? {
+        guard offset == 0 || (fromTheTop == (offset >= 0)) else { return nil }
+        var row: Int? = nil
+        var index = fromTheTop ? 0 : self.numRows - 1
+        let limitingCase = fromTheTop ? index < self.numRows - 1 : index >= 0
+        let crimenter = fromTheTop ? 1 : -1
+        while row == nil && limitingCase {
+            if isACellAndIsNotSkipped(index: self.index(position: Position(row: index, column: column))) {
+                row = index
+            }
+            index += crimenter
+        }
+        if row != nil {
+            let offsetRow = row! + offset
+            row = isACellAndIsNotSkipped(index: self.index(position: Position(row: offsetRow, column: column))) ? offsetRow : nil
+        }
+        return row
+    }
+    
+    func nonSkippedEdges() -> [Position] {
+        var edges = Set([Position]())
+        for row in 0..<numRows {
+            if let column = columnFromFromNonSkippedEdge(row: row, offset: 0, fromTheLeft: true) {
+                let position = Position(row: row, column: column)
+                if isACellAndIsNotSkipped(index: index(position: position)) {
+                    edges.insert(position)
+                }
+            }
+            
+            if let column = columnFromFromNonSkippedEdge(row: row, offset: 0, fromTheLeft: false) {
+                let position = Position(row: row, column: column)
+                if isACellAndIsNotSkipped(index: index(position: position)) {
+                    edges.insert(position)
+                }
+            }
+        }
+        
+        for column in 0..<numColumns {
+            if let row = rowFromNonSkippedEdge(column: column, offset: 0, fromTheTop: true) {
+                let position = Position(row: row, column: column)
+                if isACellAndIsNotSkipped(index: index(position: position)) {
+                    edges.insert(position)
+                }
+            }
+            
+            if let row = rowFromNonSkippedEdge(column: column, offset: 0, fromTheTop: false) {
+                let position = Position(row: row, column: column)
+                if isACellAndIsNotSkipped(index: index(position: position)) {
+                    edges.insert(position)
+                }
+            }
+        }
+        return Array(edges)
+    }
+    
+    func boarderedCells(position: Position) -> [Position] {
+        let possiblePositions = [
+            Position(row: position.row, column: position.column + 1),
+            Position(row: position.row, column: position.column - 1),
+            Position(row: position.row + 1, column: position.column + 1),
+            Position(row: position.row - 1, column: position.column + 1),
+            Position(row: position.row + 1, column: position.column - 1),
+            Position(row: position.row - 1, column: position.column - 1),
+            Position(row: position.row + 1, column: position.column),
+            Position(row: position.row - 1, column: position.column)
+        ]
+        return possiblePositions.filter({ (pos: Position) -> Bool in
+            isACellAndIsNotSkipped(index: index(position: pos))
+        })
+    }
+    
+    
+    /// for making an octoganol board
+    class func octoganalSkips(across: Int) -> [Int] {
+        var skips = [Int]()
+        let aThird = across/3
+        var edges = aThird
+        var middle = across - (edges * 2)
+        var index = 0
+        
+        // top part of the octogon
+        while edges > 0 {
+            // beginning edge skips
+            for _ in 0..<edges {
+                skips.append(index)
+                index += 1
+            }
+            // leave the middle
+            index += middle
+            
+            // end edge skips
+            for _ in 0..<edges {
+                skips.append(index)
+                index += 1
+            }
+            edges -= 1
+            middle += 2
+        }
+        
+        // middle part of the octagon
+        index += across * (across - (aThird * 2))
+        
+        // bottom part of the octagon
+        edges = 1
+        middle = across - 2
+        while edges <= aThird {
+            // beginning edge skips
+            for _ in 0..<edges {
+                skips.append(index)
+                index += 1
+            }
+            // leave the middle
+            index += middle
+            
+            // end edge skips
+            for _ in 0..<edges {
+                skips.append(index)
+                index += 1
+            }
+            edges += 1
+            middle -= 2
+        }
+        return skips
     }
 }
 
 
-/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. empty cells are clear placeholder views
+/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
 
 class BoardView: UIView {
     var cells = [UIView]()
@@ -201,7 +357,7 @@ class BoardView: UIView {
                 }
             }
             
-            if let empty = board.emptyCells, empty.contains(i) {
+            if let skipped = board.skipCells, skipped.contains(i) {
                 cell.backgroundColor = UIColor.clear
             } else {
                 if imageIndex < images?.count {

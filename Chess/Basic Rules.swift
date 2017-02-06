@@ -36,7 +36,7 @@ class MustBeVacantCell: Condition {
         }
         for translation in translations ?? [] where isMet == true {
             let positionToCheck = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
-            if !game.board.isACellAndIsNotEmpty(index: game.board.index(position: positionToCheck)) {
+            if !game.board.isACellAndIsNotSkipped(index: game.board.index(position: positionToCheck)) {
                 isMet = false
             } else {
                 let pieceOccupying = game.piece(position: positionToCheck)
@@ -130,7 +130,9 @@ class RemoveOpponent: Condition {
             let piecesToRemove = game.pieces(position: positionToRemove)?.filter({$0.player != nil && $0.player! != player})
             
             for pieceToRemove in piecesToRemove ?? [] {
-                completions.append(Completion(closure: {game.removePiece(piece: pieceToRemove)}, evenIfNotMet: false))
+                if game.vc != nil {
+                    completions.append(Completion(closure: {game.vc!.removePieceAndViewFromGame(piece: pieceToRemove)}, evenIfNotMet: false))
+                }
             }
         }
         return IsMetAndCompletions(isMet: true, completions: completions.count > 0 ? completions : nil)

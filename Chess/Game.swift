@@ -137,6 +137,13 @@ class Game {
         addPiece(piece: piece2)
     }
     
+    func removeCell(position: Position) {
+        for piece in pieces(position: position) ?? [] {
+            removePiece(piece: piece)
+        }
+        board.skipCells?.insert(board.index(position: position))
+    }
+    
     func playerIndex(player: Player) -> Int? {
         return players.index(where: {$0.id == player.id})
     }

@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "filename" : "SquareOrange.pdf"
+    },
+    {
+      "idiom" : "ipad",
+      "filename" : "SquareOrange.Ipad.pdf"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

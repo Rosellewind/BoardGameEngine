@@ -9,12 +9,14 @@
 import UIKit
 
 enum GameVariation: Int {
-    case galaxy
-    static let allValues = [galaxy]
+    case galaxy, blackHole
+    static let allValues = [galaxy, blackHole]
     func name() -> String {
         switch self {
         case .galaxy:
             return "Galaxy Game"
+        case .blackHole:
+            return "Black Hole"
         }
     }
 }
@@ -68,10 +70,56 @@ class GameVC: PieceViewProtocol {
             let images = (image1 != nil && image2 != nil) ? [image1!, image2!] : nil
             let boardView = BoardView(board: board, checkered: true, images: images, backgroundColors: [UIColor.red, UIColor.black])
             
-            // create the players with pieces
-            let players = [Player(name: "Green", id: 0, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Purple", id: 1, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
+            // create the players with pieces   // set forwardDirection elsewhere, by index in players/playerId
+            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
             
             self.init(gameView: gameView, board: board, boardView: boardView, players: players)
+        case .blackHole:
+            // create the board
+            let board = Board(numRows: 10, numColumns: 10)
+            board.skipCells = Set(Board.octoganalSkips(across: 10))
+
+            // create the boardView
+            let image1 = UIImage(named: "galaxy1")
+            let image2 = UIImage(named: "galaxy2")
+            let images = (image1 != nil && image2 != nil) ? [image1!, image2!] : nil
+            let boardView = BoardView(board: board, checkered: true, images: images, backgroundColors: [UIColor.red, UIColor.black])
+            
+            // create the players with pieces
+            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
+            
+            // adjust pieces starting positions
+            for player in players {
+                switch player.forwardDirection {
+                case .right:
+                    for piece in player.pieces {
+                        let offset = piece.position.column
+                        piece.position = Position(row: piece.position.row, column: board.columnFromFromNonSkippedEdge(row: piece.position.row, offset: offset, fromTheLeft: true) ?? 0)
+                        piece.startingPosition = piece.position
+                    }
+                case .left:
+                    for piece in player.pieces {
+                        let offset = piece.position.column - (board.numColumns - 1)
+                        piece.position = Position(row: piece.position.row, column: board.columnFromFromNonSkippedEdge(row: piece.position.row, offset: offset, fromTheLeft: false) ?? 0)
+                        piece.startingPosition = piece.position
+                    }
+                case .top:
+                    for piece in player.pieces {
+                        let offset = piece.position.row
+                        piece.position = Position(row: board.rowFromNonSkippedEdge(column: piece.position.column, offset: offset, fromTheTop: false) ?? 0, column: piece.position.column)
+                        piece.startingPosition = piece.position
+                    }
+                case .bottom:
+                    for piece in player.pieces {
+                        let offset = piece.position.row - (board.numRows - 1)
+                        piece.position = Position(row: board.rowFromNonSkippedEdge(column: piece.position.column, offset: offset, fromTheTop: true) ?? 0, column: piece.position.column)
+                        piece.startingPosition = piece.position
+                    }
+                }
+            }
+            self.init(gameView: gameView, board: board, boardView: boardView, players: players)
+            
+            //            let tenByTenOctagon = [0, 1, 2, 7, 8, 9, 10, 11, 18, 19, 20, 29, 70, 79, 80, 81, 88, 89, 90, 91, 92, 97, 98, 99]
         }
     }
     
@@ -235,6 +283,18 @@ extension GameVC {
                 setupLayoutAndObservingForPieceView(pieceView: pieceView)
             }
         }
+    }
+    
+    func removeCellAndViewFromGame(position: Position) {
+        for piece in game.pieces(position: position) ?? [] {
+            removePieceAndViewFromGame(piece: piece)
+        }
+        if let index = boardView.cells.index(where: {$0.tag == game.board.index(position: position)}) {
+            
+            let removed = boardView.cells.remove(at: index)
+            removed.removeFromSuperview()
+        }
+        game.board.skipCells?.insert(game.board.index(position: position))
     }
     
     func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {

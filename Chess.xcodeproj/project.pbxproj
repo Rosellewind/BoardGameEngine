@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2310BFFF1E30252000AAC409 /* GalaxyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2310BFFE1E30252000AAC409 /* GalaxyRules.swift */; };
 		235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06361E04AD1300FBDBF4 /* GameVC.swift */; };
 		235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06381E04D51800FBDBF4 /* Chess Rules.swift */; };
 		23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2310BFFE1E30252000AAC409 /* GalaxyRules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalaxyRules.swift; sourceTree = "<group>"; };
 		235E06361E04AD1300FBDBF4 /* GameVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
 		235E06381E04D51800FBDBF4 /* Chess Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Rules.swift"; sourceTree = "<group>"; };
 		23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Basic Rules.swift"; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
 				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
 				23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */,
+				2310BFFE1E30252000AAC409 /* GalaxyRules.swift */,
 				4AC0A3851DB520C900129CDB /* Chess */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
@@ -193,6 +196,7 @@
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
 				4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
+				2310BFFF1E30252000AAC409 /* GalaxyRules.swift in Sources */,
 				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,
 				4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */,
 			);
