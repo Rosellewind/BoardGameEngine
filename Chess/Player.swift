@@ -8,10 +8,8 @@
 
 import Foundation
 
-
 enum Direction: Int {
     case top, bottom, right, left
-//    case bottom, top, left, right
     static let allValues = [top, bottom, right, left]
     init(loopingRawValue: Int) {
         self = Direction(rawValue: (loopingRawValue % Direction.allValues.count))!
@@ -40,9 +38,11 @@ class Player {
         return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({($0.copy() as! Piece)}))
     }
 }
+
 func == (lhs: Player, rhs: Player) -> Bool {
     return lhs.id == rhs.id
 }
+
 func != (lhs: Player, rhs: Player) -> Bool {
     return lhs.id != rhs.id
 }

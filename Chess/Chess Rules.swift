@@ -84,7 +84,7 @@ class RookCanCastle: Condition {
         }
         let rooks = player.pieces.filter({$0.name.hasPrefix("Rook")})
         let kingLandingPosition = Position.positionFromTranslation(kingTranslation, fromPosition: king.position, direction: player.forwardDirection)
-        let kingDirection = kingTranslation.column > 0 ? 1 : -1 ////bool
+        let kingDirection = kingTranslation.column > 0 ? 1 : -1
         let rookLandingPosition = Position.positionFromTranslation(Translation(row: kingTranslation.row, column: kingTranslation.column - kingDirection), fromPosition: king.position, direction: player.forwardDirection)
         var castlingRook: Piece? = nil
         for rook in rooks {

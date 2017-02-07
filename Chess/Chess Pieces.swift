@@ -19,28 +19,30 @@ class PawnPiece: Piece {
 
 class ChessPieceCreator: PiecesCreator {
     static let shared = ChessPieceCreator()
+
     func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece] {
         guard let variation = variation as? ChessVariation else {
             return []
         }
-        let position = Direction(rawValue: playerId) ?? Direction.bottom
+        let direction = Direction(rawValue: playerId) ?? Direction.top
         var pieces = [Piece]()
+        
+        let king = self.chessPiece(.King)
+        let queen = self.chessPiece(.Queen)
+        let rook = self.chessPiece(.Rook)
+        let bishop = self.chessPiece(.Bishop)
+        let knight = self.chessPiece(.Knight)
+        let pawn = self.chessPiece(.Pawn)
+        let rook2 = rook.copy() as! Piece
+        let bishop2 = bishop.copy() as! Piece
+        let knight2 = knight.copy() as! Piece
+        let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
+        var pawns = [Piece]()
+        
+        // set starting positions
         switch variation {
         case .standardChess:
-            let king = self.chessPiece(.King)
-            let queen = self.chessPiece(.Queen)
-            let rook = self.chessPiece(.Rook)
-            let bishop = self.chessPiece(.Bishop)
-            let knight = self.chessPiece(.Knight)
-            let pawn = self.chessPiece(.Pawn)
-            let rook2 = rook.copy() as! Piece
-            let bishop2 = bishop.copy() as! Piece
-            let knight2 = knight.copy() as! Piece
-            let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
-            var pawns = [Piece]()
-            
-            // set starting positions
-            if position == .top || position == .bottom {
+            if direction == .top || direction == .bottom {
                 rook2.position = Position(row: 0, column: 7)
                 bishop2.position = Position(row: 0, column: 5)
                 knight2.position = Position(row: 0, column: 6)
@@ -52,7 +54,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if position == .top {
+                if direction == .top {
                     for piece in royalty {
                         piece.position = Position(row: 7, column: piece.position.column)
                     }
@@ -60,28 +62,12 @@ class ChessPieceCreator: PiecesCreator {
                         piece.position = Position(row: 6, column: piece.position.column)
                     }
                 }
-            } else {
-                
             }
-            
             pieces.append(contentsOf: royalty)
             pieces.append(contentsOf: pawns)
             
         case .fourPlayer, .fourPlayerX:
-            let king = self.chessPiece(.King)
-            let queen = self.chessPiece(.Queen)
-            let rook = self.chessPiece(.Rook)
-            let bishop = self.chessPiece(.Bishop)
-            let knight = self.chessPiece(.Knight)
-            let pawn = self.chessPiece(.Pawn)
-            let rook2 = rook.copy() as! Piece
-            let bishop2 = bishop.copy() as! Piece
-            let knight2 = knight.copy() as! Piece
-            let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
-            var pawns = [Piece]()
-            
-            // set starting positions
-            if position == .top || position == .bottom {
+            if direction == .top || direction == .bottom {
                 king.position = Position(row: 0, column: 6)
                 queen.position = Position(row: 0, column: 5)
                 rook.position = Position(row: 0, column: 2)
@@ -99,7 +85,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if position == .bottom {
+                if direction == .bottom {
                     for piece in royalty {
                         piece.position = Position(row: 11, column: piece.position.column)
                     }
@@ -125,7 +111,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if position == .right {
+                if direction == .right {
                     for piece in royalty {
                         piece.position = Position(row: piece.position.row, column: 11)
                     }
@@ -137,12 +123,10 @@ class ChessPieceCreator: PiecesCreator {
             
             pieces.append(contentsOf: royalty)
             pieces.append(contentsOf: pawns)
-//        default:
-//            print("implement")
         }
         
         // set the id and isFirstMove
-        let offset = position.rawValue * pieces.count
+        let offset = playerId * pieces.count
         for i in 0..<pieces.count {
             pieces[i].id = i + offset
             pieces[i].isFirstMove = true

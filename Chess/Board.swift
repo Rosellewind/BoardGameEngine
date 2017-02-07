@@ -7,6 +7,7 @@
 //
 
 import UIKit
+// after queen promotion, check for checkmate, also  does not get disappear when taken after promotion
 //// working on nonSkippedEdges gives repeated positions, change Position to struct, check cells to delete when bordered by skipped and empty cells
 
 

@@ -70,158 +70,116 @@ class Piece: NSObject, NSCopying {
 
 class PieceCreator: PiecesCreator {
     static let shared = PieceCreator()
+    
+    func basicSquareAndCirclePieces(playerId: Int, board: Board, deleteEdgeCells: Bool) -> [Piece] {
+        var pieces = [Piece]()
+
+        // make square pieces
+        var column = playerId == 0 ? 0 : board.numColumns - 1
+        for row in 0..<board.numRows {
+            let isPossibleTranslation = {(translation: Translation) -> Bool in
+                if translation.row == 0 && translation.column == 0 {
+                    return false
+                } else {    // move or jump one vertically or horizontally
+                    return (translation.row == 0 && (abs(translation.column) == 1 || abs(translation.column) == 2)) || (translation.column == 0 && (abs(translation.row) == 1 || abs(translation.row) == 2))
+                }
+            }
+            
+            let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
+                var isLegal = false
+                var conditions: [LegalIf]? = nil
+                
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if (translation.row == 0 && abs(translation.column) == 1) || (translation.column == 0 && abs(translation.row) == 1) {    // move one vertically or horizontally if vacant
+                    isLegal = true
+                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
+                } else if (translation.row == 0 && abs(translation.column) == 2) || (translation.column == 0 && abs(translation.row) == 2) {
+                    isLegal = true
+                    var jumpedRow = translation.row
+                    jumpedRow.stepTowardsZero()
+                    var jumpedColumn = translation.column
+                    jumpedColumn.stepTowardsZero()
+                    let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
+                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
+                }
+                
+                if conditions != nil && deleteEdgeCells == true {
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)
+                    conditions!.append(condition)
+                }
+                
+                return (isLegal, conditions)
+            }
+            
+            pieces.append(Piece(name: "Square", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
+            
+        }
+        
+        // make round pieces
+        column = playerId == 0 ? 1 : board.numColumns - 2
+        for row in 0..<board.numRows {
+            let isPossibleTranslation = {(translation: Translation) -> Bool in
+                if translation.row == 0 && translation.column == 0 {
+                    return false
+                } else {                        // move or jump one diagonally
+                    return (abs(translation.row) == 1 && abs(translation.column) == 1) || (abs(translation.row) == 2 && abs(translation.column) == 2)
+                }
+            }
+            
+            let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
+                var isLegal = false
+                var conditions: [LegalIf]? = nil
+                
+                if translation.row == 0 && translation.column == 0 {
+                    isLegal = false
+                } else if abs(translation.row) == 1 && abs(translation.column) == 1 {    // move one diagonally if vacant
+                    isLegal = true
+                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
+                } else if abs(translation.row) == 2 && abs(translation.column) == 2 {
+                    isLegal = true
+                    var jumpedRow = translation.row
+                    jumpedRow.stepTowardsZero()
+                    var jumpedColumn = translation.column
+                    jumpedColumn.stepTowardsZero()
+                    let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
+                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
+                }
+                
+                if conditions != nil && deleteEdgeCells == true {
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)
+                    conditions!.append(condition)
+                }
+                
+                return (isLegal, conditions)
+            }
+            
+            pieces.append(Piece(name: "Circle", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
+        }
+        
+        // set the id and isFirstMove
+        let offset = playerId * pieces.count
+        for i in 0..<pieces.count {
+            pieces[i].id = i + offset
+            pieces[i].isFirstMove = true
+        }
+        
+        return pieces
+    }
+    
     func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece] {
         guard let variation = variation as? UniqueVariation else {
             return []
         }
-        var pieces = [Piece]()
+        var pieces: [Piece]
         switch variation {
         case .galaxy:
+            pieces = basicSquareAndCirclePieces(playerId: playerId, board: board, deleteEdgeCells: false)
             
-            // make square pieces
-            var column = playerId == 0 ? 0 : board.numColumns - 1
-            for row in 0..<board.numRows {
-                let isPossibleTranslation = {(translation: Translation) -> Bool in
-                    if translation.row == 0 && translation.column == 0 {
-                        return false
-                    } else {    // move or jump one vertically or horizontally
-                        return (translation.row == 0 && (abs(translation.column) == 1 || abs(translation.column) == 2)) || (translation.column == 0 && (abs(translation.row) == 1 || abs(translation.row) == 2))
-                    }
-                }
-                
-                let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
-                    var isLegal = false
-                    var conditions: [LegalIf]? = nil
-
-                    if translation.row == 0 && translation.column == 0 {
-                        isLegal = false
-                    } else if (translation.row == 0 && abs(translation.column) == 1) || (translation.column == 0 && abs(translation.row) == 1) {    // move one vertically or horizontally if vacant
-                        isLegal = true
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
-                    } else if (translation.row == 0 && abs(translation.column) == 2) || (translation.column == 0 && abs(translation.row) == 2) {
-                        isLegal = true
-                        var jumpedRow = translation.row
-                        jumpedRow.stepTowardsZero()
-                        var jumpedColumn = translation.column
-                        jumpedColumn.stepTowardsZero()
-                        let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
-                    }
-                    
-                    return (isLegal, conditions)
-                }
-                
-                pieces.append(Piece(name: "Square", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
-                
-            }
-            
-            // make round pieces
-            column = playerId == 0 ? 1 : board.numColumns - 2
-            for row in 0..<board.numRows {
-                let isPossibleTranslation = {(translation: Translation) -> Bool in
-                    if translation.row == 0 && translation.column == 0 {
-                        return false
-                    } else {                        // move or jump one diagonally
-                        return (abs(translation.row) == 1 && abs(translation.column) == 1) || (abs(translation.row) == 2 && abs(translation.column) == 2)
-                    }
-                }
-                
-                let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
-                    var isLegal = false
-                    var conditions: [LegalIf]? = nil
-                    
-                    if translation.row == 0 && translation.column == 0 {
-                        isLegal = false
-                    } else if abs(translation.row) == 1 && abs(translation.column) == 1 {    // move one diagonally if vacant
-                        isLegal = true
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
-                    } else if abs(translation.row) == 2 && abs(translation.column) == 2 {
-                        isLegal = true
-                        var jumpedRow = translation.row
-                        jumpedRow.stepTowardsZero()
-                        var jumpedColumn = translation.column
-                        jumpedColumn.stepTowardsZero()
-                        let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
-                    }
-                    return (isLegal, conditions)
-                }
-                
-                pieces.append(Piece(name: "Circle", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
-            }
         case .blackHole:
-            // make square pieces
-            var column = playerId == 0 ? 0 : board.numColumns - 1
-            for row in 0..<board.numRows {
-                let isPossibleTranslation = {(translation: Translation) -> Bool in
-                    if translation.row == 0 && translation.column == 0 {
-                        return false
-                    } else {    // move or jump one vertically or horizontally
-                        return (translation.row == 0 && (abs(translation.column) == 1 || abs(translation.column) == 2)) || (translation.column == 0 && (abs(translation.row) == 1 || abs(translation.row) == 2))
-                    }
-                }
-                
-                let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
-                    var isLegal = false
-                    var conditions: [LegalIf]? = nil
-                    
-                    if translation.row == 0 && translation.column == 0 {
-                        isLegal = false
-                    } else if (translation.row == 0 && abs(translation.column) == 1) || (translation.column == 0 && abs(translation.row) == 1) {    // move one vertically or horizontally if vacant
-                        isLegal = true
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)]
-                    } else if (translation.row == 0 && abs(translation.column) == 2) || (translation.column == 0 && abs(translation.row) == 2) {
-                        isLegal = true
-                        var jumpedRow = translation.row
-                        jumpedRow.stepTowardsZero()
-                        var jumpedColumn = translation.column
-                        jumpedColumn.stepTowardsZero()
-                        let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)]
-                    }
-                    return (isLegal, conditions)
-                }
-                
-                pieces.append(Piece(name: "Square", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
-                
-            }
-            
-            // make round pieces
-            column = playerId == 0 ? 1 : board.numColumns - 2
-            for row in 0..<board.numRows {
-                let isPossibleTranslation = {(translation: Translation) -> Bool in
-                    if translation.row == 0 && translation.column == 0 {
-                        return false
-                    } else {                        // move or jump one diagonally
-                        return (abs(translation.row) == 1 && abs(translation.column) == 1) || (abs(translation.row) == 2 && abs(translation.column) == 2)
-                    }
-                }
-                
-                let isLegalMove = {(translation : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?) in
-                    var isLegal = false
-                    var conditions: [LegalIf]? = nil
-                    
-                    if translation.row == 0 && translation.column == 0 {
-                        isLegal = false
-                    } else if abs(translation.row) == 1 && abs(translation.column) == 1 {    // move one diagonally if vacant
-                        isLegal = true
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)]
-                    } else if abs(translation.row) == 2 && abs(translation.column) == 2 {
-                        isLegal = true
-                        var jumpedRow = translation.row
-                        jumpedRow.stepTowardsZero()
-                        var jumpedColumn = translation.column
-                        jumpedColumn.stepTowardsZero()
-                        let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                        conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)]
-                    }
-                    return (isLegal, conditions)
-                }
-                
-                pieces.append(Piece(name: "Circle", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
-            }
-            
+            pieces = basicSquareAndCirclePieces(playerId: playerId, board: board, deleteEdgeCells: true)
         }
+        
         // set the id and isFirstMove
         let offset = playerId * pieces.count
         for i in 0..<pieces.count {
