@@ -23,7 +23,7 @@ class ChessPieceCreator: PiecesCreator {
         guard let variation = variation as? ChessVariation else {
             return []
         }
-        let position = ChessPlayerOrientation(rawValue: playerId) ?? ChessPlayerOrientation.bottom
+        let position = Direction(rawValue: playerId) ?? Direction.bottom
         var pieces = [Piece]()
         switch variation {
         case .standardChess:
@@ -52,7 +52,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if position == .bottom {
+                if position == .top {
                     for piece in royalty {
                         piece.position = Position(row: 7, column: piece.position.column)
                     }

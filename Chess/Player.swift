@@ -11,6 +11,7 @@ import Foundation
 
 enum Direction: Int {
     case top, bottom, right, left
+//    case bottom, top, left, right
     static let allValues = [top, bottom, right, left]
     init(loopingRawValue: Int) {
         self = Direction(rawValue: (loopingRawValue % Direction.allValues.count))!
@@ -23,10 +24,10 @@ class Player {
     var forwardDirection: Direction
     var pieces: [Piece]
 
-    init(name: String?, id: Int, forwardDirection: Direction?, pieces: [Piece]) {
+    init(name: String?, id: Int, forwardDirection: Direction, pieces: [Piece]) {
         self.name = name
         self.id = id
-        self.forwardDirection = forwardDirection ?? Direction(loopingRawValue: id)
+        self.forwardDirection = forwardDirection
         self.pieces = pieces
         pieces.forEach({$0.player = self})
     }
