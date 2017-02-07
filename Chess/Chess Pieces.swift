@@ -19,10 +19,13 @@ class PawnPiece: Piece {
 
 class ChessPieceCreator: PiecesCreator {
     static let shared = ChessPieceCreator()
-    func makePieces(variation: ChessVariation.RawValue, playerId: Int, board: Board) -> [Piece] {
+    func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece] {
+        guard let variation = variation as? ChessVariation else {
+            return []
+        }
         let position = ChessPlayerOrientation(rawValue: playerId) ?? ChessPlayerOrientation.bottom
         var pieces = [Piece]()
-        switch ChessVariation(rawValue: variation) ?? ChessVariation.standardChess {
+        switch variation {
         case .standardChess:
             let king = self.chessPiece(.King)
             let queen = self.chessPiece(.Queen)

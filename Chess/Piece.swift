@@ -11,7 +11,7 @@ import UIKit
 
 
 protocol PiecesCreator {
-    func makePieces(variation: Int, playerId: Int, board: Board) -> [Piece]
+    func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece]
 }
 
 struct LegalIf {
@@ -75,9 +75,12 @@ class Piece: NSObject, NSCopying {
 
 class PieceCreator: PiecesCreator {
     static let shared = PieceCreator()
-    func makePieces(variation: Int, playerId: Int, board: Board) -> [Piece] {
+    func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece] {
+        guard let variation = variation as? UniqueVariation else {
+            return []
+        }
         var pieces = [Piece]()
-        switch GameVariation(rawValue: variation) ?? GameVariation.galaxy {
+        switch variation {
         case .galaxy:
             
             // make square pieces

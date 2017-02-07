@@ -31,7 +31,7 @@ class ChessPlayer: Player {
     var orientation: ChessPlayerOrientation {
         return ChessPlayerOrientation(rawValue: self.id) ?? ChessPlayerOrientation.bottom
     }
-    init(index: Int, variation: Int, board: Board) {
+    init(index: Int, variation: ChessVariation, board: Board) {
         let pieces = ChessPieceCreator.shared.makePieces(variation: variation, playerId: index, board: board)
         super.init(name: nil, id: index, forwardDirection: nil, pieces: pieces)
         self.name = self.orientation.color()

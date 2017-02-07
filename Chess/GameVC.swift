@@ -8,10 +8,14 @@
 
 import UIKit
 
-enum GameVariation: Int {
+protocol GameVariation {
+    func screenName() -> String
+}
+
+enum UniqueVariation: GameVariation {
     case galaxy, blackHole
     static let allValues = [galaxy, blackHole]
-    func name() -> String {
+    func screenName() -> String {
         switch self {
         case .galaxy:
             return "Galaxy Game"
@@ -58,7 +62,7 @@ class GameVC: PieceViewProtocol {
     }
     
     /// creates a default board for testing purposes
-    convenience init(gameVariation: GameVariation, gameView: UIView) {
+    convenience init(gameVariation: UniqueVariation, gameView: UIView) {
         switch gameVariation {
         case .galaxy:
             // create the board
@@ -71,7 +75,7 @@ class GameVC: PieceViewProtocol {
             let boardView = BoardView(board: board, checkered: true, images: images, backgroundColors: [UIColor.red, UIColor.black])
             
             // create the players with pieces   // set forwardDirection elsewhere, by index in players/playerId
-            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
+            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation, playerId: 1, board: board))]
             
             self.init(gameView: gameView, board: board, boardView: boardView, players: players)
         case .blackHole:
@@ -86,7 +90,7 @@ class GameVC: PieceViewProtocol {
             let boardView = BoardView(board: board, checkered: true, images: images, backgroundColors: [UIColor.red, UIColor.black])
             
             // create the players with pieces
-            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation.rawValue, playerId: 1, board: board))]
+            let players = [Player(name: "Green", id: 0, forwardDirection: .right, pieces: PieceCreator.shared.makePieces(variation: gameVariation, playerId: 0, board: board)), Player(name: "Orange", id: 1, forwardDirection: .left, pieces: PieceCreator.shared.makePieces(variation: gameVariation, playerId: 1, board: board))]
             
             // adjust pieces starting positions
             for player in players {

@@ -9,7 +9,7 @@
 import UIKit
 
 class MenuTVC: UITableViewController {
-    let tableData: [Any] = (ChessVariation.allValues as [Any]) + (GameVariation.allValues as [Any]) as [Any]
+    let tableData: [GameVariation] = ChessVariation.allValues as [GameVariation] + UniqueVariation.allValues  as [GameVariation]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,12 +40,7 @@ class MenuTVC: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "basicId", for: indexPath)
-        if let chessVariation = tableData[indexPath.row] as? ChessVariation {
-            cell.textLabel?.text = chessVariation.name()
-        } else if let gameVariation = tableData[indexPath.row] as? GameVariation {
-            cell.textLabel?.text = gameVariation.name()
-        }
-
+        cell.textLabel?.text = tableData[indexPath.row].screenName()
         return cell
     }
 
@@ -92,11 +87,7 @@ class MenuTVC: UITableViewController {
         // Pass the selected object to the new view controller.
         if let vc = segue.destination as? GamePlayVC {
             if let path = self.tableView.indexPathForSelectedRow {
-                if let chessVariation = self.tableData[path.row] as? ChessVariation {
-                    vc.chessVariation = chessVariation
-                } else if let gameVariation = self.tableData[path.row] as? GameVariation {
-                    vc.gameVariation = gameVariation
-                }
+                vc.gameVariation = self.tableData[path.row]
             }            
         }
     }

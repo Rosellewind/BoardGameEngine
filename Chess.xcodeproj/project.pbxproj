@@ -11,6 +11,7 @@
 		235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06361E04AD1300FBDBF4 /* GameVC.swift */; };
 		235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06381E04D51800FBDBF4 /* Chess Rules.swift */; };
 		23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */; };
+		23FBBF9D1E493E25006945F2 /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FBBF9C1E493E25006945F2 /* x.swift */; };
 		4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */; };
 		4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */; };
 		4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33CD1CE9358B00C25E7D /* Main.storyboard */; };
@@ -32,6 +33,7 @@
 		235E06361E04AD1300FBDBF4 /* GameVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
 		235E06381E04D51800FBDBF4 /* Chess Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Rules.swift"; sourceTree = "<group>"; };
 		23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Basic Rules.swift"; sourceTree = "<group>"; };
+		23FBBF9C1E493E25006945F2 /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
 		4A0F33C61CE9358B00C25E7D /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePlayVC.swift; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 		4A0F33BD1CE9358B00C25E7D = {
 			isa = PBXGroup;
 			children = (
+				23FBBF9C1E493E25006945F2 /* x.swift */,
 				4A0F33C81CE9358B00C25E7D /* Chess */,
 				4A0F33C71CE9358B00C25E7D /* Products */,
 			);
@@ -194,6 +197,7 @@
 				235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */,
 				4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
+				23FBBF9D1E493E25006945F2 /* x.swift in Sources */,
 				4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
 				2310BFFF1E30252000AAC409 /* GalaxyRules.swift in Sources */,
