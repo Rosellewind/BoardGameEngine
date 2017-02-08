@@ -8,12 +8,12 @@
 
 import UIKit
 // after queen promotion, check for checkmate, also  does not get disappear when taken after promotion
-//// working on nonSkippedEdges gives repeated positions, change Position to struct, check cells to delete when bordered by skipped and empty cells
+//// check cells to delete when bordered by skipped and empty cells
 
 
 /// Position Class: rows and columns, equatable
 
-class Position: NSObject {      // Position is class instead of a struct so that it can be observed
+class Position: NSObject {      // Position is class instead of a struct for KVO
     var row: Int
     var column: Int
     
@@ -359,7 +359,7 @@ class BoardView: UIView {
             }
             
             if let skipped = board.skipCells, skipped.contains(i) {
-                cell.backgroundColor = UIColor.clear
+                cell.isHidden = true
             } else {
                 if imageIndex < images?.count {
                     let imageView = UIImageView(image: images![imageIndex])

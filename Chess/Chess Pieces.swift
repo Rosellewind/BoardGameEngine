@@ -150,7 +150,6 @@ class ChessPieceCreator: PiecesCreator {
                 var conditions: [LegalIf]? = nil
                 
                 // exactly one square horizontally, vertically, or diagonally, 1 castling per game
-                ////only one
                 if translation.row == 0 && translation.column == 0 {
                     isLegal = false
                 } else if (translation.row == 0 || translation.row == -1 || translation.row == 1) && (translation.column == 0 || translation.column == -1 || translation.column == 1){

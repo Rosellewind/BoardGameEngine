@@ -50,6 +50,21 @@ class GamePlayVC: UIViewController, GamePresenterProtocol {
         alert.addAction(no)
         self.present(alert, animated: true, completion: nil)
     }
+//    
+//    func showRules(sender: UIBarButtonItem) {
+//        let popover = UIViewController()
+//        let scrollView = UIScrollView()
+//        scrollView
+//        popover.view.addSubview(scrollView)
+//        NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(scrollView))
+//        UIPopoverPresentationController(presentedViewController: self, presenting: popover)
+//    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let vc = segue.destination as? RulesVC {
+            vc.gameVariation = gameVariation
+        }
+    }
 
 }
 
@@ -86,4 +101,6 @@ extension GamePlayVC {
         self.present(alert, animated: true, completion: nil)
     }
 }
+
+
 

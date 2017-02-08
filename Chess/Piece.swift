@@ -105,7 +105,7 @@ class PieceCreator: PiecesCreator {
                 }
                 
                 if conditions != nil && deleteEdgeCells == true {
-                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: [translation])
                     conditions!.append(condition)
                 }
                 
@@ -147,7 +147,7 @@ class PieceCreator: PiecesCreator {
                 }
                 
                 if conditions != nil && deleteEdgeCells == true {
-                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: nil)
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: [translation])
                     conditions!.append(condition)
                 }
                 

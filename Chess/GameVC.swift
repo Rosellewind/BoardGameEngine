@@ -293,12 +293,11 @@ extension GameVC {
         for piece in game.pieces(position: position) ?? [] {
             removePieceAndViewFromGame(piece: piece)
         }
-        if let index = boardView.cells.index(where: {$0.tag == game.board.index(position: position)}) {
-            
-            let removed = boardView.cells.remove(at: index)
-            removed.removeFromSuperview()
+        let boardPosition = game.board.index(position: position)
+        if let x = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+            x.isHidden = true
         }
-        game.board.skipCells?.insert(game.board.index(position: position))
+        game.board.skipCells?.insert(boardPosition)
     }
     
     func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval) {

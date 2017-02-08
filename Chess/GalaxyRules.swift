@@ -14,14 +14,26 @@ class DeleteEdgeCellsTouchingAllEmpty: Condition {          // put translation i
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var completions =  [Completion]()
         for edge in game.board.nonSkippedEdges() {
-            let borderingCells = game.board.boarderedCells(position: edge)
+            var borderingCells = game.board.boarderedCells(position: edge)
+            borderingCells.append(edge)
             var vacantCellsCount = 0
             borderingCells.forEach({ (position: Position) in
-                if game.piece(position: position) == nil {
+                let pieceWithinBorder = game.piece(position: position)
+                if pieceWithinBorder == nil || pieceWithinBorder! == piece {
                     vacantCellsCount += 1
                 }
             })
-            let isVacantAdjoiningCells = borderingCells.count == vacantCellsCount
+            
+            var isVacantAdjoiningCells = borderingCells.count == vacantCellsCount
+
+            // account for piece landing
+            if isVacantAdjoiningCells, let translation = translations?[0] {
+                let landingPosition = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: piece.player?.forwardDirection ?? Direction.left)  ////?
+                if borderingCells.contains(landingPosition) {
+                    isVacantAdjoiningCells = false
+                }
+            }
+            
             if isVacantAdjoiningCells {
                 if game.vc != nil {
                     completions.append(Completion(closure: {game.vc!.removeCellAndViewFromGame(position: edge)}, evenIfNotMet: false))
