@@ -7,11 +7,9 @@
 //
 
 import UIKit
-// after queen promotion, check for checkmate, also  does not get disappear when taken after promotion
-//// check cells to delete when bordered by skipped and empty cells
+//// after queen promotion, check for checkmate, also  does not get disappear when taken after promotion
 
 
-/// Position Class: rows and columns, equatable
 
 class Position: NSObject {      // Position is class instead of a struct for KVO
     var row: Int
@@ -305,7 +303,7 @@ class Board {
 }
 
 
-/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are clear placeholder views
+/// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are hidden but still there for layout
 
 class BoardView: UIView {
     var cells = [UIView]()
