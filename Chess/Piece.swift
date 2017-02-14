@@ -93,7 +93,7 @@ class PieceCreator: PiecesCreator {
                     isLegal = false
                 } else if (translation.row == 0 && abs(translation.column) == 1) || (translation.column == 0 && abs(translation.row) == 1) {    // move one vertically or horizontally if vacant
                     isLegal = true
-                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
+                    conditions = [LegalIf(condition: MustBeVacantCell(), translations: [translation])]
                 } else if (translation.row == 0 && abs(translation.column) == 2) || (translation.column == 0 && abs(translation.row) == 2) {
                     isLegal = true
                     var jumpedRow = translation.row
@@ -101,11 +101,11 @@ class PieceCreator: PiecesCreator {
                     var jumpedColumn = translation.column
                     jumpedColumn.stepTowardsZero()
                     let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
+                    conditions = [LegalIf(condition: MustBeVacantCell(), translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent(), translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent(), translations: [jumpedTranslation])]
                 }
                 
                 if conditions != nil && deleteEdgeCells == true {
-                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: [translation])
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty(), translations: [translation])
                     conditions!.append(condition)
                 }
                 
@@ -135,7 +135,7 @@ class PieceCreator: PiecesCreator {
                     isLegal = false
                 } else if abs(translation.row) == 1 && abs(translation.column) == 1 {    // move one diagonally if vacant
                     isLegal = true
-                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation])]
+                    conditions = [LegalIf(condition: MustBeVacantCell(), translations: [translation])]
                 } else if abs(translation.row) == 2 && abs(translation.column) == 2 {
                     isLegal = true
                     var jumpedRow = translation.row
@@ -143,11 +143,11 @@ class PieceCreator: PiecesCreator {
                     var jumpedColumn = translation.column
                     jumpedColumn.stepTowardsZero()
                     let jumpedTranslation = Translation(row: jumpedRow, column: jumpedColumn)
-                    conditions = [LegalIf(condition: MustBeVacantCell.shared, translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent.shared, translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent.shared, translations: [jumpedTranslation])]
+                    conditions = [LegalIf(condition: MustBeVacantCell(), translations: [translation]), LegalIf(condition: MustBeOccupiedByOpponent(), translations: [jumpedTranslation]), LegalIf(condition: RemoveOpponent(), translations: [jumpedTranslation])]
                 }
                 
                 if conditions != nil && deleteEdgeCells == true {
-                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty.shared, translations: [translation])
+                    let condition: LegalIf = LegalIf(condition: DeleteEdgeCellsTouchingAllEmpty(), translations: [translation])
                     conditions!.append(condition)
                 }
                 

@@ -8,9 +8,7 @@
 
 import Foundation
 
-class DeleteEdgeCellsTouchingAllEmpty: Condition {          // put translation in vacantCellsCount, haven't moved yet
-    static var shared: Condition = DeleteEdgeCellsTouchingAllEmpty()
-    private init() {}
+struct DeleteEdgeCellsTouchingAllEmpty: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var completions =  [Completion]()
         for edge in game.board.nonSkippedEdges() {

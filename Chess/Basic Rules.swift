@@ -19,16 +19,13 @@ struct IsMetAndCompletions {
 }
 
 protocol Condition {
-    static var shared: Condition {get}
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions
 }
 
 
 // MARK: Basic Conditions
 
-class MustBeVacantCell: Condition {
-    static var shared: Condition = MustBeVacantCell()
-    private init() {}
+struct MustBeVacantCell: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = true
         guard let player = piece.player else {
@@ -49,9 +46,7 @@ class MustBeVacantCell: Condition {
     }
 }
 
-class MustBeOccupied: Condition {
-    static var shared: Condition = MustBeOccupied()
-    private init() {}
+struct MustBeOccupied: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = true
         guard let player = piece.player else {
@@ -68,9 +63,7 @@ class MustBeOccupied: Condition {
     }
 }
 
-class MustBeOccupiedByOpponent: Condition {
-    static var shared: Condition = MustBeOccupiedByOpponent()
-    private init() {}
+struct MustBeOccupiedByOpponent: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = true
         guard let player = piece.player else {
@@ -87,9 +80,7 @@ class MustBeOccupiedByOpponent: Condition {
     }
 }
 
-class CantBeOccupiedBySelf: Condition {
-    static var shared: Condition = CantBeOccupiedBySelf()
-    private init() {}
+struct CantBeOccupiedBySelf: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = true
         guard let player = piece.player else {
@@ -106,9 +97,7 @@ class CantBeOccupiedBySelf: Condition {
     }
 }
 
-class IsInitialMove: Condition {
-    static var shared: Condition = IsInitialMove()
-    private init() {}
+struct IsInitialMove: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = true
         if !piece.isFirstMove {
@@ -118,8 +107,7 @@ class IsInitialMove: Condition {
     }
 }
 
-class RemoveOpponent: Condition {
-    static var shared: Condition = RemoveOpponent()
+struct RemoveOpponent: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         guard let player = piece.player else {
             return IsMetAndCompletions(isMet: false, completions: nil)

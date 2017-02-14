@@ -11,9 +11,7 @@ import UIKit
 
 // MARK: Chess Conditions
 
-class CantBeInCheck: Condition {
-    static var shared: Condition = CantBeInCheck()
-    private init() {}
+struct CantBeInCheck: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         print("...")
         var isMet = true
@@ -66,9 +64,7 @@ class CantBeInCheck: Condition {
     }
 }
 
-class RookCanCastle: Condition {
-    static var shared: Condition = RookCanCastle()
-    private init() {}
+struct RookCanCastle: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         // king moves 2 horizontally, rook goes where king just crossed
         // 1. neither the king nor the rook may have been previously moved
@@ -98,7 +94,7 @@ class RookCanCastle: Condition {
                     let mustBeEmptyTranslations = mustBeEmptyPositions.map({ (position: Position) -> Translation in
                         Position.calculateTranslation(fromPosition: rook.position, toPosition: position, direction: player.forwardDirection)
                     })
-                    let conditionsMet = MustBeVacantCell.shared.checkIfConditionIsMet(piece: rook, translations: mustBeEmptyTranslations, game: game)
+                    let conditionsMet = MustBeVacantCell().checkIfConditionIsMet(piece: rook, translations: mustBeEmptyTranslations, game: game)
                     if conditionsMet.isMet == true {
                         castlingRook = rook
                         break
@@ -118,9 +114,7 @@ class RookCanCastle: Condition {
     }
 }
 
-class CheckForPromotion: Condition {
-    static var shared: Condition = CheckForPromotion()
-    private init() {}
+struct CheckForPromotion: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         guard let vc = game.vc else {
             return IsMetAndCompletions(isMet: true, completions: nil)
@@ -190,18 +184,14 @@ class CheckForPromotion: Condition {
     }
 }
 
-class MarkAdvancedTwo: Condition {
-    static var shared: Condition = MarkAdvancedTwo()
-    private init() {}
+struct MarkAdvancedTwo: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         let closure: () -> Void = {(piece as? PawnPiece)?.roundWhenPawnAdvancedTwo = game.round}
         return IsMetAndCompletions(isMet: true, completions: [Completion(closure: closure, evenIfNotMet: false)])
     }
 }
 
-class MustBeOccupiedByOpponentOrEnPassant: Condition {
-    static var shared: Condition = MustBeOccupiedByOpponentOrEnPassant()
-    private init() {}
+struct MustBeOccupiedByOpponentOrEnPassant: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
         var isMet = false
         var completions: [Completion]? = nil
@@ -232,7 +222,7 @@ class MustBeOccupiedByOpponentOrEnPassant: Condition {
                 }
                 isMet = true
             } else {                    // is pawn attack move
-                return MustBeOccupied.shared.checkIfConditionIsMet(piece: piece, translations: [landingTranslation], game: game)                               }
+                return MustBeOccupied().checkIfConditionIsMet(piece: piece, translations: [landingTranslation], game: game)                               }
         }
         return IsMetAndCompletions(isMet: isMet, completions: completions)
     }
