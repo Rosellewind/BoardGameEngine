@@ -18,14 +18,14 @@ class ChessPlayer: Player {
     
     func color(direction: Direction) -> String {
         switch direction {
-        case .bottom:
-            return "Black"
         case .top:
             return "White"
-        case .left:
-            return "Blue"
+        case .bottom:
+            return "Black"
         case .right:
             return "Red"
+        case .left:
+            return "Blue"
         }
     }
 }

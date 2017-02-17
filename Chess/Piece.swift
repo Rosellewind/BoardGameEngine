@@ -196,8 +196,7 @@ protocol PieceViewProtocol: class {
     func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval)
 }
 
-class PieceView: UIView {
-    var image: UIImage
+class PieceView: UIImageView {
     var positionConstraints = [NSLayoutConstraint]()
     weak var delegate: PieceViewProtocol?
     var observing: [(objectToObserve: NSObject, keyPath: String)]? {
@@ -214,16 +213,9 @@ class PieceView: UIView {
     }
 
     init(image: UIImage, pieceTag: Int) {
-        self.image = image
-        super.init(frame: CGRect.zero)
+        super.init(image:image)
         self.tag = pieceTag
         self.isUserInteractionEnabled = false
-        
-        // add imageView as subview
-        let imageView = UIImageView(image:image)
-        self.addSubview(imageView)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(imageView))
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -261,6 +253,8 @@ class PieceView: UIView {
     }
     
     func constrainToCell(_ cell: UIView) {
+        print(self.constraints)
+        print(".....")
         translatesAutoresizingMaskIntoConstraints = false
         let widthConstraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: .equal, toItem: cell, attribute: .width, multiplier: 1, constant: 0)
         let heightConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: cell, attribute: .height, multiplier: 1, constant: 0)

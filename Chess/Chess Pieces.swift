@@ -85,7 +85,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if direction == .bottom {
+                if direction == .top {
                     for piece in royalty {
                         piece.position = Position(row: 11, column: piece.position.column)
                     }
@@ -111,7 +111,7 @@ class ChessPieceCreator: PiecesCreator {
                     pawns.append(pawnI)
                 }
                 
-                if direction == .right {
+                if direction == .left {
                     for piece in royalty {
                         piece.position = Position(row: piece.position.row, column: 11)
                     }

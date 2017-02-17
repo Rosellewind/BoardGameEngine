@@ -26,7 +26,7 @@ struct DeleteEdgeCellsTouchingAllEmpty: Condition {
 
             // account for piece landing
             if isVacantAdjoiningCells, let translation = translations?[0] {
-                let landingPosition = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: piece.player?.forwardDirection ?? Direction.left)  ////?
+                let landingPosition = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: piece.player?.forwardDirection ?? Direction.left)
                 if borderingCells.contains(landingPosition) {
                     isVacantAdjoiningCells = false
                 }
