@@ -66,7 +66,7 @@ class GameVC {
         switch gameVariation {
         case .galaxy:
             // create the board
-            let board = Board(numRows: 8, numColumns: 8)
+            let board = Board(numRows: 8, numColumns: 8, skipCells: nil)
             
             // create the boardView
             let image1 = UIImage(named: "galaxy1")
@@ -80,8 +80,7 @@ class GameVC {
             self.init(gameView: gameView, board: board, boardView: boardView, players: players)
         case .blackHole:
             // create the board
-            var board = Board(numRows: 10, numColumns: 10)
-            board.skipCells = Set(Board.octoganalSkips(across: 10))
+            let board = Board(numRows: 10, numColumns: 10, skipCells: Set(Board.octoganalSkips(across: 10)))
 
             // create the boardView
             let image1 = UIImage(named: "galaxy1")
