@@ -35,8 +35,15 @@ class Piece: NSObject, NSCopying {
     var isLegalMove: IsLegalMove
     var removePieceOccupyingNewPosition = true
     var isFirstMove: Bool
-    dynamic var selected = false
+    var selected = false {
+        didSet {
+            if self.pieceView != nil {
+                self.pieceView!.alpha = selected ? 0.4: 1.0
+            }
+        }
+    }
     weak var player: Player?
+    weak var pieceView: PieceView?
     
     init(name: String, position: Position, isPossibleTranslation: @escaping (_ : Translation) -> Bool, isLegalMove: @escaping IsLegalMove) {
         self.name = name
@@ -67,6 +74,32 @@ class Piece: NSObject, NSCopying {
         return type(of: self).init(toCopy: self)
     }   
 }
+
+
+class PieceView: UIImageView {
+    var positionConstraints = [NSLayoutConstraint]()
+    
+    init(image: UIImage, pieceTag: Int) {
+        super.init(image:image)
+        self.tag = pieceTag
+        self.isUserInteractionEnabled = false
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func constrainToCell(_ cell: UIView) {
+        translatesAutoresizingMaskIntoConstraints = false
+        let widthConstraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: .equal, toItem: cell, attribute: .width, multiplier: 1, constant: 0)
+        let heightConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: cell, attribute: .height, multiplier: 1, constant: 0)
+        let positionX = NSLayoutConstraint(item: self, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
+        let positionY = NSLayoutConstraint(item: self, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
+        positionConstraints = [positionX, positionY]
+        NSLayoutConstraint.activate([widthConstraint, heightConstraint, positionX, positionY])
+    }
+}
+
 
 class PieceCreator: PiecesCreator {
     static let shared = PieceCreator()
@@ -191,76 +224,3 @@ class PieceCreator: PiecesCreator {
 }
 
 
-private var myContext = 0
-protocol PieceViewProtocol: class {
-    func animateMove(_ pieceView: PieceView, position: Position, duration: TimeInterval)
-}
-
-class PieceView: UIImageView {
-    var positionConstraints = [NSLayoutConstraint]()
-    weak var delegate: PieceViewProtocol?
-    var observing: [(objectToObserve: NSObject, keyPath: String)]? {
-        willSet {
-            for observe in observing ?? [] {
-                observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
-            }
-        }
-        didSet {
-            for observe in observing ?? [] {
-                observe.objectToObserve.addObserver(self, forKeyPath: observe.keyPath, options: [.new, .old], context: &myContext)
-            }
-        }
-    }
-
-    init(image: UIImage, pieceTag: Int) {
-        super.init(image:image)
-        self.tag = pieceTag
-        self.isUserInteractionEnabled = false
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if context == &myContext {
-            if keyPath == "selected" {
-                if let new = change?[NSKeyValueChangeKey.newKey] as? Bool {
-                    if new == true {
-                        self.alpha = 0.4
-                    } else {
-                        self.alpha = 1.0
-                    }
-                }
-            } else if keyPath == "position" {
-                if let new = change?[NSKeyValueChangeKey.newKey] as? Position {
-                    delegate?.animateMove(self, position: new, duration: 0.5)
-                }
-            }
-        } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        }
-    }
-    
-    deinit {
-        print("deinit PieceView")
-        for observe in observing ?? [] {
-            observe.objectToObserve.removeObserver(self, forKeyPath: observe.keyPath, context: &myContext)
-        }
-        observing = nil
-    }
-    
-    func constrainToCell(_ cell: UIView) {
-        print(self.constraints)
-        print(".....")
-        translatesAutoresizingMaskIntoConstraints = false
-        let widthConstraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: .equal, toItem: cell, attribute: .width, multiplier: 1, constant: 0)
-        let heightConstraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: .equal, toItem: cell, attribute: .height, multiplier: 1, constant: 0)
-        let positionX = NSLayoutConstraint(item: self, attribute: .centerX, relatedBy: .equal, toItem: cell, attribute: .centerX, multiplier: 1, constant: 0)
-        let positionY = NSLayoutConstraint(item: self, attribute: .centerY, relatedBy: .equal, toItem: cell, attribute: .centerY, multiplier: 1, constant: 0)
-        positionConstraints = [positionX, positionY]
-        NSLayoutConstraint.activate([widthConstraint, heightConstraint, positionX, positionY])
-    }
-}

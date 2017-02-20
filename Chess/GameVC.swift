@@ -25,7 +25,7 @@ enum UniqueVariation: GameVariation {
     }
 }
 
-class GameVC: PieceViewProtocol {
+class GameVC {
     var game: Game
     var boardView: BoardView
     var pieceViews: [PieceView] = [PieceView]()
@@ -50,8 +50,8 @@ class GameVC: PieceViewProtocol {
         boardView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
         
-        // pieceView layout and observing
-        setupLayoutAndObservingForPieceViews(pieceViews: pieceViews)
+//        // pieceView layout
+        setupLayoutForPieceViews(pieceViews: pieceViews)
         
         // add taps to cells on boardView
         boardView.cells.forEach({ (view: UIView) in
@@ -158,30 +158,25 @@ class GameVC: PieceViewProtocol {
                 radians = M_PI_2
             }
             if let image = UIImage(named: name) {
-                let imageView = PieceView(image: image, pieceTag: piece.id)
-                imageView.transform = CGAffineTransform(rotationAngle: CGFloat(radians))
-                return imageView
+                let pieceView = PieceView(image: image, pieceTag: piece.id)
+                pieceView.transform = CGAffineTransform(rotationAngle: CGFloat(radians))
+                piece.pieceView = pieceView
+                return pieceView
             }
         }
         
         return nil
     }
     
-    func setupLayoutAndObservingForPieceViews(pieceViews: [PieceView]) {
-        // pieceView layout and observing
+    func setupLayoutForPieceViews(pieceViews: [PieceView]) {////forall()
+        // pieceView layout
         for pieceView in pieceViews {
-            setupLayoutAndObservingForPieceView(pieceView: pieceView)
+            setupLayoutForPieceView(pieceView: pieceView)
         }
     }
     
-    func setupLayoutAndObservingForPieceView(pieceView: PieceView) {
+    func setupLayoutForPieceView(pieceView: PieceView) {
         if let piece = game.piece(tag: pieceView.tag) {
-            // add delegate
-            pieceView.delegate = self
-            // add observing
-            pieceView.observing = [(piece, "selected"), (piece, "position")]
-            
-            // pieceView layout
             let indexOfPieceOnBoard = game.board.index(position: piece.position)
             if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
                 boardView.addSubview(pieceView)
@@ -234,8 +229,12 @@ extension GameVC {
                             removePieceAndViewFromGame(piece: pieceTapped!)
                         }
                         
-                        // move the piece
+                        // move the piece       /////////selectedPiece! guard
                         game.movePiece(piece: game.selectedPiece!, position: positionTapped, removeOccupying: false)
+                        if let pieceView = game.selectedPiece!.pieceView {
+                            animateMove(pieceView, position: game.selectedPiece!.position, duration: 0.5)
+
+                        }
                         
                         
                         // completions
@@ -284,7 +283,7 @@ extension GameVC {
         if let player = piece.player {
             player.pieces.append(piece)
             if let pieceView = makePieceView(piece: piece) {
-                setupLayoutAndObservingForPieceView(pieceView: pieceView)
+                setupLayoutForPieceView(pieceView: pieceView)
             }
         }
     }

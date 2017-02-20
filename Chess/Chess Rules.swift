@@ -13,7 +13,6 @@ import UIKit
 
 struct CantBeInCheck: Condition {
     func checkIfConditionIsMet(piece: Piece, translations: [Translation]?, game: Game) -> IsMetAndCompletions {
-        print("...")
         var isMet = true
         var completions: [Completion]? = nil
         guard let player = piece.player, let translations = translations  else {
