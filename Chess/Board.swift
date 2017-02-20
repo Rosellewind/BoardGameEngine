@@ -113,12 +113,6 @@ struct Board {
         }
     }
     
-    init(numRows: Int, numColumns: Int, skipCells: Set<Int>? = nil) {
-        self.numRows = numRows
-        self.numColumns = numColumns
-        self.skipCells = skipCells
-    }
-    
     func index(position: Position) -> Int {
         return position.column + position.row * numColumns
     }
@@ -133,10 +127,6 @@ struct Board {
     
     func isACellAndIsNotSkipped(index: Int) -> Bool {
         return indexesNotSkipped.contains(index)
-    }
-    
-    func copy() -> Board {/////////////now a struct
-        return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
     }
     
     func columnFromFromNonSkippedEdge(row: Int, offset: Int, fromTheLeft: Bool) -> Int? {

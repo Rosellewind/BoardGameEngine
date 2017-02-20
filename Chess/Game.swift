@@ -64,7 +64,7 @@ class Game {
     }
 
     func copy() -> Game {
-        let game = Game(board: board.copy(), players: players.map({$0.copy()}))
+        let game = Game(board: board, players: players.map({$0.copy()}))
         game.selectedPiece = allPieces.elementPassing({$0.id == selectedPiece?.id})
         game.round = round
         game.firstInRound = firstInRound
