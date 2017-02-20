@@ -11,28 +11,14 @@ import UIKit
 
 
 
-class Position: NSObject {      // Position is class instead of a struct for KVO
+struct Position: Hashable {
     var row: Int
     var column: Int
-    
-    init(row: Int, column: Int) {
-        self.row = row
-        self.column = column
-    }
-    
-    override var hashValue: Int {
+    var hashValue: Int {
         return row.hashValue ^ column.hashValue
     }
     
-    override func isEqual(_ object: Any?) -> Bool {
-        if let object = object as? Position {
-            return object.row == self.row && object.column == self.column
-        } else  {
-            return false
-        }
-    }
-    
-    class func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
+    static func positionFromTranslation(_ translation: Translation, fromPosition: Position, direction: Direction) -> Position {
         let row: Int
         let column: Int
         switch direction {
@@ -52,7 +38,7 @@ class Position: NSObject {      // Position is class instead of a struct for KVO
         return Position(row: row, column: column)
     }
     
-    class func calculateTranslation(fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
+    static func calculateTranslation(fromPosition:Position, toPosition: Position, direction: Direction) -> Translation {
         let row: Int
         let column: Int
         switch direction {
@@ -72,7 +58,7 @@ class Position: NSObject {      // Position is class instead of a struct for KVO
         return Translation(row: row, column: column)
     }
     
-    class func betweenLinearExclusive(position1: Position, position2: Position) -> [Position] {
+    static func betweenLinearExclusive(position1: Position, position2: Position) -> [Position] {
         var positions = [Position]()
         var lower = 0
         var higher = 0
@@ -114,9 +100,9 @@ func ==(lhs: Position, rhs: Position) -> Bool {
 typealias Translation = Position
 
 
-/// Board Class: Grid of rows and columns that may include skipped cells.
+/// Board: Grid of rows and columns that may include skipped cells.
 
-class Board {
+struct Board {
     var numRows: Int
     var numColumns: Int
     var numCells: Int {get {return numRows * numColumns}}
@@ -125,10 +111,6 @@ class Board {
         get {
             return Set(0..<numCells).subtracting(skipCells ?? [])
         }
-    }
-    
-    convenience init() {
-        self.init(numRows: 5, numColumns: 5)
     }
     
     init(numRows: Int, numColumns: Int, skipCells: Set<Int>? = nil) {
@@ -153,7 +135,7 @@ class Board {
         return indexesNotSkipped.contains(index)
     }
     
-    func copy() -> Board {
+    func copy() -> Board {/////////////now a struct
         return Board(numRows: numRows, numColumns: numColumns, skipCells: skipCells)
     }
     
@@ -249,7 +231,7 @@ class Board {
     
     
     /// for making an octoganol board
-    class func octoganalSkips(across: Int) -> [Int] {
+    static func octoganalSkips(across: Int) -> [Int] {
         var skips = [Int]()
         let aThird = across/3
         var edges = aThird

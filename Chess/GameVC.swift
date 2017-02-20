@@ -80,7 +80,7 @@ class GameVC {
             self.init(gameView: gameView, board: board, boardView: boardView, players: players)
         case .blackHole:
             // create the board
-            let board = Board(numRows: 10, numColumns: 10)
+            var board = Board(numRows: 10, numColumns: 10)
             board.skipCells = Set(Board.octoganalSkips(across: 10))
 
             // create the boardView

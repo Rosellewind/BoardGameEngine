@@ -24,7 +24,7 @@ typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?
 class Piece: NSObject, NSCopying {
     var name: String
     var id = 0
-    dynamic var position: Position  
+    var position: Position  
         {
         didSet {
             self.isFirstMove = false
