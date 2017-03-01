@@ -53,7 +53,7 @@ class ChessGameVC: GameVC {
             super.init(gameView: gameView, board: chessBoard, boardView: chessBoardView, players: chessPlayers)
         case .standardChess:
             // create the board
-            let chessBoard = Board(numRows: 8, numColumns: 8)
+            let chessBoard = Board(numRows: 8, numColumns: 8, skipCells: nil)
             
             // create the boardView
             let chessBoardView = BoardView(board: chessBoard, checkered: true, images: nil, backgroundColors: [UIColor.red, UIColor.black])

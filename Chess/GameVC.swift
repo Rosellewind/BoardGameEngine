@@ -180,6 +180,7 @@ class GameVC {
             if let cell = boardView.cells.elementPassing({return indexOfPieceOnBoard == $0.tag}) {
                 boardView.addSubview(pieceView)
                 pieceView.constrainToCell(cell)
+                cell.occupierDescription = accessabilityStringForPiece(piece: piece)
             }
         }
     }
@@ -190,6 +191,10 @@ class GameVC {
                 presenterDelegate?.gameMessage("Game Over", status: .gameOver)
             }
         }
+    }
+    
+    func accessabilityStringForPiece(piece: Piece) -> String {
+        return piece.player != nil ? piece.player!.name! + " " + piece.name : piece.name
     }
 }
 
@@ -232,9 +237,13 @@ extension GameVC {
                         game.movePiece(piece: game.selectedPiece!, position: positionTapped, removeOccupying: false)
                         if let pieceView = game.selectedPiece!.pieceView {
                             animateMove(pieceView, position: game.selectedPiece!.position, duration: 0.5)
-
                         }
                         
+                        // update description for accessibility
+                        let boardPosition = game.board.index(position: positionTapped)
+                        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+                            cell.occupierDescription = accessabilityStringForPiece(piece: game.selectedPiece!)
+                        }
                         
                         // completions
                         if let completions = isMetAndCompletions.completions {
@@ -268,6 +277,13 @@ extension GameVC {
 
 extension GameVC {
     func removePieceAndViewFromGame(piece: Piece) {
+        
+        // update cell description for accessibility
+        let boardPosition = game.board.index(position: piece.position)
+        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+            cell.occupierDescription = nil
+        }
+        
         for player in game.players {
             if let index = player.pieces.index(of: piece) {
                 if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == piece.id}) {
@@ -280,6 +296,13 @@ extension GameVC {
     
     func addPieceAndViewToGame(piece: Piece) {
         if let player = piece.player {
+            
+            // update cell description for accessibility
+            let boardPosition = game.board.index(position: piece.position)
+            if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+                cell.occupierDescription = accessabilityStringForPiece(piece: piece)
+            }
+            
             player.pieces.append(piece)
             if let pieceView = makePieceView(piece: piece) {
                 setupLayoutForPieceView(pieceView: pieceView)
@@ -292,8 +315,8 @@ extension GameVC {
             removePieceAndViewFromGame(piece: piece)
         }
         let boardPosition = game.board.index(position: position)
-        if let x = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-            x.isHidden = true
+        if let cellToRemove = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+            cellToRemove.isHidden = true
         }
         game.board.skipCells?.insert(boardPosition)
     }
@@ -320,9 +343,18 @@ extension GameVC {
     }
     
     func replacePieceAndView(piece piece1: Piece, withPiece piece2: Piece) {
+        
+        // update cell description for accessibility
+        let boardPosition = game.board.index(position: piece1.position)
+        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+            cell.occupierDescription = accessabilityStringForPiece(piece: piece2)
+        }
+        
         UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
             self.removePieceAndViewFromGame(piece: piece1)
             self.addPieceAndViewToGame(piece: piece2)
+            
+            
         }, completion: nil)
     }
     

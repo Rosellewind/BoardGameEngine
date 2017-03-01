@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="KSN-Me-POf">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="KSN-Me-POf">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -23,11 +23,11 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="4jR-Fk-e0a" id="eOI-zc-VcX">
-                                    <rect key="frame" x="0.0" y="0.0" width="342" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="342" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="cxa-Ay-KxS">
-                                            <rect key="frame" x="15" y="0.0" width="325" height="43"/>
+                                            <rect key="frame" x="15" y="0.0" width="325" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
@@ -68,6 +68,9 @@
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="OI2-wq-VHs">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="114"/>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" notEnabled="YES"/>
+                                        </accessibility>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -152,33 +155,8 @@
                     <view key="view" contentMode="scaleToFill" id="nnf-1F-lHo">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vnv-g1-gik">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <subviews>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="BasicChessRules" translatesAutoresizingMaskIntoConstraints="NO" id="und-L4-kv0">
-                                        <rect key="frame" x="0.0" y="0.0" width="612" height="792"/>
-                                    </imageView>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="und-L4-kv0" secondAttribute="trailing" id="1k2-70-fhm"/>
-                                    <constraint firstItem="und-L4-kv0" firstAttribute="leading" secondItem="vnv-g1-gik" secondAttribute="leading" id="3Rd-Xp-J7m"/>
-                                    <constraint firstAttribute="bottom" secondItem="und-L4-kv0" secondAttribute="bottom" id="8J6-F4-u3s"/>
-                                    <constraint firstItem="und-L4-kv0" firstAttribute="top" secondItem="vnv-g1-gik" secondAttribute="top" id="fk7-Oc-vVL"/>
-                                </constraints>
-                            </scrollView>
-                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="vnv-g1-gik" firstAttribute="leading" secondItem="nnf-1F-lHo" secondAttribute="leading" id="0Oc-fs-u6a"/>
-                            <constraint firstAttribute="trailing" secondItem="vnv-g1-gik" secondAttribute="trailing" id="24r-Af-JKu"/>
-                            <constraint firstItem="Xqi-nj-q12" firstAttribute="top" secondItem="vnv-g1-gik" secondAttribute="bottom" id="C1D-Ah-TAz"/>
-                            <constraint firstItem="vnv-g1-gik" firstAttribute="top" secondItem="nnf-1F-lHo" secondAttribute="top" id="y67-nr-aJK"/>
-                        </constraints>
                     </view>
-                    <connections>
-                        <outlet property="rulesImageView" destination="und-L4-kv0" id="7Je-yc-nMo"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qJo-HI-cC4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -203,7 +181,4 @@
             <point key="canvasLocation" x="1324" y="343.17841079460271"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="BasicChessRules" width="612" height="792"/>
-    </resources>
 </document>

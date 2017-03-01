@@ -12,6 +12,10 @@
 		235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06361E04AD1300FBDBF4 /* GameVC.swift */; };
 		235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06381E04D51800FBDBF4 /* Chess Rules.swift */; };
 		23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */; };
+		23E2469C1E5CA197009AB937 /* ChessUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E2469B1E5CA197009AB937 /* ChessUITests.swift */; };
+		23E414D71E677EF0005E920D /* BlackHoleRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D51E677EF0005E920D /* BlackHoleRules.html */; };
+		23E414D81E677EF0005E920D /* GalaxyGameRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D61E677EF0005E920D /* GalaxyGameRules.html */; };
+		23E414DA1E6780E5005E920D /* ChessRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D91E6780E5005E920D /* ChessRules.html */; };
 		23FBBF9D1E493E25006945F2 /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FBBF9C1E493E25006945F2 /* x.swift */; };
 		4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */; };
 		4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */; };
@@ -29,12 +33,28 @@
 		4AC0A3891DB5227100129CDB /* MenuTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AC0A3881DB5227100129CDB /* MenuTVC.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		23E2469E1E5CA197009AB937 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4A0F33BE1CE9358B00C25E7D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A0F33C51CE9358B00C25E7D;
+			remoteInfo = Chess;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		2310BFFE1E30252000AAC409 /* GalaxyRules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalaxyRules.swift; sourceTree = "<group>"; };
 		2336CC151E4B940B00224480 /* RulesVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RulesVC.swift; sourceTree = "<group>"; };
 		235E06361E04AD1300FBDBF4 /* GameVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
 		235E06381E04D51800FBDBF4 /* Chess Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Rules.swift"; sourceTree = "<group>"; };
 		23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Basic Rules.swift"; sourceTree = "<group>"; };
+		23E246991E5CA197009AB937 /* ChessUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChessUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		23E2469B1E5CA197009AB937 /* ChessUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessUITests.swift; sourceTree = "<group>"; };
+		23E2469D1E5CA197009AB937 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		23E414D51E677EF0005E920D /* BlackHoleRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = BlackHoleRules.html; sourceTree = "<group>"; };
+		23E414D61E677EF0005E920D /* GalaxyGameRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = GalaxyGameRules.html; sourceTree = "<group>"; };
+		23E414D91E6780E5005E920D /* ChessRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = ChessRules.html; sourceTree = "<group>"; };
 		23FBBF9C1E493E25006945F2 /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
 		4A0F33C61CE9358B00C25E7D /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +75,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		23E246961E5CA197009AB937 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A0F33C31CE9358B00C25E7D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -65,11 +92,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		23E2469A1E5CA197009AB937 /* ChessUITests */ = {
+			isa = PBXGroup;
+			children = (
+				23E2469B1E5CA197009AB937 /* ChessUITests.swift */,
+				23E2469D1E5CA197009AB937 /* Info.plist */,
+			);
+			path = ChessUITests;
+			sourceTree = "<group>";
+		};
+		23E414DB1E678106005E920D /* Rules html */ = {
+			isa = PBXGroup;
+			children = (
+				23E414D51E677EF0005E920D /* BlackHoleRules.html */,
+				23E414D61E677EF0005E920D /* GalaxyGameRules.html */,
+				23E414D91E6780E5005E920D /* ChessRules.html */,
+			);
+			name = "Rules html";
+			sourceTree = "<group>";
+		};
 		4A0F33BD1CE9358B00C25E7D = {
 			isa = PBXGroup;
 			children = (
 				23FBBF9C1E493E25006945F2 /* x.swift */,
 				4A0F33C81CE9358B00C25E7D /* Chess */,
+				23E2469A1E5CA197009AB937 /* ChessUITests */,
 				4A0F33C71CE9358B00C25E7D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -78,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				4A0F33C61CE9358B00C25E7D /* Chess.app */,
+				23E246991E5CA197009AB937 /* ChessUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,6 +145,7 @@
 				23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */,
 				2310BFFE1E30252000AAC409 /* GalaxyRules.swift */,
 				4AC0A3851DB520C900129CDB /* Chess */,
+				23E414DB1E678106005E920D /* Rules html */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
@@ -120,6 +169,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		23E246981E5CA197009AB937 /* ChessUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 23E246A21E5CA197009AB937 /* Build configuration list for PBXNativeTarget "ChessUITests" */;
+			buildPhases = (
+				23E246951E5CA197009AB937 /* Sources */,
+				23E246961E5CA197009AB937 /* Frameworks */,
+				23E246971E5CA197009AB937 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				23E2469F1E5CA197009AB937 /* PBXTargetDependency */,
+			);
+			name = ChessUITests;
+			productName = ChessUITests;
+			productReference = 23E246991E5CA197009AB937 /* ChessUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		4A0F33C51CE9358B00C25E7D /* Chess */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4A0F33D81CE9358B00C25E7D /* Build configuration list for PBXNativeTarget "Chess" */;
@@ -143,10 +210,15 @@
 		4A0F33BE1CE9358B00C25E7D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0730;
+				LastSwiftUpdateCheck = 0820;
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Roselle Tanner";
 				TargetAttributes = {
+					23E246981E5CA197009AB937 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 4A0F33C51CE9358B00C25E7D;
+					};
 					4A0F33C51CE9358B00C25E7D = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = N5W8253H8H;
@@ -168,16 +240,27 @@
 			projectRoot = "";
 			targets = (
 				4A0F33C51CE9358B00C25E7D /* Chess */,
+				23E246981E5CA197009AB937 /* ChessUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		23E246971E5CA197009AB937 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A0F33C41CE9358B00C25E7D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				4A0F33D41CE9358B00C25E7D /* LaunchScreen.storyboard in Resources */,
+				23E414D71E677EF0005E920D /* BlackHoleRules.html in Resources */,
+				23E414D81E677EF0005E920D /* GalaxyGameRules.html in Resources */,
+				23E414DA1E6780E5005E920D /* ChessRules.html in Resources */,
 				4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */,
 				4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */,
 			);
@@ -186,6 +269,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		23E246951E5CA197009AB937 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23E2469C1E5CA197009AB937 /* ChessUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A0F33C21CE9358B00C25E7D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -212,6 +303,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		23E2469F1E5CA197009AB937 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A0F33C51CE9358B00C25E7D /* Chess */;
+			targetProxy = 23E2469E1E5CA197009AB937 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		4A0F33CD1CE9358B00C25E7D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -232,6 +331,35 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		23E246A01E5CA197009AB937 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				INFOPLIST_FILE = ChessUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Tanner.ChessUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = Chess;
+			};
+			name = Debug;
+		};
+		23E246A11E5CA197009AB937 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				INFOPLIST_FILE = ChessUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = Roselle.Tanner.ChessUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_TARGET_NAME = Chess;
+			};
+			name = Release;
+		};
 		4A0F33D61CE9358B00C25E7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -355,6 +483,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		23E246A21E5CA197009AB937 /* Build configuration list for PBXNativeTarget "ChessUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				23E246A01E5CA197009AB937 /* Debug */,
+				23E246A11E5CA197009AB937 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4A0F33C11CE9358B00C25E7D /* Build configuration list for PBXProject "Chess" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

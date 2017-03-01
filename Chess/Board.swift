@@ -129,6 +129,12 @@ struct Board {
         return indexesNotSkipped.contains(index)
     }
     
+    func numberedDescription(position: Position) -> String {
+        guard let column = UnicodeScalar(position.column + 65) else { return "" }
+        let row = numRows - position.row
+        return "\(column)\(row)"
+    }
+    
     func columnFromFromNonSkippedEdge(row: Int, offset: Int, fromTheLeft: Bool) -> Int? {
         guard offset == 0 || (fromTheLeft == (offset >= 0)) else { return nil }
         var column: Int? = nil
@@ -277,8 +283,31 @@ struct Board {
 
 /// makes a checkered view from a Board. checkered will offset images by 1 on the next row. skipped cells are hidden but still there for layout
 
+class Cell: UIView {
+    let position: Position
+    var positionDescription: String = ""
+    var occupierDescription: String? = nil
+    
+    init(position: Position) {
+        self.position = position
+        super.init(frame: CGRect.zero)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override var isAccessibilityElement: Bool { get { return true } set { }}
+    override var accessibilityLabel: String? {
+        get {
+            let occupierString = occupierDescription != nil ? occupierDescription! + " on " : nil
+            return occupierString != nil ? occupierString! + positionDescription : positionDescription
+        } set { }
+    }
+}
+
 class BoardView: UIView {
-    var cells = [UIView]()
+    var cells = [Cell]()
     let images: [UIImage]?
     let backgroundColors: [UIColor]?
     var checkered = true
@@ -308,8 +337,12 @@ class BoardView: UIView {
         for i in 0..<board.numCells {
             
             // make a cell
-            let cell = UIView()
+            let position = board.position(index: i)
+            let cell = Cell(position: position)
             cell.tag = i
+            
+            // accessibility
+            cell.positionDescription = board.numberedDescription(position: position)
             
             // set the image or color
             let evenNumberColumns = board.numColumns % 2 == 0

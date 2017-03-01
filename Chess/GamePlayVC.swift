@@ -20,6 +20,14 @@ class GamePlayVC: UIViewController, GamePresenterProtocol {
     override func viewDidAppear(_ animated: Bool) {
         setupGame()
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(confirmBack(sender:)))
+        
+        // allow for accessibility resize text
+        self.topLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        self.bottomLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        if #available(iOS 10.0, *) {    // allows resizing midstream, otherwise need UI redraw
+            self.topLabel.adjustsFontForContentSizeCategory =  true
+            self.bottomLabel.adjustsFontForContentSizeCategory =  true
+        }
     }
     
     func setupGame() {
