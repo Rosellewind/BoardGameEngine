@@ -7,7 +7,7 @@
 //
 
 import UIKit
-//// after queen promotion, check for checkmate, also  does not get disappear when taken after promotion
+//// after queen promotion, check for checkmate, also  does not disappear when taken after promotion, checkmate not working
 
 
 

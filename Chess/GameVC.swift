@@ -50,8 +50,8 @@ class GameVC {
         boardView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(NSLayoutConstraint.bindTopBottomLeftRight(boardView))
         
-//        // pieceView layout
-        setupLayoutForPieceViews(pieceViews: pieceViews)
+        // pieceView layout
+        pieceViews.forEach({setupLayoutForPieceView(pieceView: $0)})
         
         // add taps to cells on boardView
         boardView.cells.forEach({ (view: UIView) in
@@ -167,13 +167,6 @@ class GameVC {
         return nil
     }
     
-    func setupLayoutForPieceViews(pieceViews: [PieceView]) {////forall()
-        // pieceView layout
-        for pieceView in pieceViews {
-            setupLayoutForPieceView(pieceView: pieceView)
-        }
-    }
-    
     func setupLayoutForPieceView(pieceView: PieceView) {
         if let piece = game.piece(tag: pieceView.tag) {
             let indexOfPieceOnBoard = game.board.index(position: piece.position)
@@ -220,29 +213,30 @@ extension GameVC {
                 }
             }
                 
-                // final part of turn, choosing where to go, selectedPiece is not nil
+                // final part of turn, choosing where to go
             else {
-                let translation = Position.calculateTranslation(fromPosition: game.selectedPiece!.position, toPosition: positionTapped, direction: game.players[game.whoseTurn].forwardDirection)
-                let moveFunction = game.selectedPiece!.isLegalMove(translation)
+                guard let selectedPiece = game.selectedPiece else { fatalError() }
+                let translation = Position.calculateTranslation(fromPosition: selectedPiece.position, toPosition: positionTapped, direction: game.players[game.whoseTurn].forwardDirection)
+                let moveFunction = selectedPiece.isLegalMove(translation)
                 if moveFunction.isLegal {
                     // check
-                    let isMetAndCompletions = game.checkIfConditionsAreMet(piece: game.selectedPiece!, legalIfs: moveFunction.legalIf)
+                    let isMetAndCompletions = game.checkIfConditionsAreMet(piece: selectedPiece, legalIfs: moveFunction.legalIf)
                     if isMetAndCompletions.isMet {
                         // remove occupying piece if needed     // put in condition: removeOccupying, completions: removeOccupying
-                        if game.selectedPiece!.removePieceOccupyingNewPosition == true && pieceTapped != nil {
+                        if selectedPiece.removePieceOccupyingNewPosition == true && pieceTapped != nil {
                             removePieceAndViewFromGame(piece: pieceTapped!)
                         }
                         
-                        // move the piece       /////////selectedPiece! guard
-                        game.movePiece(piece: game.selectedPiece!, position: positionTapped, removeOccupying: false)
-                        if let pieceView = game.selectedPiece!.pieceView {
-                            animateMove(pieceView, position: game.selectedPiece!.position, duration: 0.5)
+                        // move the piece       
+                        game.movePiece(piece: selectedPiece, position: positionTapped, removeOccupying: false)
+                        if let pieceView = selectedPiece.pieceView {
+                            animateMove(pieceView, position: selectedPiece.position, duration: 0.5)
                         }
                         
                         // update description for accessibility
                         let boardPosition = game.board.index(position: positionTapped)
                         if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-                            cell.occupierDescription = accessabilityStringForPiece(piece: game.selectedPiece!)
+                            cell.occupierDescription = accessabilityStringForPiece(piece: selectedPiece)
                         }
                         
                         // completions
@@ -266,8 +260,8 @@ extension GameVC {
                         }
                     }
                 }
-                game.selectedPiece!.selected = false
-                game.selectedPiece = nil
+                selectedPiece.selected = false
+                game.selectedPiece = nil////check
             }
         }
     }

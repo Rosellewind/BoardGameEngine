@@ -72,7 +72,16 @@ class Piece: NSObject, NSCopying {
     
     func copy(with zone: NSZone?) -> Any {
         return type(of: self).init(toCopy: self)
-    }   
+    }
+    
+    override func isEqual(_ object: Any?) -> Bool {
+        guard let rhs = object as? Piece else { return false }
+        let lhs = self
+        return lhs.id == rhs.id
+    }
+}
+func ==(lhs: Piece, rhs: Piece) -> Bool {
+    return lhs.id == rhs.id
 }
 
 

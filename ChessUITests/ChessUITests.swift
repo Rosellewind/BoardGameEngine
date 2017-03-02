@@ -41,8 +41,30 @@ class ChessUITests: XCTestCase {
         app.otherElements["H4"].tap()
     }
     
+    func testInCheckMate() {    //// just starting to test this, no asserts yet
+        let app = XCUIApplication()
+        app.tables.staticTexts["Chess"].tap()
+        
+        app.otherElements["White Pawn on H2"].tap()
+        app.otherElements["H3"].tap()
+        
+        let blackPawnOnC7Element = app.otherElements["Black Pawn on C7"]
+        blackPawnOnC7Element.tap()
+        app.otherElements["C6"].tap()
+        app.otherElements["White Pawn on F2"].tap()
+        app.otherElements["F3"].tap()
+        app.otherElements["Black Queen on D8"].tap()
+        blackPawnOnC7Element.tap()
+        app.otherElements["White Pawn on A2"].tap()
+        app.otherElements["A3"].tap()
+        app.otherElements["Black Queen on C7"].tap()
+        app.otherElements["G3"].tap()
+        sleep(8)
+        
+    }
     
-    func testPawnCapture() {    //// just starting to test this, no asserts yet
+    
+    func testPawnCapture() {
         let app = XCUIApplication()
         app.tables.staticTexts["Chess"].tap()
         

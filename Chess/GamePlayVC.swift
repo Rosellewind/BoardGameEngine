@@ -5,7 +5,7 @@
 //  Created by Roselle Milvich on 5/15/16.
 //  Copyright © 2016 Roselle Tanner. All rights reserved.
 //
-// TODO: end of game?
+// TODO: end of game? use a bitboard next time?
 
 import UIKit
 
