@@ -33,9 +33,9 @@ class ChessPieceCreator: PiecesCreator {
         let bishop = self.chessPiece(.Bishop)
         let knight = self.chessPiece(.Knight)
         let pawn = self.chessPiece(.Pawn)
-        let rook2 = rook.copy() as! Piece
-        let bishop2 = bishop.copy() as! Piece
-        let knight2 = knight.copy() as! Piece
+        let rook2 = rook.copyWithNewID()
+        let bishop2 = bishop.copyWithNewID()
+        let knight2 = knight.copyWithNewID()
         let royalty: [Piece] = [king, queen, rook, bishop, knight, rook2, bishop2, knight2]
         var pawns = [Piece]()
         
@@ -49,7 +49,7 @@ class ChessPieceCreator: PiecesCreator {
                 
                 pawns.append(pawn)
                 for i in 1..<8 {
-                    let pawnI = pawn.copy() as! Piece
+                    let pawnI = pawn.copyWithNewID()
                     pawnI.position = Position(row: pawn.position.row, column: i)
                     pawns.append(pawnI)
                 }
@@ -80,7 +80,7 @@ class ChessPieceCreator: PiecesCreator {
                 pawn.position = Position(row: 1, column: 2)
                 pawns.append(pawn)
                 for i in 1..<8 {
-                    let pawnI = pawn.copy() as! Piece
+                    let pawnI = pawn.copyWithNewID()
                     pawnI.position = Position(row: pawn.position.row, column: i + 2)
                     pawns.append(pawnI)
                 }
@@ -106,7 +106,7 @@ class ChessPieceCreator: PiecesCreator {
                 pawn.position = Position(row: 2, column: 1)
                 pawns.append(pawn)
                 for i in 1..<8 {
-                    let pawnI = pawn.copy() as! Piece
+                    let pawnI = pawn.copyWithNewID()
                     pawnI.position = Position(row: i + 2, column: pawn.position.column)
                     pawns.append(pawnI)
                 }
@@ -125,16 +125,14 @@ class ChessPieceCreator: PiecesCreator {
             pieces.append(contentsOf: pawns)
         }
         
-        // set the id and isFirstMove
-        let offset = playerId * pieces.count
-        for i in 0..<pieces.count {
-            pieces[i].id = i + offset
-            pieces[i].isFirstMove = true
-        }
+        // set  isFirstMove
+        pieces.forEach({$0.isFirstMove = true}) ////
+        
         return pieces
     }
     
     func chessPiece(_ name: ChessPieceType) -> Piece {
+        
         switch name {
         case .King:
             let isPossibleTranslation = {(translation: Translation) -> Bool in
@@ -222,7 +220,10 @@ class ChessPieceCreator: PiecesCreator {
                 if mustBeVacantCell.count > 0 {
                     conditions.append(LegalIf(condition: MustBeVacantCell(), translations: mustBeVacantCell))
                 }
-                conditions.append(LegalIf(condition: CantBeInCheck(), translations: [translation]))
+//                if !alreadyInCheck {////
+                    conditions.append(LegalIf(condition: CantBeInCheck(), translations: [translation]))
+
+//                }
                 return (isLegal, conditions)
             }
             return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)

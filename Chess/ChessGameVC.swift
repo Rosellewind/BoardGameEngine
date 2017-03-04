@@ -66,35 +66,50 @@ class ChessGameVC: GameVC {
     }
     
     override func checkForGameOver(){
+        var playersInCheck = [Player]()
+        var playersInCheckMate = [Player]()
         
-        // check if next player is in check, display string
-        let player = game.players[game.nextTurn]
-        if isCheck(player, game: nil) {
-            let message = player.name != nil ? (player.name! + " is in check") : "in check"
+        // determine in player are in check or checkmate
+        for player in game.players {
+            // check for in check
+            if isCheck(player, game: nil) {
+                if isCheckMate(player, game: nil) {
+                    playersInCheckMate.append(player)
+                } else {
+                    playersInCheck.append(player)
+                }
+            }
+            
+        }
+        
+        // show message for players in check
+        if playersInCheck.count > 0 {
+            var message = ""
+            if playersInCheck.count == 1 {
+                message.append(playersInCheck[0].name! + " is in check")
+            } else if playersInCheck.count > 1 {
+                message.append("\(playersInCheck[0].name)")
+                for i in 1..<playersInCheck.count {
+                    message.append(" and \(playersInCheck[i].name)")
+                }
+                message.append(" are in check")
+            }
             presenterDelegate?.secondaryGameMessage(string: message)
         } else {
             presenterDelegate?.secondaryGameMessage(string: "")
         }
         
-        // check if any player is in checkmate
-        var playersInCheckMate = [Player]()
-        for player in game.players {
-            if player.id != game.players[game.whoseTurn].id {
-                if isCheckMate(player, game: game.copy()) {
-                    playersInCheckMate.append(player)
-                }
-            }
-        }
+        // show message for players in checkmate
         if playersInCheckMate.count > 0 {
-            var message = (playersInCheckMate[0].name ?? "")
+            var message = ""
             if playersInCheckMate.count == 1 {
-                message.append(" Is In Checkmate!!!")
+                message.append("\(playersInCheckMate[0].name) is in checkmate!")
             } else {
-                for player in playersInCheckMate {
-                    message.append(" And ")
-                    message.append(player.name ?? "")
-                    message.append(" Are In Checkmate!!!")
+                message.append("\(playersInCheckMate[0].name)")
+                for i in 1..<playersInCheckMate.count {
+                    message.append(" and \(playersInCheckMate[i].name)")
                 }
+                message.append(" are in checkmate!")
             }
             presenterDelegate?.gameMessage(message, status: .gameOver)
         }
@@ -104,7 +119,7 @@ class ChessGameVC: GameVC {
 
         // all other players pieces can not take king
         var isCheck = false
-        let player = game?.players.elementPassing({$0.id == player.id}) ?? player
+        let player = game?.players.elementPassing({$0.id == player.id}) ?? player////put after?
         let game = game ?? self.game
         if let king = player.pieces.elementPassing({$0.name == "King"}) {
             for otherPlayer in game.players where isCheck == false {

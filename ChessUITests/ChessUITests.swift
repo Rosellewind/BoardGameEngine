@@ -27,7 +27,7 @@ class ChessUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    func testInCheck() {    //// just starting to test this, no asserts yet
+    func testInCheck() {
         let app = XCUIApplication()
         app.tables.staticTexts["Chess"].tap()
         
@@ -39,15 +39,16 @@ class ChessUITests: XCTestCase {
         app.otherElements["A4"].tap()
         app.otherElements["Black Queen on D8"].tap()
         app.otherElements["H4"].tap()
+        
+        XCTAssert(app.staticTexts["White is in check"].exists)
     }
     
-    func testInCheckMate() {    //// just starting to test this, no asserts yet
+    func testInCheckMate() {
         let app = XCUIApplication()
         app.tables.staticTexts["Chess"].tap()
         
         app.otherElements["White Pawn on H2"].tap()
         app.otherElements["H3"].tap()
-        
         let blackPawnOnC7Element = app.otherElements["Black Pawn on C7"]
         blackPawnOnC7Element.tap()
         app.otherElements["C6"].tap()
@@ -59,8 +60,41 @@ class ChessUITests: XCTestCase {
         app.otherElements["A3"].tap()
         app.otherElements["Black Queen on C7"].tap()
         app.otherElements["G3"].tap()
-        sleep(8)
         
+        let weHaveAWinnerAlert = app.alerts["We have a winner!"]
+        XCTAssert(weHaveAWinnerAlert.exists)
+    }
+    
+    func testPromotionThenCapture() {
+        let app = XCUIApplication()
+        app.tables.staticTexts["Chess"].tap()
+        
+        app.otherElements["White Pawn on A2"].tap()
+        app.otherElements["A4"].tap()
+        let blackPawnOnB7Element = app.otherElements["Black Pawn on B7"]
+        blackPawnOnB7Element.tap()
+        app.otherElements["B5"].tap()
+        app.otherElements["White Pawn on A4"].tap()
+        app.otherElements["Black Pawn on B5"].tap()
+        let blackKnightOnB8Element = app.otherElements["Black Knight on B8"]
+        blackKnightOnB8Element.tap()
+        app.otherElements["C6"].tap()
+        app.otherElements["White Pawn on B5"].tap()
+        app.otherElements["B6"].tap()
+        app.otherElements["Black Pawn on A7"].tap()
+        app.otherElements["A6"].tap()
+        app.otherElements["White Pawn on B6"].tap()
+        blackPawnOnB7Element.tap()
+        app.otherElements["Black Pawn on A6"].tap()
+        app.otherElements["A5"].tap()
+        app.otherElements["White Pawn on B7"].tap()
+        blackKnightOnB8Element.tap()
+        app.sheets["Promotion"].buttons["Queen"].tap()
+        app.otherElements["Black Rook on A8"].tap()
+        app.otherElements["White Queen on B8"].tap()
+        
+        XCTAssert(app.otherElements["Black Rook on B8"].exists)
+        XCTAssert(!app.otherElements["White Queen on B8"].exists)
     }
     
     
@@ -74,8 +108,49 @@ class ChessUITests: XCTestCase {
         app.otherElements["D5"].tap()
         app.otherElements["White Pawn on E4"].tap()
         app.otherElements["Black Pawn on D5"].tap()
-        sleep(3)
-        XCTAssertNotNil(app.otherElements["White Pawn on D5"])
+        
+        XCTAssert(app.otherElements["White Pawn on D5"].exists)
+    }
+    
+    func testCheckGameOverAfterPromotion() {
+        let app = XCUIApplication()
+        app.tables.staticTexts["Chess"].tap()
+        
+        app.otherElements["White Pawn on B2"].tap()
+        app.otherElements["B4"].tap()
+        let blackPawnOnC7Element = app.otherElements["Black Pawn on C7"]
+        blackPawnOnC7Element.tap()
+        app.otherElements["C5"].tap()
+        app.otherElements["White Pawn on B4"].tap()
+        app.otherElements["Black Pawn on C5"].tap()
+        app.otherElements["Black Pawn on D7"].tap()
+        app.otherElements["D6"].tap()
+        app.otherElements["White Pawn on C5"].tap()
+        app.otherElements["C6"].tap()
+        let blackBishopOnC8Element = app.otherElements["Black Bishop on C8"]
+        blackBishopOnC8Element.tap()
+        app.otherElements["F5"].tap()
+        app.otherElements["White Pawn on A2"].tap()
+        app.otherElements["A3"].tap()
+        app.otherElements["Black Queen on D8"].tap()
+        app.otherElements["A5"].tap()
+        app.otherElements["White Pawn on A3"].tap()
+        app.otherElements["A4"].tap()
+        app.otherElements["Black Bishop on F5"].tap()
+        app.otherElements["G6"].tap()
+        app.otherElements["White Pawn on C6"].tap()
+        blackPawnOnC7Element.tap()
+        app.otherElements["Black Queen on A5"].tap()
+        app.otherElements["H5"].tap()
+        app.otherElements["White Pawn on C7"].tap()
+        blackBishopOnC8Element.tap()
+        sleep(2)
+        app.sheets["Promotion"].buttons["Queen"].tap()
+        sleep(6)
+        let weHaveAWinnerAlert = app.alerts["We have a winner!"]
+        XCTAssert(weHaveAWinnerAlert.exists)
+        
+        //// bug in test, isCheck true but is not because the king is taken so isCheck(_ player: Player, game: Game?) should return false.  queen doesn't appear to move in gameCopy
     }
     
 }

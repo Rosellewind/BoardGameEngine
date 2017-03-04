@@ -223,7 +223,7 @@ extension GameVC {
                     let isMetAndCompletions = game.checkIfConditionsAreMet(piece: selectedPiece, legalIfs: moveFunction.legalIf)
                     if isMetAndCompletions.isMet {
                         // remove occupying piece if needed     // put in condition: removeOccupying, completions: removeOccupying
-                        if selectedPiece.removePieceOccupyingNewPosition == true && pieceTapped != nil {
+                        if pieceTapped != nil && selectedPiece.removePieceOccupyingNewPosition == true {
                             removePieceAndViewFromGame(piece: pieceTapped!)
                         }
                         
@@ -233,7 +233,7 @@ extension GameVC {
                             animateMove(pieceView, position: selectedPiece.position, duration: 0.5)
                         }
                         
-                        // update description for accessibility
+                        // update description for accessibility////move downone
                         let boardPosition = game.board.index(position: positionTapped)
                         if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
                             cell.occupierDescription = accessabilityStringForPiece(piece: selectedPiece)
@@ -242,11 +242,11 @@ extension GameVC {
                         // completions
                         if let completions = isMetAndCompletions.completions {
                             for completion in completions {
-                                completion.closure()
+                                completion.closure()//finish first
                             }
                         }
                         
-                        // check for gameOver
+                        // check for gameOver and change turns
                         checkForGameOver()
                         game.whoseTurn += 1
                         presenterDelegate?.gameMessage((game.players[game.whoseTurn].name ?? "") + "'s turn", status: .whoseTurn)
@@ -265,23 +265,20 @@ extension GameVC {
             }
         }
     }
+
 }
 
 // MARK: Moving Pieces
 
 extension GameVC {
     func removePieceAndViewFromGame(piece: Piece) {
-        
-        // update cell description for accessibility
-        let boardPosition = game.board.index(position: piece.position)
-        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-            cell.occupierDescription = nil
-        }
-        
         for player in game.players {
             if let index = player.pieces.index(of: piece) {
                 if let pieceViewToRemove = pieceViews.elementPassing({$0.tag == piece.id}) {
                     pieceViewToRemove.removeFromSuperview()
+                    if let viewIndex = pieceViews.index(of: pieceViewToRemove) {
+                        pieceViews.remove(at: viewIndex)
+                    }
                 }
                 player.pieces.remove(at: index)
             }
@@ -290,15 +287,9 @@ extension GameVC {
     
     func addPieceAndViewToGame(piece: Piece) {
         if let player = piece.player {
-            
-            // update cell description for accessibility
-            let boardPosition = game.board.index(position: piece.position)
-            if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-                cell.occupierDescription = accessabilityStringForPiece(piece: piece)
-            }
-            
             player.pieces.append(piece)
             if let pieceView = makePieceView(piece: piece) {
+                pieceViews.append(pieceView)
                 setupLayoutForPieceView(pieceView: pieceView)
             }
         }
@@ -337,13 +328,6 @@ extension GameVC {
     }
     
     func replacePieceAndView(piece piece1: Piece, withPiece piece2: Piece) {
-        
-        // update cell description for accessibility
-        let boardPosition = game.board.index(position: piece1.position)
-        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-            cell.occupierDescription = accessabilityStringForPiece(piece: piece2)
-        }
-        
         UIView.animate(withDuration: 0.2, delay: 0, options: .transitionCrossDissolve, animations: {
             self.removePieceAndViewFromGame(piece: piece1)
             self.addPieceAndViewToGame(piece: piece2)

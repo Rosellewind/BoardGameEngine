@@ -25,7 +25,7 @@ struct CantBeInCheck: Condition {
             let position = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
             gameCopy.movePieceMatching(piece: piece, position: position, removeOccupying: piece.removePieceOccupyingNewPosition)
             
-            if isCheck(player: player, game: gameCopy) {
+            if isCheck(player: player, game: gameCopy) {    //// bug in test, isCheck true but is not because the king is taken so isCheck(_ player: Player, game: Game?) should return false.  queen doesn't appear to move in gameCopy
                 isMet = false
                 completions = [Completion(closure: {game.vc?.presenterDelegate?.secondaryGameMessage(string: "Can't leave yourself in check")}, evenIfNotMet: true)]
             }
@@ -136,21 +136,25 @@ struct CheckForPromotion: Condition {
                     let alert = UIAlertController(title: "Promotion", message: "Which chess piece do you want to promote your pawn with?", preferredStyle: .actionSheet)
                     let queen = UIAlertAction(title: "Queen", style: .default, handler: {(UIAction) in
                         self.promote(piece: piece, toType: .Queen, game: game)
+                        vc.checkForGameOver()
                         alert.dismiss(animated: true, completion: nil)
                     })
                     alert.addAction(queen)
                     let knight = UIAlertAction(title: "Knight", style: .default, handler: {(UIAction) in
                         self.promote(piece: piece, toType: .Knight, game: game)
+                        vc.checkForGameOver()
                         alert.dismiss(animated: true, completion: nil)
                     })
                     alert.addAction(knight)
                     let rook = UIAlertAction(title: "Rook", style: .default, handler: {(UIAction) in
                         self.promote(piece: piece, toType: .Rook, game: game)
+                        vc.checkForGameOver()
                         alert.dismiss(animated: true, completion: nil)
                     })
                     alert.addAction(rook)
                     let bishop = UIAlertAction(title: "Bishop", style: .default, handler: {(UIAction) in
                         self.promote(piece: piece, toType: .Bishop, game: game)
+                        vc.checkForGameOver()
                         alert.dismiss(animated: true, completion: nil)
                     })
                     alert.addAction(bishop)
@@ -166,9 +170,9 @@ struct CheckForPromotion: Condition {
     fileprivate func promote(piece: Piece, toType: ChessPieceType, game: Game) {
         
         // create replacement
-        let newPiece = ChessPieceCreator.shared.chessPiece(toType)
+        let newPiece = ChessPieceCreator.shared.chessPiece(toType)////not creating
         newPiece.position = piece.position
-        newPiece.id = piece.id
+//        newPiece.id = piece.id
         newPiece.isFirstMove = piece.isFirstMove
         newPiece.startingPosition = piece.startingPosition
         newPiece.player = piece.player

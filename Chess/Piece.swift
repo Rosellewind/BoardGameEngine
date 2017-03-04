@@ -14,6 +14,9 @@ protocol PiecesCreator {
     func makePieces(variation: GameVariation, playerId: Int, board: Board) -> [Piece]
 }
 
+
+
+
 struct LegalIf {
     let condition: Condition
     let translations: [Translation]?
@@ -23,7 +26,7 @@ typealias IsLegalMove = (_ : Translation) -> (isLegal: Bool, legalIf: [LegalIf]?
 
 class Piece: NSObject, NSCopying {
     var name: String
-    var id = 0
+    var id: Int
     var position: Position  
         {
         didSet {
@@ -45,8 +48,17 @@ class Piece: NSObject, NSCopying {
     weak var player: Player?
     weak var pieceView: PieceView?
     
+    class func nextID() -> Int {
+        struct Holder {
+            static var count = 0
+        }
+        Holder.count += 1
+        return Holder.count
+    }
+    
     init(name: String, position: Position, isPossibleTranslation: @escaping (_ : Translation) -> Bool, isLegalMove: @escaping IsLegalMove) {
         self.name = name
+        self.id = Piece.nextID()
         self.position = position
         self.startingPosition = position
         self.isPossibleTranslation = isPossibleTranslation
@@ -66,12 +78,19 @@ class Piece: NSObject, NSCopying {
         self.player = toCopy.player
     }
     
+    
     deinit {
         print("deinit Piece")
     }
     
     func copy(with zone: NSZone?) -> Any {
         return type(of: self).init(toCopy: self)
+    }
+    
+    func copyWithNewID() -> Piece {
+        let copy = self.copy() as! Piece
+        copy.id = Piece.nextID()
+        return copy
     }
     
     override func isEqual(_ object: Any?) -> Bool {
@@ -111,7 +130,7 @@ class PieceView: UIImageView {
 
 
 class PieceCreator: PiecesCreator {
-    static let shared = PieceCreator()
+    static let shared: PieceCreator = PieceCreator()
     
     func basicSquareAndCirclePieces(playerId: Int, board: Board, deleteEdgeCells: Bool) -> [Piece] {
         var pieces = [Piece]()
@@ -199,10 +218,8 @@ class PieceCreator: PiecesCreator {
             pieces.append(Piece(name: "Circle", position: Position(row: row, column: column), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove))
         }
         
-        // set the id and isFirstMove
-        let offset = playerId * pieces.count
+        // set isFirstMove
         for i in 0..<pieces.count {
-            pieces[i].id = i + offset
             pieces[i].isFirstMove = true
         }
         
@@ -222,12 +239,9 @@ class PieceCreator: PiecesCreator {
             pieces = basicSquareAndCirclePieces(playerId: playerId, board: board, deleteEdgeCells: true)
         }
         
-        // set the id and isFirstMove
-        let offset = playerId * pieces.count
-        for i in 0..<pieces.count {
-            pieces[i].id = i + offset
-            pieces[i].isFirstMove = true
-        }
+        // set  isFirstMove
+        pieces.forEach({$0.isFirstMove = true})
+
         return pieces
     }
 }
