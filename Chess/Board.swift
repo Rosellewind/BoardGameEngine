@@ -7,8 +7,6 @@
 //
 
 import UIKit
-//// after queen promotion, check for checkmate, also  does not disappear when taken after promotion
-
 
 
 struct Position: Hashable {

@@ -86,11 +86,11 @@ class ChessGameVC: GameVC {
         if playersInCheck.count > 0 {
             var message = ""
             if playersInCheck.count == 1 {
-                message.append(playersInCheck[0].name! + " is in check")
+                message.append("\(playersInCheck[0].name!) is in check")
             } else if playersInCheck.count > 1 {
-                message.append("\(playersInCheck[0].name)")
+                message.append("\(playersInCheck[0].name!)")
                 for i in 1..<playersInCheck.count {
-                    message.append(" and \(playersInCheck[i].name)")
+                    message.append(" and \(playersInCheck[i].name!)")
                 }
                 message.append(" are in check")
             }
@@ -103,11 +103,11 @@ class ChessGameVC: GameVC {
         if playersInCheckMate.count > 0 {
             var message = ""
             if playersInCheckMate.count == 1 {
-                message.append("\(playersInCheckMate[0].name) is in checkmate!")
+                message.append("\(playersInCheckMate[0].name!) is in checkmate!")
             } else {
-                message.append("\(playersInCheckMate[0].name)")
+                message.append("\(playersInCheckMate[0].name!)")
                 for i in 1..<playersInCheckMate.count {
-                    message.append(" and \(playersInCheckMate[i].name)")
+                    message.append(" and \(playersInCheckMate[i].name!)")
                 }
                 message.append(" are in checkmate!")
             }
@@ -115,11 +115,11 @@ class ChessGameVC: GameVC {
         }
      }
     
-    func isCheck(_ player: Player, game: Game?) -> Bool {
-
+    func isCheck(_ player: Player, game: Game?, callingFunctionName: String = #function) -> Bool {
+print("Calling Function: \(callingFunctionName)")
         // all other players pieces can not take king
         var isCheck = false
-        let player = game?.players.elementPassing({$0.id == player.id}) ?? player////put after?
+        let player = game?.players.elementPassing({$0.id == player.id}) ?? player
         let game = game ?? self.game
         if let king = player.pieces.elementPassing({$0.name == "King"}) {
             for otherPlayer in game.players where isCheck == false {
@@ -128,8 +128,13 @@ class ChessGameVC: GameVC {
                 } else {
                     for otherPlayerPiece in otherPlayer.pieces where isCheck == false {
                         let translationToCaptureKing = Position.calculateTranslation(fromPosition: otherPlayerPiece.position, toPosition: king.position, direction: otherPlayer.forwardDirection)
-                        let moveFunction = otherPlayerPiece.isLegalMove(translationToCaptureKing)
+                        var moveFunction = otherPlayerPiece.isLegalMove(translationToCaptureKing)
                         if moveFunction.isLegal {
+                            // if called from isCheckMate, remove the CantBeInCheck condition for other player
+                            if callingFunctionName == "isCheckMate(_:game:)", let index = moveFunction.legalIf?.index(where: {($0.condition as? CantBeInCheck) != nil}) {
+                                moveFunction.legalIf!.remove(at: index)
+                            }
+                            
                             // give chance for condition to make isCheck false
                             let isMetAndCompletions = game.checkIfConditionsAreMet(piece: otherPlayerPiece, legalIfs: moveFunction.legalIf)
                             if isMetAndCompletions.isMet {

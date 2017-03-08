@@ -25,7 +25,7 @@ struct CantBeInCheck: Condition {
             let position = Position.positionFromTranslation(translation, fromPosition: piece.position, direction: player.forwardDirection)
             gameCopy.movePieceMatching(piece: piece, position: position, removeOccupying: piece.removePieceOccupyingNewPosition)
             
-            if isCheck(player: player, game: gameCopy) {    //// bug in test, isCheck true but is not because the king is taken so isCheck(_ player: Player, game: Game?) should return false.  queen doesn't appear to move in gameCopy
+            if isCheck(player: player, game: gameCopy) {
                 isMet = false
                 completions = [Completion(closure: {game.vc?.presenterDelegate?.secondaryGameMessage(string: "Can't leave yourself in check")}, evenIfNotMet: true)]
             }
@@ -170,9 +170,8 @@ struct CheckForPromotion: Condition {
     fileprivate func promote(piece: Piece, toType: ChessPieceType, game: Game) {
         
         // create replacement
-        let newPiece = ChessPieceCreator.shared.chessPiece(toType)////not creating
+        let newPiece = ChessPieceCreator.shared.chessPiece(toType)
         newPiece.position = piece.position
-//        newPiece.id = piece.id
         newPiece.isFirstMove = piece.isFirstMove
         newPiece.startingPosition = piece.startingPosition
         newPiece.player = piece.player

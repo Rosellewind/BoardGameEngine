@@ -126,7 +126,7 @@ class ChessPieceCreator: PiecesCreator {
         }
         
         // set  isFirstMove
-        pieces.forEach({$0.isFirstMove = true}) ////
+        pieces.forEach({$0.isFirstMove = true})
         
         return pieces
     }
@@ -220,10 +220,7 @@ class ChessPieceCreator: PiecesCreator {
                 if mustBeVacantCell.count > 0 {
                     conditions.append(LegalIf(condition: MustBeVacantCell(), translations: mustBeVacantCell))
                 }
-//                if !alreadyInCheck {////
-                    conditions.append(LegalIf(condition: CantBeInCheck(), translations: [translation]))
-
-//                }
+                conditions.append(LegalIf(condition: CantBeInCheck(), translations: [translation]))
                 return (isLegal, conditions)
             }
             return Piece(name: name.rawValue, position: Position(row: 0, column:  3), isPossibleTranslation: isPossibleTranslation, isLegalMove: isLegalMove)

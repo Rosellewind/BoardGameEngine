@@ -233,17 +233,19 @@ extension GameVC {
                             animateMove(pieceView, position: selectedPiece.position, duration: 0.5)
                         }
                         
-                        // update description for accessibility////move downone
-                        let boardPosition = game.board.index(position: positionTapped)
-                        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
-                            cell.occupierDescription = accessabilityStringForPiece(piece: selectedPiece)
-                        }
+
                         
                         // completions
                         if let completions = isMetAndCompletions.completions {
                             for completion in completions {
                                 completion.closure()//finish first
                             }
+                        }
+                        
+                        // update description for accessibility
+                        let boardPosition = game.board.index(position: positionTapped)
+                        if let cell = boardView.cells.elementPassing({$0.tag == boardPosition}) {
+                            cell.occupierDescription = accessabilityStringForPiece(piece: selectedPiece)
                         }
                         
                         // check for gameOver and change turns
@@ -261,7 +263,7 @@ extension GameVC {
                     }
                 }
                 selectedPiece.selected = false
-                game.selectedPiece = nil////check
+                game.selectedPiece = nil
             }
         }
     }

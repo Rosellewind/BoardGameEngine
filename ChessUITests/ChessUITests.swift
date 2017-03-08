@@ -39,7 +39,6 @@ class ChessUITests: XCTestCase {
         app.otherElements["A4"].tap()
         app.otherElements["Black Queen on D8"].tap()
         app.otherElements["H4"].tap()
-        
         XCTAssert(app.staticTexts["White is in check"].exists)
     }
     
@@ -112,7 +111,9 @@ class ChessUITests: XCTestCase {
         XCTAssert(app.otherElements["White Pawn on D5"].exists)
     }
     
-    func testCheckGameOverAfterPromotion() {
+    func testPawnPromotionToQueenInAttack_ShouldBeCheckMateAfter_EvenIfOpponentCanPutSelfInCheck() {
+        // checks both: checking for checkmate after pawn promotion
+        //              checking for checkmate, opponent can leave self in check
         let app = XCUIApplication()
         app.tables.staticTexts["Chess"].tap()
         
@@ -146,11 +147,8 @@ class ChessUITests: XCTestCase {
         blackBishopOnC8Element.tap()
         sleep(2)
         app.sheets["Promotion"].buttons["Queen"].tap()
-        sleep(6)
         let weHaveAWinnerAlert = app.alerts["We have a winner!"]
         XCTAssert(weHaveAWinnerAlert.exists)
-        
-        //// bug in test, isCheck true but is not because the king is taken so isCheck(_ player: Player, game: Game?) should return false.  queen doesn't appear to move in gameCopy
     }
     
 }
