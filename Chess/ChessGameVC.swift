@@ -69,7 +69,7 @@ class ChessGameVC: GameVC {
         var playersInCheck = [Player]()
         var playersInCheckMate = [Player]()
         
-        // determine in player are in check or checkmate
+        // determine if players are in check or checkmate
         for player in game.players {
             // check for in check
             if isCheck(player, game: nil) {
@@ -79,7 +79,6 @@ class ChessGameVC: GameVC {
                     playersInCheck.append(player)
                 }
             }
-            
         }
         
         // show message for players in check

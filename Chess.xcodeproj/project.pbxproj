@@ -7,16 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2310BFFF1E30252000AAC409 /* GalaxyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2310BFFE1E30252000AAC409 /* GalaxyRules.swift */; };
+		2310BFFF1E30252000AAC409 /* GalaxyConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2310BFFE1E30252000AAC409 /* GalaxyConditions.swift */; };
 		2336CC161E4B940B00224480 /* RulesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2336CC151E4B940B00224480 /* RulesVC.swift */; };
 		235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06361E04AD1300FBDBF4 /* GameVC.swift */; };
-		235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06381E04D51800FBDBF4 /* Chess Rules.swift */; };
-		23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */; };
+		235E06391E04D51800FBDBF4 /* ChessConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235E06381E04D51800FBDBF4 /* ChessConditions.swift */; };
+		237B2C191E7087D2007ABCB3 /* ReadMe.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 237B2C181E7087D2007ABCB3 /* ReadMe.rtf */; };
+		237B2C1C1E70A8A0007ABCB3 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 237B2C1B1E70A8A0007ABCB3 /* BoardView.swift */; };
+		237B2C1E1E70A94C007ABCB3 /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 237B2C1D1E70A94C007ABCB3 /* PieceView.swift */; };
+		23894F501DF62B5D00EB63DD /* BasicConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* BasicConditions.swift */; };
 		23E2469C1E5CA197009AB937 /* ChessUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E2469B1E5CA197009AB937 /* ChessUITests.swift */; };
 		23E414D71E677EF0005E920D /* BlackHoleRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D51E677EF0005E920D /* BlackHoleRules.html */; };
 		23E414D81E677EF0005E920D /* GalaxyGameRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D61E677EF0005E920D /* GalaxyGameRules.html */; };
 		23E414DA1E6780E5005E920D /* ChessRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D91E6780E5005E920D /* ChessRules.html */; };
-		23FBBF9D1E493E25006945F2 /* x.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FBBF9C1E493E25006945F2 /* x.swift */; };
 		4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */; };
 		4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */; };
 		4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33CD1CE9358B00C25E7D /* Main.storyboard */; };
@@ -44,18 +46,20 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2310BFFE1E30252000AAC409 /* GalaxyRules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalaxyRules.swift; sourceTree = "<group>"; };
+		2310BFFE1E30252000AAC409 /* GalaxyConditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GalaxyConditions.swift; sourceTree = "<group>"; };
 		2336CC151E4B940B00224480 /* RulesVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RulesVC.swift; sourceTree = "<group>"; };
 		235E06361E04AD1300FBDBF4 /* GameVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
-		235E06381E04D51800FBDBF4 /* Chess Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chess Rules.swift"; sourceTree = "<group>"; };
-		23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Basic Rules.swift"; sourceTree = "<group>"; };
+		235E06381E04D51800FBDBF4 /* ChessConditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessConditions.swift; sourceTree = "<group>"; };
+		237B2C181E7087D2007ABCB3 /* ReadMe.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = ReadMe.rtf; sourceTree = "<group>"; };
+		237B2C1B1E70A8A0007ABCB3 /* BoardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
+		237B2C1D1E70A94C007ABCB3 /* PieceView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
+		23894F4F1DF62B5D00EB63DD /* BasicConditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicConditions.swift; sourceTree = "<group>"; };
 		23E246991E5CA197009AB937 /* ChessUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChessUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		23E2469B1E5CA197009AB937 /* ChessUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessUITests.swift; sourceTree = "<group>"; };
 		23E2469D1E5CA197009AB937 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		23E414D51E677EF0005E920D /* BlackHoleRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = BlackHoleRules.html; sourceTree = "<group>"; };
 		23E414D61E677EF0005E920D /* GalaxyGameRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = GalaxyGameRules.html; sourceTree = "<group>"; };
 		23E414D91E6780E5005E920D /* ChessRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = ChessRules.html; sourceTree = "<group>"; };
-		23FBBF9C1E493E25006945F2 /* x.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = x.swift; sourceTree = "<group>"; };
 		4A0F33C61CE9358B00C25E7D /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePlayVC.swift; sourceTree = "<group>"; };
@@ -92,6 +96,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		237B2C1A1E70A835007ABCB3 /* Game Files */ = {
+			isa = PBXGroup;
+			children = (
+				235E06361E04AD1300FBDBF4 /* GameVC.swift */,
+				4A0F34281CEA67D800C25E7D /* Game.swift */,
+				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
+				237B2C1B1E70A8A0007ABCB3 /* BoardView.swift */,
+				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
+				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
+				237B2C1D1E70A94C007ABCB3 /* PieceView.swift */,
+				23894F4F1DF62B5D00EB63DD /* BasicConditions.swift */,
+				2310BFFE1E30252000AAC409 /* GalaxyConditions.swift */,
+			);
+			name = "Game Files";
+			sourceTree = "<group>";
+		};
 		23E2469A1E5CA197009AB937 /* ChessUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,7 +134,7 @@
 		4A0F33BD1CE9358B00C25E7D = {
 			isa = PBXGroup;
 			children = (
-				23FBBF9C1E493E25006945F2 /* x.swift */,
+				237B2C181E7087D2007ABCB3 /* ReadMe.rtf */,
 				4A0F33C81CE9358B00C25E7D /* Chess */,
 				23E2469A1E5CA197009AB937 /* ChessUITests */,
 				4A0F33C71CE9358B00C25E7D /* Products */,
@@ -137,33 +157,27 @@
 				4AC0A3881DB5227100129CDB /* MenuTVC.swift */,
 				2336CC151E4B940B00224480 /* RulesVC.swift */,
 				4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */,
-				235E06361E04AD1300FBDBF4 /* GameVC.swift */,
-				4A0F34281CEA67D800C25E7D /* Game.swift */,
-				4A0F33DB1CE935BC00C25E7D /* Board.swift */,
-				4A0F342C1CEA74FF00C25E7D /* Player.swift */,
-				4A0F34261CEA5F6E00C25E7D /* Piece.swift */,
-				23894F4F1DF62B5D00EB63DD /* Basic Rules.swift */,
-				2310BFFE1E30252000AAC409 /* GalaxyRules.swift */,
-				4AC0A3851DB520C900129CDB /* Chess */,
-				23E414DB1E678106005E920D /* Rules html */,
+				237B2C1A1E70A835007ABCB3 /* Game Files */,
+				4AC0A3851DB520C900129CDB /* Chess Game Files */,
 				4A0F33CD1CE9358B00C25E7D /* Main.storyboard */,
 				4A0F33D01CE9358B00C25E7D /* Assets.xcassets */,
 				4A0F33D21CE9358B00C25E7D /* LaunchScreen.storyboard */,
 				4A0F33DD1CE940F800C25E7D /* Swift Extensions.swift */,
 				4A0F33D51CE9358B00C25E7D /* Info.plist */,
+				23E414DB1E678106005E920D /* Rules html */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
 		};
-		4AC0A3851DB520C900129CDB /* Chess */ = {
+		4AC0A3851DB520C900129CDB /* Chess Game Files */ = {
 			isa = PBXGroup;
 			children = (
 				4A3BD31E1D0FB4A4008A14AF /* ChessGameVC.swift */,
 				4AC0A3811DB51E6200129CDB /* ChessPlayer.swift */,
 				4AC0A3831DB5201000129CDB /* Chess Pieces.swift */,
-				235E06381E04D51800FBDBF4 /* Chess Rules.swift */,
+				235E06381E04D51800FBDBF4 /* ChessConditions.swift */,
 			);
-			name = Chess;
+			name = "Chess Game Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -262,6 +276,7 @@
 				23E414D81E677EF0005E920D /* GalaxyGameRules.html in Resources */,
 				23E414DA1E6780E5005E920D /* ChessRules.html in Resources */,
 				4A0F33D11CE9358B00C25E7D /* Assets.xcassets in Resources */,
+				237B2C191E7087D2007ABCB3 /* ReadMe.rtf in Resources */,
 				4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -285,17 +300,18 @@
 				4A0F34291CEA67D800C25E7D /* Game.swift in Sources */,
 				4A3BD31F1D0FB4A4008A14AF /* ChessGameVC.swift in Sources */,
 				4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */,
-				23894F501DF62B5D00EB63DD /* Basic Rules.swift in Sources */,
+				23894F501DF62B5D00EB63DD /* BasicConditions.swift in Sources */,
 				235E06371E04AD1300FBDBF4 /* GameVC.swift in Sources */,
 				4AC0A3891DB5227100129CDB /* MenuTVC.swift in Sources */,
 				2336CC161E4B940B00224480 /* RulesVC.swift in Sources */,
-				235E06391E04D51800FBDBF4 /* Chess Rules.swift in Sources */,
+				235E06391E04D51800FBDBF4 /* ChessConditions.swift in Sources */,
+				237B2C1E1E70A94C007ABCB3 /* PieceView.swift in Sources */,
 				4AC0A3821DB51E6300129CDB /* ChessPlayer.swift in Sources */,
 				4A0F342D1CEA74FF00C25E7D /* Player.swift in Sources */,
-				23FBBF9D1E493E25006945F2 /* x.swift in Sources */,
+				237B2C1C1E70A8A0007ABCB3 /* BoardView.swift in Sources */,
 				4AC0A3841DB5201000129CDB /* Chess Pieces.swift in Sources */,
 				4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */,
-				2310BFFF1E30252000AAC409 /* GalaxyRules.swift in Sources */,
+				2310BFFF1E30252000AAC409 /* GalaxyConditions.swift in Sources */,
 				4A0F33DE1CE940F800C25E7D /* Swift Extensions.swift in Sources */,
 				4A0F33DC1CE935BC00C25E7D /* Board.swift in Sources */,
 			);
