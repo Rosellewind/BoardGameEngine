@@ -15,10 +15,10 @@
 		237B2C1C1E70A8A0007ABCB3 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 237B2C1B1E70A8A0007ABCB3 /* BoardView.swift */; };
 		237B2C1E1E70A94C007ABCB3 /* PieceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 237B2C1D1E70A94C007ABCB3 /* PieceView.swift */; };
 		23894F501DF62B5D00EB63DD /* BasicConditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23894F4F1DF62B5D00EB63DD /* BasicConditions.swift */; };
-		23E2469C1E5CA197009AB937 /* BoardGameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E2469B1E5CA197009AB937 /* BoardGameUITests.swift */; };
 		23E414D71E677EF0005E920D /* BlackHoleRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D51E677EF0005E920D /* BlackHoleRules.html */; };
 		23E414D81E677EF0005E920D /* GalaxyGameRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D61E677EF0005E920D /* GalaxyGameRules.html */; };
 		23E414DA1E6780E5005E920D /* ChessRules.html in Resources */ = {isa = PBXBuildFile; fileRef = 23E414D91E6780E5005E920D /* ChessRules.html */; };
+		23E4F5031E70D840002961F9 /* BoardGameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E4F5021E70D840002961F9 /* BoardGameUITests.swift */; };
 		4A0F33CA1CE9358B00C25E7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */; };
 		4A0F33CC1CE9358B00C25E7D /* GamePlayVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */; };
 		4A0F33CF1CE9358B00C25E7D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A0F33CD1CE9358B00C25E7D /* Main.storyboard */; };
@@ -36,12 +36,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		23E2469E1E5CA197009AB937 /* PBXContainerItemProxy */ = {
+		23E4F5051E70D840002961F9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4A0F33BE1CE9358B00C25E7D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4A0F33C51CE9358B00C25E7D;
-			remoteInfo = Chess;
+			remoteInfo = BoardGame;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -54,12 +54,12 @@
 		237B2C1B1E70A8A0007ABCB3 /* BoardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		237B2C1D1E70A94C007ABCB3 /* PieceView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceView.swift; sourceTree = "<group>"; };
 		23894F4F1DF62B5D00EB63DD /* BasicConditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicConditions.swift; sourceTree = "<group>"; };
-		23E246991E5CA197009AB937 /* BoardGameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardGameUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		23E2469B1E5CA197009AB937 /* BoardGameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardGameUITests.swift; sourceTree = "<group>"; };
-		23E2469D1E5CA197009AB937 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		23E414D51E677EF0005E920D /* BlackHoleRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = BlackHoleRules.html; sourceTree = "<group>"; };
 		23E414D61E677EF0005E920D /* GalaxyGameRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = GalaxyGameRules.html; sourceTree = "<group>"; };
 		23E414D91E6780E5005E920D /* ChessRules.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = ChessRules.html; sourceTree = "<group>"; };
+		23E4F5001E70D840002961F9 /* BoardGameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoardGameUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		23E4F5021E70D840002961F9 /* BoardGameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardGameUITests.swift; sourceTree = "<group>"; };
+		23E4F5041E70D840002961F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A0F33C61CE9358B00C25E7D /* BoardGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoardGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0F33C91CE9358B00C25E7D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A0F33CB1CE9358B00C25E7D /* GamePlayVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePlayVC.swift; sourceTree = "<group>"; };
@@ -79,7 +79,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		23E246961E5CA197009AB937 /* Frameworks */ = {
+		23E4F4FD1E70D840002961F9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -112,15 +112,6 @@
 			name = "Game Files";
 			sourceTree = "<group>";
 		};
-		23E2469A1E5CA197009AB937 /* BoardGameUITests */ = {
-			isa = PBXGroup;
-			children = (
-				23E2469B1E5CA197009AB937 /* BoardGameUITests.swift */,
-				23E2469D1E5CA197009AB937 /* Info.plist */,
-			);
-			path = BoardGameUITests;
-			sourceTree = "<group>";
-		};
 		23E414DB1E678106005E920D /* Rules html */ = {
 			isa = PBXGroup;
 			children = (
@@ -131,12 +122,21 @@
 			name = "Rules html";
 			sourceTree = "<group>";
 		};
+		23E4F5011E70D840002961F9 /* BoardGameUITests */ = {
+			isa = PBXGroup;
+			children = (
+				23E4F5021E70D840002961F9 /* BoardGameUITests.swift */,
+				23E4F5041E70D840002961F9 /* Info.plist */,
+			);
+			path = BoardGameUITests;
+			sourceTree = "<group>";
+		};
 		4A0F33BD1CE9358B00C25E7D = {
 			isa = PBXGroup;
 			children = (
 				237B2C181E7087D2007ABCB3 /* ReadMe.rtf */,
 				4A0F33C81CE9358B00C25E7D /* BoardGame */,
-				23E2469A1E5CA197009AB937 /* BoardGameUITests */,
+				23E4F5011E70D840002961F9 /* BoardGameUITests */,
 				4A0F33C71CE9358B00C25E7D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -145,7 +145,7 @@
 			isa = PBXGroup;
 			children = (
 				4A0F33C61CE9358B00C25E7D /* BoardGame.app */,
-				23E246991E5CA197009AB937 /* BoardGameUITests.xctest */,
+				23E4F5001E70D840002961F9 /* BoardGameUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -183,22 +183,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		23E246981E5CA197009AB937 /* BoardGameUITests */ = {
+		23E4F4FF1E70D840002961F9 /* BoardGameUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 23E246A21E5CA197009AB937 /* Build configuration list for PBXNativeTarget "BoardGameUITests" */;
+			buildConfigurationList = 23E4F5071E70D840002961F9 /* Build configuration list for PBXNativeTarget "BoardGameUITests" */;
 			buildPhases = (
-				23E246951E5CA197009AB937 /* Sources */,
-				23E246961E5CA197009AB937 /* Frameworks */,
-				23E246971E5CA197009AB937 /* Resources */,
+				23E4F4FC1E70D840002961F9 /* Sources */,
+				23E4F4FD1E70D840002961F9 /* Frameworks */,
+				23E4F4FE1E70D840002961F9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				23E2469F1E5CA197009AB937 /* PBXTargetDependency */,
+				23E4F5061E70D840002961F9 /* PBXTargetDependency */,
 			);
 			name = BoardGameUITests;
-			productName = ChessUITests;
-			productReference = 23E246991E5CA197009AB937 /* BoardGameUITests.xctest */;
+			productName = BoardGameUITests;
+			productReference = 23E4F5001E70D840002961F9 /* BoardGameUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		4A0F33C51CE9358B00C25E7D /* BoardGame */ = {
@@ -228,7 +228,7 @@
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Roselle Tanner";
 				TargetAttributes = {
-					23E246981E5CA197009AB937 = {
+					23E4F4FF1E70D840002961F9 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 4A0F33C51CE9358B00C25E7D;
@@ -254,13 +254,13 @@
 			projectRoot = "";
 			targets = (
 				4A0F33C51CE9358B00C25E7D /* BoardGame */,
-				23E246981E5CA197009AB937 /* BoardGameUITests */,
+				23E4F4FF1E70D840002961F9 /* BoardGameUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		23E246971E5CA197009AB937 /* Resources */ = {
+		23E4F4FE1E70D840002961F9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -284,11 +284,11 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		23E246951E5CA197009AB937 /* Sources */ = {
+		23E4F4FC1E70D840002961F9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				23E2469C1E5CA197009AB937 /* BoardGameUITests.swift in Sources */,
+				23E4F5031E70D840002961F9 /* BoardGameUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,10 +320,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		23E2469F1E5CA197009AB937 /* PBXTargetDependency */ = {
+		23E4F5061E70D840002961F9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4A0F33C51CE9358B00C25E7D /* BoardGame */;
-			targetProxy = 23E2469E1E5CA197009AB937 /* PBXContainerItemProxy */;
+			targetProxy = 23E4F5051E70D840002961F9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -347,7 +347,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		23E246A01E5CA197009AB937 /* Debug */ = {
+		23E4F5081E70D840002961F9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -362,7 +362,7 @@
 			};
 			name = Debug;
 		};
-		23E246A11E5CA197009AB937 /* Release */ = {
+		23E4F5091E70D840002961F9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -499,14 +499,13 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		23E246A21E5CA197009AB937 /* Build configuration list for PBXNativeTarget "BoardGameUITests" */ = {
+		23E4F5071E70D840002961F9 /* Build configuration list for PBXNativeTarget "BoardGameUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				23E246A01E5CA197009AB937 /* Debug */,
-				23E246A11E5CA197009AB937 /* Release */,
+				23E4F5081E70D840002961F9 /* Debug */,
+				23E4F5091E70D840002961F9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 		4A0F33C11CE9358B00C25E7D /* Build configuration list for PBXProject "BoardGame" */ = {
 			isa = XCConfigurationList;
