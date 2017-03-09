@@ -118,8 +118,7 @@
 				23E2469B1E5CA197009AB937 /* BoardGameUITests.swift */,
 				23E2469D1E5CA197009AB937 /* Info.plist */,
 			);
-			name = BoardGameUITests;
-			path = ChessUITests;
+			path = BoardGameUITests;
 			sourceTree = "<group>";
 		};
 		23E414DB1E678106005E920D /* Rules html */ = {
