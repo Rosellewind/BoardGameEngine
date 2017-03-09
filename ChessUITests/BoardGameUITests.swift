@@ -8,7 +8,7 @@
 
 import XCTest
 
-class ChessUITests: XCTestCase {
+class BoardGameUITests: XCTestCase {
         
     override func setUp() {
         super.setUp()
