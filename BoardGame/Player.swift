@@ -35,7 +35,7 @@ class Player {
     }
     
     func copy() -> Player {
-        return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({($0.copy() as! Piece)}))
+        return Player(name: name, id: id, forwardDirection: forwardDirection, pieces: pieces.map({$0.copy()}))
     }
 }
 
